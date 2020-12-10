@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Miscellaneous data -->
+    <title>Howard Pearce</title>
+
+    <!-- Metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport"    content="width=device-width, initial-scale=1">
+    <meta name="author"      content="Howard Pearce">
+    <meta name="description" content="My Portfolio">
+
+    <!-- Included fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- CSS: using uikit because it looks cool! -->
+    <link rel="stylesheet" type = "text/css" href="css/uikit.min.css" />
+    <link rel="stylesheet" type = "text/css" href="css/header.css"    />
+    <link rel="stylesheet" type = "text/css" href="css/defaults.css"  />
+    <link rel="stylesheet" type = "text/css" href="css/utils.css"     />
+    <link rel="stylesheet" type = "text/css" href="css/main.css"      />
+    <link rel="stylesheet" type = "text/css" href="css/responsive.css"/>
+    <link rel="stylesheet" type = "text/css" href="css/text.css"/>
+
+    <!-- JavaScript: uikit dependencies + some scrolling scripts -->
+    <script src="js/uikit.min.js"      ></script>
+    <script src="js/uikit-icons.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/scroll.js"         ></script>
+
+  </head>
+
+  <body>
+    <div class = "all_elements">
+      <nav class = "navbar-container" id = "nav">
+        <div class = "header-card-container">
+          <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('home')"> Home     </a></div>
+          <div class = "header-card"><a href="resume/resume.pdf" class = "custom-underline"> Resume   </a></div>
+          <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('contact')"> Contact  </a></div>
+          <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('about')"> About Me </a></div>
+        </div>
+        <hr class = "thin-hr"/>
+      </nav>
+      <!-- Intro title image, takes up full width/height of the screen -->
+      <div class = "title-container centered-container" id = "title">
+        <img class = "title" src="svg/central_logo_white.svg" alt="Howard Pearce"/>
+      </div>
+      <!-- About Me section-->
+      <article class = "p-sides-20 full-height" id = "about">
+        <br/>
+        <h2 class = "section-header"> About Me: </h2>
+        <div class = "vertical-container p-20">
+          <div>
+            <p>
+              <strong class = "accent"> Student: </strong> I'm a fourth year student at <a href = "https://www.dal.ca/" target="_blank">Dalhousie University</a> studying Computer Science <em class="small-text"> (Semester 7/8) </em>.
+              I plan to graduate in spring 2021 with a Bachelor's degree of Computer Science, certificate in artificial intelligence, and designation for their co-operative education program.
+              I finish my last semester in the fall of 2020 and am ready to work immediately after this.
+              Professionally I am interested in back-end development and working with machine learning algorithms.
+              I am also interested in full-stack development, but am not interested in doing exclusively front end work.
+            </p>
+          </div>
+          <hr/>
+          <div>
+            <p>
+              <strong class = "accent"> Athlete: </strong> I have played sports since I was 6, mostly playing hockey but I also have played soccer, baseball, and football.
+              I also started training at the gym in 2018, and have been going regularly since. I primarily do strength training, but also run outdoors while weather permits.
+              For me fitness is a great way to clear my head and refresh myself after spending long periods of time at the keyboard or indoors.
+              I find it very rewarding to set long-term fitness goals for myself and achieve them. I also enjoy competing with my friends who I train with.
+            </p>
+          </div>
+          <hr/>
+          <div>
+            <p>
+              <strong class = "accent"> Creator: </strong> My passion for Computer Science stems from my passion for creating in general.
+              It's my lifelong passion to create new things in varying and engaging ways.
+              I am a hobbyist woodworker, graphic designer, sewist, and I enjoy electronics using microcontrollers such as Arduino.
+              To me, making something from nothing and overcoming the challenges that come along the way to be the most rewarding thing you can do.
+              I also enjoy repairing things that I buy, and doing the same for my friends.
+            </p>
+          </div>
+        </div>
+    </article>
+    <!-- Contact Section -->
+    <article class = "p-sides-20 full-height" id = "contact">
+      <br/>
+      <h2 class = "section-header"> Contact: </h2>
+      <div class = "p-20 vertical-container">
+        <h4 class = "m-0"> Business: </h4>
+        <p class = "m-10" style = "padding-left: 20px;">
+          Feel free to connect with me via any of the following channels. I'll be sure to respond within 1-2 business days.
+        </p>
+        <ul class = "no-deco m-0">
+          <li> <strong class="accent"> LinkedIn: </strong> <a href = "https://ca.linkedin.com/in/howard-alexander-pearce"> howard-alexander-pearce </a></li>
+          <li> <strong class="accent"> Email: </strong> Howard.Pearce@dal.ca </li>
+        </ul>
+        <!-- spacer -->
+        <div class = "p-10"></div>
+        <h4 class = "m-0"> Social: </h4>
+        <p class = "m-10" style = "padding-left: 20px;">
+          See what I'm up to day-to-day! Most of the work I do is on my school's local Gitlab server.
+        </p>
+        <ul class = "no-deco m-0">
+          <li><strong class = "accent"> Github: </strong><a href = "https://github.com/strigiforme" target = "_blank"> strigiforme </a></li>
+          <li><strong class = "accent"> Gitlab: </strong><a href = "https://git.cs.dal.ca/hpearce" target = "_blank"> hpearce </a></li>
+          <li><strong class = "accent"> Stack Exchange: </strong> <a href = "https://stackoverflow.com/users/7474480/howard-p" target = "_blank"> Howard P </a></li>
+          <li><strong class = "accent"> Facebook: </strong><a href = "https://www.facebook.com/howard.pearce.52" target = "_blank"> howard.pearce.52 </a></li>
+          <li><strong class = "accent"> Instagram: </strong><a href = "https://www.instagram.com/howie_pearce/" target = "_blank"> howie_pearce </a></li>
+        </ul>
+      </div>
+    </article>
+    </div>
+  </body>
+</html>

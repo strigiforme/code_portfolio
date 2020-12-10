@@ -1,0 +1,16 @@
+/* CSS for managing text */
+
+/* I like this font */
+* {
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Text stuff */
+.small-text{
+  font-size: 12px;
+}
+
+/* color */
+.accent {
+  color: #6080a6;
+}

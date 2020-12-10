@@ -1,0 +1,34 @@
+/* Styles for the main page, used throughout index.html */
+
+/* Prevent exremely wide screens from ruining my day */
+article {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* for 'contact me' section */
+.no-deco {
+  list-style-type: none;
+}
+
+/* customizing uikit styles */
+.uk-accordion-title {
+  font-size: 24px;
+}
+
+/* general styles */
+.section-header {
+  font-size: 32px;
+  color: #222225;
+  margin: 0px;
+}
+
+/* styles that manage the title */
+.title-container{
+  height: 100vh;
+  width: 100%;
+}
+
+.title {
+  width:40%;
+}

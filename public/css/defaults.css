@@ -1,0 +1,27 @@
+/*
+ * Default styles I like for certain elements that don't change often.
+ */
+
+p {
+  font-size: 18px;
+  color: #222225;
+}
+
+strong {
+  font-weight: 700
+  color: #222225;
+}
+
+em {
+  font-style: italic;
+  color: #222225;
+}
+
+html, body {
+  height:100%;
+  overflow: auto;
+}
+
+hr {
+  border-top: 1px solid #999 !important;
+}
