@@ -19,5 +19,5 @@ app.listen(3000, function(){
 
 // get for root
 app.get('/', function (req, res) {
-  res.sendfile('index.html');
+  res.sendFile('index.html');
 });

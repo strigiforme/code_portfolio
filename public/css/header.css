@@ -18,7 +18,8 @@
   padding: 0px 10px;
   height: 50px;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
+  justify-content:space-between;
 }
 
 .header-card{
