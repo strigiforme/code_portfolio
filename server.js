@@ -8,9 +8,11 @@ var mongoose = require("mongoose")
 
 // CONNECT THE DATABASE
 // https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
-mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
-var mongodb = mongoose.connection;
-mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
+// mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
+// var mongodb = mongoose.connection;
+// mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+
 
 // THIS SECTION IS FOR INITIALIZING THE APP
 var app = express();
@@ -35,11 +37,15 @@ app.listen(3000, function(){
 app.set('view engine', 'pug');
 
 
+
+
+
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
 // get request for root page
 app.get('/', function (req, res) {
   var login_status = req.query.login;
   res.render('index', {login: login_status});
+  res.end()
 });
 
 // get request to logout
@@ -49,13 +55,13 @@ app.get('/logout', function (req, res) {
 });
 
 // get request for login page
-app.get("/admin", function (req, res) {
+app.get("/success", function (req, res) {
   // check if the user profile has been populated
   if(userProfile){
     // check if the email for the user's profile is authorized
     if(userProfile.emails[0].value == "howardpearce0@gmail.com") {
       console.log("User email " + userProfile.emails[0].value + " successfully authenticated.");
-      res.render('admin.pug');
+      res.redirect("/admin");
     } else {
       console.log("User email " + userProfile.emails[0].value + " was rejected.");
       res.redirect("/?login=false");
@@ -65,9 +71,35 @@ app.get("/admin", function (req, res) {
   }
 });
 
+// get request for login page
+app.get("/admin", authenticated, function (req, res) {
+  res.render('admin.pug');
+  res.end();
+});
+
+app.get("/forbidden", function (req, res) {
+  res.render("forbidden");
+  res.end();
+});
+
+app.get("/post/add", authenticated, function (req, res) {
+  res.send("post add");
+  res.end()
+});
 
 
-
+function authenticated (req, res, next) {
+  // check if we're allowed to be here
+  if(!userProfile){
+    res.redirect("/forbidden");
+  } else {
+    if (userProfile.emails[0].value != "howardpearce0@gmail.com") {
+      res.redirect("/forbidden");
+    } else {
+      return next;
+    }
+  }
+}
 
 
 // THE FOLLOWING IS FOR GOOGLE AUTHENTICATION: DO NOT TOUCH OR SO HELP ME
@@ -111,8 +143,8 @@ app.get('/auth/google',
   passport.authenticate('google', { scope : ['profile', 'email'] }));
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/error' }),
+  passport.authenticate('google', { failureRedirect: '/?login=false' }),
   function(req, res) {
     // Successful authentication, redirect success.
-    res.redirect('/admin');
+    res.redirect('/success');
   });

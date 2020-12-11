@@ -16,10 +16,15 @@
   border: none;
   border-radius: 5px;
   padding: 5px;
+  background-color: lightgrey;
+  text-align: center;
+  color: black;
 }
 
 .control:hover{
   background-color: #d0d0d0;
+  color: #000080;
+  text-decoration: none;
 }
 
 .padded {
