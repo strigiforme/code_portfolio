@@ -28,18 +28,38 @@ app.listen(3000, function(){
   console.log("Listening on port 3000!")
 });
 
-
+app.set('view engine', 'pug');
 
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
 // get request for root page
 app.get('/', function (req, res) {
-  res.sendFile('index.html');
+  res.render('index');
+});
+
+// get request to logout
+app.get('/logout', function (req, res) {
+  userProfile = null;
+  res.redirect('/');
 });
 
 // get request for login page
-app.get("/login", function (req, res) {
-  res.sendFile('public/login.html', { root: __dirname });
+app.get("/admin", function (req, res) {
+  // check if the user profile has been populated
+  if(userProfile){
+    // check if the email for the user's profile is authorized
+    if(userProfile.emails[0].value == "howardpearce0@gmail.com") {
+      console.log("User email " + userProfile.emails[0].value + " successfully authenticated.");
+      res.render('admin.pug');
+    } else {
+      console.log("User email " + userProfile.emails[0].value + " was rejected.");
+      res.redirect("/");
+    }
+  } else {
+    res.redirect("/");
+  }
 });
+
+
 
 
 
@@ -54,9 +74,6 @@ var userProfile;
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.set('view engine', 'pug');
-
-app.get('/success', (req, res) => res.send("logged in"));
 app.get('/error', (req, res) => res.send("error logging in"));
 
 passport.serializeUser(function(user, cb) {
@@ -91,5 +108,5 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/error' }),
   function(req, res) {
     // Successful authentication, redirect success.
-    res.redirect('/success');
+    res.redirect('/admin');
   });

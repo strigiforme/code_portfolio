@@ -1,0 +1,52 @@
+doctype html
+head
+  // Miscellaneous data
+  title Howard Pearce
+  // Metadata
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1')
+  meta(name='author' content='Howard Pearce')
+  meta(name='description' content='My Portfolio')
+  // Included fonts
+  link(href='https://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet')
+  link(href='https://fonts.googleapis.com/css?family=Staatliches&display=swap' rel='stylesheet')
+  link(href='https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,600&display=swap' rel='stylesheet')
+  // CSS: using uikit because it looks cool!
+  link(rel='stylesheet' type='text/css' href='css/uikit.min.css')
+  link(rel='stylesheet' type='text/css' href='css/header.css')
+  link(rel='stylesheet' type='text/css' href='css/defaults.css')
+  link(rel='stylesheet' type='text/css' href='css/utils.css')
+  link(rel='stylesheet' type='text/css' href='css/main.css')
+  link(rel='stylesheet' type='text/css' href='css/responsive.css')
+  link(rel='stylesheet' type='text/css' href='css/text.css')
+  link(rel='stylesheet' type='text/css' href='css/admin.css')
+  // JavaScript: uikit dependencies + some scrolling scripts
+  script(src='js/uikit.min.js')
+  script(src='js/uikit-icons.min.js')
+  script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
+  script(src='js/scroll.js')
+.all_elements
+  nav#nav.navbar-container
+    .header-card-container
+      div
+        .header-card
+          a.custom-underline(href='logout')  Log out
+      .flex
+        .header-card
+          a.custom-underline(href='#' onclick="scrollto('home')")  Home     
+        .header-card
+          a.custom-underline(href='resume/resume.pdf')  Resume   
+        .header-card
+          a.custom-underline(href='#' onclick="scrollto('contact')")  Contact  
+        .header-card
+          a.custom-underline(href='#' onclick="scrollto('about')")  About Me 
+    hr.thin-hr
+  div.container.flexbox.flex-col
+    div
+      h2 Welcome, Howard!
+    hr.thin-hr.padded
+    div.flexbox.flex-col
+      button(type='button').control.blue Add post
+      button(type='button').control.orange Edit post
+      button(type='button').control.red Delete post
+      button(type='button').control.green View posts
