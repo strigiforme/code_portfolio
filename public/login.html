@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Miscellaneous data -->
+    <title>Howard Pearce</title>
+
+    <!-- Metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport"    content="width=device-width, initial-scale=1">
+    <meta name="author"      content="Howard Pearce">
+    <meta name="description" content="My Portfolio">
+
+    <!-- Included fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Staatliches&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,600&display=swap" rel="stylesheet">
+
+    <!-- CSS: using uikit because it looks cool! -->
+    <link rel="stylesheet" type = "text/css" href="css/uikit.min.css" />
+    <link rel="stylesheet" type = "text/css" href="css/header.css"    />
+    <link rel="stylesheet" type = "text/css" href="css/defaults.css"  />
+    <link rel="stylesheet" type = "text/css" href="css/utils.css"     />
+    <link rel="stylesheet" type = "text/css" href="css/main.css"      />
+    <link rel="stylesheet" type = "text/css" href="css/responsive.css"/>
+    <link rel="stylesheet" type = "text/css" href="css/text.css"/>
+    <link rel="stylesheet" type = "text/css" href="css/login.css"/>
+
+    <!-- JavaScript: uikit dependencies + some scrolling scripts -->
+    <script src="js/uikit.min.js"      ></script>
+    <script src="js/uikit-icons.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/scroll.js"         ></script>
+
+  </head>
+
+  <body>
+    <div class = "all_elements">
+      <nav class = "navbar-container" id = "nav">
+        <div class = "header-card-container">
+          <div>
+            <div class = "header-card"><a href="login" class = "custom-underline"> Login </a></div>
+          </div>
+          <div class = "flex">
+            <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('home')"> Home     </a></div>
+            <div class = "header-card"><a href="resume/resume.pdf" class = "custom-underline"> Resume   </a></div>
+            <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('contact')"> Contact  </a></div>
+            <div class = "header-card"><a href="#" class = "custom-underline" onclick = "scrollto('about')"> About Me </a></div>
+          </div>
+        </div>
+        <hr class = "thin-hr"/>
+      </nav>
+      <!-- Intro title image, takes up full width/height of the screen -->
+      <div class = "container">
+        <div class = "flex flex-col flex-center">
+          <h2> Login </h2>
+          <a href="/auth/google" > Login Via Google </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
