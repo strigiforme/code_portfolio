@@ -33,7 +33,8 @@ app.set('view engine', 'pug');
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
 // get request for root page
 app.get('/', function (req, res) {
-  res.render('index');
+  var login_status = req.query.login;
+  res.render('index', {login: login_status});
 });
 
 // get request to logout
@@ -52,10 +53,10 @@ app.get("/admin", function (req, res) {
       res.render('admin.pug');
     } else {
       console.log("User email " + userProfile.emails[0].value + " was rejected.");
-      res.redirect("/");
+      res.redirect("/?login=false");
     }
   } else {
-    res.redirect("/");
+    res.redirect("/?login=false");
   }
 });
 

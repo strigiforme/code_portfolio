@@ -12,6 +12,10 @@
   width: 100%;
 }
 
+.fail {
+  color:red!important;
+}
+
 /* Allows for an animated hover effect on navbar */
 
 .header-card-container{
