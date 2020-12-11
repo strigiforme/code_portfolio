@@ -3,32 +3,37 @@ var express = require("express");
 var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
+var mongoose = require("mongoose")
+
+
+// CONNECT THE DATABASE
+// https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
+mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
+var mongodb = mongoose.connection;
+mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // THIS SECTION IS FOR INITIALIZING THE APP
 var app = express();
-
+// set up sessions
 app.use(session({
   resave: false,
   saveUninitialized: true,
   secret: 'SECRET'
 }));
-
 // give access to public folder
 app.use(express.static("public"));
 app.use(passport.initialize());
 app.use(passport.session());
-
 // for receiving post requests
 app.use(express.urlencoded({
   extended: true
 }))
-
 // listen callback
 app.listen(3000, function(){
   console.log("Listening on port 3000!")
 });
-
 app.set('view engine', 'pug');
+
 
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
 // get request for root page
