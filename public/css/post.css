@@ -5,3 +5,17 @@ input[type=textarea]{
 input {
   margin-bottom: 1rem;
 }
+
+.post-container {
+  background-color: lightgray;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.post-container a {
+  padding: 1rem;
+  color: black;
+}

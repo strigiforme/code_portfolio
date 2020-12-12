@@ -12,33 +12,37 @@ head
   link(href='https://fonts.googleapis.com/css?family=Staatliches&display=swap' rel='stylesheet')
   link(href='https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,600&display=swap' rel='stylesheet')
   // CSS: using uikit because it looks cool!
-  link(rel='stylesheet' type='text/css' href='css/uikit.min.css')
-  link(rel='stylesheet' type='text/css' href='css/header.css')
-  link(rel='stylesheet' type='text/css' href='css/defaults.css')
-  link(rel='stylesheet' type='text/css' href='css/utils.css')
-  link(rel='stylesheet' type='text/css' href='css/main.css')
-  link(rel='stylesheet' type='text/css' href='css/responsive.css')
-  link(rel='stylesheet' type='text/css' href='css/text.css')
-  link(rel='stylesheet' type='text/css' href='css/admin.css')
+  link(rel='stylesheet' type='text/css' href='../css/uikit.min.css')
+  link(rel='stylesheet' type='text/css' href='../css/header.css')
+  link(rel='stylesheet' type='text/css' href='../css/defaults.css')
+  link(rel='stylesheet' type='text/css' href='../css/utils.css')
+  link(rel='stylesheet' type='text/css' href='../css/main.css')
+  link(rel='stylesheet' type='text/css' href='../css/responsive.css')
+  link(rel='stylesheet' type='text/css' href='../css/text.css')
+  link(rel='stylesheet' type='text/css' href='../css/post.css')
   // JavaScript: uikit dependencies + some scrolling scripts
-  script(src='js/uikit.min.js')
-  script(src='js/uikit-icons.min.js')
+  script(src='../js/uikit.min.js')
+  script(src='../js/uikit-icons.min.js')
   script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
-  script(src='js/scroll.js')
 .all_elements
   nav#nav.navbar-container
     .header-card-container
       div
         .header-card
-          a.custom-underline(href='login')  Login
+          a.custom-underline(href='/login')  Login
       .flex
         .header-card
           a.custom-underline(href='/')  Home     
         .header-card
-          a.custom-underline(href='resume/resume.pdf')  Resume   
+          a.custom-underline(href='/resume/resume.pdf')  Resume   
         .header-card
-          a.custom-underline(href='/posts/view_posts')  Posts 
+          a.custom-underline(href='/posts/view_posts')  Posts  
     hr.thin-hr
   div.container.flexbox.flex-col
     div
-      h2 Access disallowed, please log in as an administrator
+      h2 View Posts:
+    hr.thin-hr.padded
+    div.flexbox.flex-col
+      each post in postdata
+        div.post-container
+          a(href="/posts/view_post?id=" + post.id) #{post.title}

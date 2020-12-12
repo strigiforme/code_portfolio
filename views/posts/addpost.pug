@@ -37,16 +37,14 @@ head
         .header-card
           a.custom-underline(href='resume/resume.pdf')  Resume   
         .header-card
-          a.custom-underline(href='#' onclick="scrollto('contact')")  Contact  
-        .header-card
-          a.custom-underline(href='#' onclick="scrollto('about')")  About Me 
+          a.custom-underline(href='/posts/view_posts')  Posts  
     hr.thin-hr
   div.container.flexbox.flex-col
     div
       h2 Add Post:
     hr.thin-hr.padded
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/post/upload-post", method='POST')
+      form.flexbox.flex-col(action="/posts/upload-post", method='POST')
         input(type="text", name="title", placeholder="Post Title")
         input(type="textarea", name="content", placeholder="Post Content", rows="4")
         input(type="submit" value="Add Post")

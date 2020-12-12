@@ -53,13 +53,13 @@ app.get('/', function (req, res, next) {
 });
 
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
-app.get("/post/add", function (req, res, next) {
+app.get("/posts/add", function (req, res, next) {
   res.render("posts/addpost");
   res.end()
 });
 
 // receive request to create a new post
-app.post("/post/upload-post", function (req, res, next) {
+app.post("/posts/upload-post", function (req, res, next) {
 
   var newTitle = req.body.title;
   var newText = req.body.content;
@@ -72,6 +72,14 @@ app.post("/post/upload-post", function (req, res, next) {
     });
 
   res.end();
+});
+
+// view all posts that have been created
+app.get("/posts/view_posts", function (req,res,next) {
+  Post.find({}, function(err, posts) {
+    res.render("posts/viewposts", { postdata: posts });
+    res.end();
+  })
 });
 
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
