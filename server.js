@@ -82,6 +82,15 @@ app.get("/posts/view_posts", function (req,res,next) {
   })
 });
 
+// view individual post
+app.get("/posts/view_post", function (req,res,next) {
+  // TODO: validate get string to prevent injection
+  Post.find({ _id: req.query.id }, function(err, post) {
+    res.render("posts/viewpost", { postdata: post });
+    res.end();
+  })
+});
+
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
 // get request to logout
 app.get('/logout', function (req, res, next) {
