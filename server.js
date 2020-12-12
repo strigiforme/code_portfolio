@@ -4,15 +4,19 @@ var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
 var mongoose = require("mongoose")
-const { body,validationResult } = require('express-validator');
+
 
 // CONNECT THE DATABASE
 https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
 mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
 var mongodb = mongoose.connection;
 mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-
+// set up the schema and objects for the database
+const postSchema = mongoose.Schema ({
+  title: String,
+  content: String
+});
+const Post = mongoose.model('Post', postSchema);
 
 // THIS SECTION IS FOR INITIALIZING THE APP
 var app = express();
@@ -56,9 +60,17 @@ app.get("/post/add", function (req, res, next) {
 
 // receive request to create a new post
 app.post("/post/upload-post", function (req, res, next) {
-  var title = req.body.title;
-  var text = req.body.content;
-  console.log("Received post with title:" + title + ", content: " + text)
+
+  var newTitle = req.body.title;
+  var newText = req.body.content;
+
+  var newPost = new Post({ title: newTitle, content: newText });
+
+  newPost.save(function (err, post) {
+      if (err) return console.error(err);
+      console.log(post.name + " saved to bookstore collection.");
+    });
+
   res.end();
 });
 
