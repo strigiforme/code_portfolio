@@ -4,7 +4,7 @@ var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
 var mongoose = require("mongoose")
-
+const { body,validationResult } = require('express-validator');
 
 // CONNECT THE DATABASE
 https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
@@ -48,10 +48,37 @@ app.get('/', function (req, res, next) {
   res.end()
 });
 
+// THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
+app.get("/post/add", function (req, res, next) {
+  res.render("posts/addpost");
+  res.end()
+});
+
+// receive request to create a new post
+app.post("/post/upload-post", function (req, res, next) {
+  var title = req.body.title;
+  var text = req.body.content;
+  console.log("Received post with title:" + title + ", content: " + text)
+  res.end();
+});
+
+// THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
 // get request to logout
 app.get('/logout', function (req, res, next) {
   userProfile = null;
   res.redirect('/');
+});
+
+// get request for login page
+app.get("/admin", authenticateUser, function (req, res, next){
+  res.render('admin.pug');
+  res.end();
+});
+
+// send people here to tell them they're naughty
+app.get("/forbidden", function (req, res, next) {
+  res.render("forbidden");
+  res.end();
 });
 
 // get request for login page
@@ -72,23 +99,7 @@ app.get("/success", function (req, res, next) {
   res.end();
 });
 
-// get request for login page
-app.get("/admin", authenticateUser, function (req, res, next){
-  res.render('admin.pug');
-  res.end();
-});
-
-app.get("/forbidden", function (req, res, next) {
-  res.render("forbidden");
-  res.end();
-});
-
-app.get("/post/add", authenticateUser, function (req, res, next) {
-  res.render("posts/addpost");
-  res.end()
-});
-
-
+// callback to protect pages
 function authenticateUser (req, res, next) {
   // check if we're allowed to be here
   if(!userProfile){

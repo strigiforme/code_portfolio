@@ -19,7 +19,7 @@ head
   link(rel='stylesheet' type='text/css' href='../css/main.css')
   link(rel='stylesheet' type='text/css' href='../css/responsive.css')
   link(rel='stylesheet' type='text/css' href='../css/text.css')
-  link(rel='stylesheet' type='text/css' href='../css/admin.css')
+  link(rel='stylesheet' type='text/css' href='../css/post.css')
   // JavaScript: uikit dependencies + some scrolling scripts
   script(src='js/uikit.min.js')
   script(src='js/uikit-icons.min.js')
@@ -41,12 +41,12 @@ head
         .header-card
           a.custom-underline(href='#' onclick="scrollto('about')")  About Me 
     hr.thin-hr
-    div.container.flexbox.flex-col
-      div
-        h2 Add Post:
-      hr.thin-hr.padded
-      div.flexbox.flex-col
-        a.control(href='/post/add') Add post
-        a.control(href='#') Edit post
-        a.control(href='#') Delete post
-        a.control(href='#') View posts
+  div.container.flexbox.flex-col
+    div
+      h2 Add Post:
+    hr.thin-hr.padded
+    div.flexbox.flex-col
+      form.flexbox.flex-col(action="/post/upload-post", method='POST')
+        input(type="text", name="title", placeholder="Post Title")
+        input(type="textarea", name="content", placeholder="Post Content", rows="4")
+        input(type="submit" value="Add Post")

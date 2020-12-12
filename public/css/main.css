@@ -1,5 +1,36 @@
 /* Styles for the main page, used throughout index.html */
 
+/* General useful formatting style (I spam these) */
+.flexbox {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-center {
+  justify-content: center;
+  text-align: center;
+}
+
+.container {
+  position: relative;
+  top: 80px;
+  padding: 1rem;
+  width: 800px;
+  margin:auto;
+  /* https://css-tricks.com/almanac/properties/b/box-shadow/ */
+  -webkit-box-shadow: 3px 3px 5px 6px #ccc;  /* Safari 3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
+  -moz-box-shadow:    3px 3px 5px 6px #ccc;  /* Firefox 3.5 - 3.6 */
+  box-shadow:         3px 3px 5px 6px #ccc;  /* Opera 10.5, IE 9, Firefox 4+, Chrome 6+, iOS 5 */
+}
+
+.padded {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 /* Prevent exremely wide screens from ruining my day */
 article {
   max-width: 900px;

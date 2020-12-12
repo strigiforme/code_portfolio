@@ -1,0 +1,7 @@
+input[type=textarea]{
+  height: 100px;
+}
+
+input {
+  margin-bottom: 1rem;
+}
