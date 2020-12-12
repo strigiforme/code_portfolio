@@ -59,7 +59,7 @@ app.get("/posts/add", function (req, res, next) {
 });
 
 // receive request to create a new post
-app.post("/posts/upload-post", function (req, res, next) {
+app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
   var newTitle = req.body.title;
   var newText = req.body.content;
@@ -71,6 +71,35 @@ app.post("/posts/upload-post", function (req, res, next) {
       console.log(post.name + " saved to bookstore collection.");
     });
 
+  res.redirect("/admin");
+  res.end();
+});
+
+// receive post request to delete a post
+app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
+
+  var id = req.body.id;
+
+  Post.deleteOne({_id: id}, function(err, obj) {
+    if (err) throw err;
+    console.log("Deleted post with id: " + id)
+  });
+
+  res.redirect("/admin?delete=true");
+  res.end();
+});
+
+// receive post request to edit a post
+app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
+
+  var id = req.body.id;
+
+  Post.deleteOne({_id: id}, function(err, obj) {
+    if (err) throw err;
+    console.log("Deleted post with id: " + id)
+  });
+
+  res.redirect("/admin?delete=true");
   res.end();
 });
 
@@ -100,8 +129,10 @@ app.get('/logout', function (req, res, next) {
 
 // get request for login page
 app.get("/admin", authenticateUser, function (req, res, next){
-  res.render('admin.pug');
-  res.end();
+  Post.find({}, function(err, posts) {
+    res.render('admin.pug', { postdata: posts });
+    res.end();
+  })
 });
 
 // send people here to tell them they're naughty

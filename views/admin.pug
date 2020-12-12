@@ -20,6 +20,9 @@ head
   link(rel='stylesheet' type='text/css' href='css/responsive.css')
   link(rel='stylesheet' type='text/css' href='css/text.css')
   link(rel='stylesheet' type='text/css' href='css/admin.css')
+  link(rel='stylesheet' type='text/css' href='css/post.css')
+  // Font awesome
+  link(rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.css")
   // JavaScript: uikit dependencies + some scrolling scripts
   script(src='js/uikit.min.js')
   script(src='js/uikit-icons.min.js')
@@ -44,7 +47,22 @@ head
       h2 Welcome, Howard!
     hr.thin-hr.padded
     div.flexbox.flex-col
-      a.control(href='/posts/add') Add post
-      a.control(href='#') Edit post
-      a.control(href='#') Delete post
-      a.control(href='#') View posts
+      div.post-container
+        a.post-link(href='/posts/add') 
+          i.fa.fa-plus-circle
+          | &nbsp;Add post
+      each post in postdata
+        div.post-container
+          a(href="/posts/view_post?id=" + post.id) 
+            i.fa.fa-caret-square-o-right
+            | &nbsp;#{post.title}
+          div.edit-controls-container
+            form(action="/posts/delete_post" method="POST")
+              input(type="text" name="id" value=""+post.id hidden)
+              button(type="submit")
+                i.fa.fa-trash
+            form(action="/posts/edit_post" method="POST")
+              input(type="submit" name="id" value=""+post.id hidden)              
+              button(type="submit")
+                i.fa.fa-pencil-square
+          
