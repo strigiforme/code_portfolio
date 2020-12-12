@@ -30,7 +30,10 @@ head
     .header-card-container
       div
         .header-card
-          a.custom-underline(href='login')  Login
+          if login
+            a.custom-underline.fail(href='/auth/google')  Login Failed!
+          else
+            a.custom-underline(href='/auth/google')  Login
       .flex
         .header-card
           a.custom-underline(href='/')  Home     

@@ -153,8 +153,6 @@ var userProfile;
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/error', (req, res) => res.send("error logging in"));
-
 passport.serializeUser(function(user, cb) {
   cb(null, user);
 });
@@ -186,6 +184,5 @@ app.get('/auth/google',
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/?login=false' }),
   function(req, res) {
-    // Successful authentication, redirect success.
     res.redirect('/success');
   });
