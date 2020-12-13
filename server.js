@@ -4,6 +4,7 @@ var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
 var mongoose = require("mongoose")
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 
 // CONNECT THE DATABASE
@@ -59,69 +60,90 @@ app.get("/posts/add", function (req, res, next) {
   res.end()
 });
 
-// receive request to create a new post
+// upload a new post to database
 app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
+  // extract the title and content, will be validated during M4
   var newTitle = req.body.title;
   var newText = req.body.content;
 
+  // create new db object using data
   var newPost = new Post({ title: newTitle, content: newText });
 
+  // save this object to the database
   newPost.save(function (err, post) {
+      // intercept and log errors
       if (err) return console.error(err);
-      console.log(post.name + " saved to bookstore collection.");
+      // log result to console
+      console.log(post._id + " uploaded.");
     });
 
+  // take user back to admin page to see result
   res.redirect("/admin");
   res.end();
 });
 
-// receive post request to delete a post
+// delete a post
 app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
 
+  // extract the ID of the post from the post request
   var id = req.body.id;
 
+  // send a query to delete the post corresponding to this ID
   Post.deleteOne({_id: id}, function(err, obj) {
+    // catch errors
     if (err) throw err;
+    // report result
     console.log("Deleted post with id: " + id)
   });
 
+  // send back to admin page with result in a query string
   res.redirect("/admin?delete=true");
   res.end();
 });
 
-// receive post request to load a page to edit a post
+// take user to page to edit post
 app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
+  // extract the ID of the post from the post request
   var id = req.body.id;
+
   // get the post using its ID
   Post.findOne({_id: id}, function(err, post) {
-    if (err) throw err;
+      // catch errors
+      if (err) throw err;
+      // give user a page to edit the content
       res.render("posts/editpost", {postData: post})
   });
 
 });
 
-// receive a post request to apply the edit made to a post
+// upload edited post to databse
 app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
 
-  // get all the variables from the edit request
+  // get ID from the post request
   var id = req.body.id;
 
+  // construct obj with update data
   var update = {title: req.body.title, content: req.body.content };
 
-  // get the post using its ID
+  // update the post using the update data and the post's ID
   Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
+    // catch errors
     if (err) throw err;
-    res.redirect("/admin");
+    // take user back to admin page with result
+    res.redirect("/admin?edit=true");
   });
 
 });
 
 // view all posts that have been created
 app.get("/posts/view_posts", function (req,res,next) {
+  // query mongodb for all posts
   Post.find({}, function(err, posts) {
+    // send user to view posts page along with data for every post
     res.render("posts/viewposts", { postdata: posts });
+    // end request
     res.end();
   })
 });
@@ -129,8 +151,11 @@ app.get("/posts/view_posts", function (req,res,next) {
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
   // TODO: validate get string to prevent injection
-  Post.find({ _id: req.query.id }, function(err, post) {
+  // query database for the post that corresponds to this ID
+  Post.findOne({ _id: req.query.id }, function(err, post) {
+    // send user to view post page with data about the post
     res.render("posts/viewpost", { postdata: post });
+    // end request
     res.end();
   })
 });
@@ -156,79 +181,81 @@ app.get("/forbidden", function (req, res, next) {
   res.end();
 });
 
-// get request for login page
-app.get("/success", function (req, res, next) {
-  // check if the user profile has been populated
-  if(userProfile){
-    // check if the email for the user's profile is authorized
-    if(userProfile.emails[0].value == "howardpearce0@gmail.com") {
-      console.log("User email " + userProfile.emails[0].value + " successfully authenticated.");
-      res.redirect("/admin");
-    } else {
-      console.log("User email " + userProfile.emails[0].value + " was rejected.");
-      res.redirect("/?login=false");
-    }
-  } else {
-    res.redirect("/?login=false");
-  }
-  res.end();
-});
-
 // callback to protect pages
 function authenticateUser (req, res, next) {
   // check if we're allowed to be here
   if(!userProfile){
     res.redirect("/forbidden");
   } else {
-    if (userProfile.emails[0].value != "howardpearce0@gmail.com") {
-      res.redirect("/forbidden");
-    } else {
+    // --------------------------------------------------------------------------------------------------------------------------
+    // NOTE: THIS SECTION HAS BEEN COMMENTED OUT FOR MY M3 SUBMISSION TO ALLOW MARKERS TO USE THE ADMINISTRATION INTERFACE.
+    // WILL BE RE-ADDED WITH A TEST ACCOUNT FOR MILESTONE 4
+    // --------------------------------------------------------------------------------------------------------------------------
+    //if (userProfile.emails[0].value != "howardpearce0@gmail.com") {
+    //  res.redirect("/forbidden");
+    //} else {
       next();
-    }
+    //}
   }
 }
 
 
-// THE FOLLOWING IS FOR GOOGLE AUTHENTICATION: DO NOT TOUCH OR SO HELP ME
+// THE FOLLOWING IS FOR GOOGLE AUTHENTICATION
 // REFERENCES https://www.loginradius.com/blog/async/google-authentication-with-nodejs-and-passportjs/
 
-/*  PASSPORT SETUP  */
-
+// variable that we can put the users profile information in. Needed for authentication later.
 var userProfile;
 
+// initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+// function to serialize the userProfile var we made
 passport.serializeUser(function(user, cb) {
   cb(null, user);
 });
-
+// function to deserialize the userProfile var we made
 passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
 
-/*  Google AUTH  */
-
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+// google api setup for authentication
 const GOOGLE_CLIENT_ID = '40436206251-ru4jeohin8cod771svsr5dmtp86as5kc.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = 'KknKW2b3k2KOjFAmm3F3dUXo';
 
-passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
+// create login strategy to send to passport
+var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, callbackURL: "http://localhost:3000/auth/google/callback" }, function(accessToken, refreshToken, profile, done) {
+      // place result in userProfile
       userProfile=profile;
+      // return result
       return done(null, userProfile);
   }
-));
+)
 
-app.get('/auth/google',
-  passport.authenticate('google', { scope : ['profile', 'email'] }));
+// pass google api to passport
+passport.use(strategy);
 
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/?login=false' }),
-  function(req, res) {
-    res.redirect('/success');
-  });
+// send authentication request to google
+app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+// receive the final response from google after logging in
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
+  // redirect to verify the result
+  // check if the user profile has been populated
+  if(userProfile){
+    // --------------------------------------------------------------------------------------------------------------------------
+    // NOTE: THIS SECTION HAS BEEN COMMENTED OUT FOR MY M3 SUBMISSION TO ALLOW MARKERS TO USE THE ADMINISTRATION INTERFACE.
+    // WILL BE RE-ADDED WITH A TEST ACCOUNT FOR MILESTONE 4
+    // --------------------------------------------------------------------------------------------------------------------------
+    // check if the email for the user's profile is authorized
+    //if(userProfile.emails[0].value == "howardpearce0@gmail.com") {
+      //console.log("User email " + userProfile.emails[0].value + " successfully authenticated.");
+      res.redirect("/admin");
+    //} else {
+      //console.log("User email " + userProfile.emails[0].value + " was rejected.");
+      //res.redirect("/?login=false");
+    //}
+  } else {
+    res.redirect("/?login=false");
+  }
+});
