@@ -17,6 +17,7 @@ const postSchema = mongoose.Schema ({
   content: String
 });
 const Post = mongoose.model('Post', postSchema);
+mongoose.set('useFindAndModify', false);
 
 // THIS SECTION IS FOR INITIALIZING THE APP
 var app = express();
@@ -89,18 +90,32 @@ app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
   res.end();
 });
 
-// receive post request to edit a post
+// receive post request to load a page to edit a post
 app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
   var id = req.body.id;
-
-  Post.deleteOne({_id: id}, function(err, obj) {
+  // get the post using its ID
+  Post.findOne({_id: id}, function(err, post) {
     if (err) throw err;
-    console.log("Deleted post with id: " + id)
+      res.render("posts/editpost", {postData: post})
   });
 
-  res.redirect("/admin?delete=true");
-  res.end();
+});
+
+// receive a post request to apply the edit made to a post
+app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
+
+  // get all the variables from the edit request
+  var id = req.body.id;
+
+  var update = {title: req.body.title, content: req.body.content };
+
+  // get the post using its ID
+  Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
+    if (err) throw err;
+    res.redirect("/admin");
+  });
+
 });
 
 // view all posts that have been created
