@@ -4,6 +4,9 @@ var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
 var mongoose = require("mongoose")
+var crypto = require("crypto")
+var fs = require("fs")
+
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 
@@ -46,7 +49,6 @@ Admin.find({}, function(err, admins) {
 
 // END DATABASE PORTION --------------------------------------------------------------------------------------------------------
 
-
 // APP INIT PORTION ------------------------------------------------------------------------------------------------------------
 var app = express();
 
@@ -76,10 +78,35 @@ app.listen(3000, function(){
 
 // set view engine to be pug
 app.set('view engine', 'pug');
+
 // END APP INIT PORTION ---------------------------------------------------------------------------------------------------------
 
 
+// ACCESS CODE INIT PORTION -----------------------------------------------------------------------------------------------------
+// check if the access file doesn't exist
+if (!fs.existsSync("access.txt")) {
+  // log the creation of the file
+  console.log("Access code file does not exist yet, creating now.")
 
+  // access code
+  var code = 'sleipnir'
+
+  // get the hashed access code
+  var hash = crypto.createHash('sha256').update(code).digest('hex');
+
+  // create the access file
+  fs.open("access.txt", "w", function (err) {
+    if (err) return console.log(err);
+  });
+
+  // write the hash to the access file
+  fs.writeFile("access.txt", hash, function (err) {
+    if (err) return console.log(err);
+  });
+} else {
+  console.log("Access code already exists, skipping generation.")
+}
+// END ACCESS CODE INIT PORTION -------------------------------------------------------------------------------------------------
 
 
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
