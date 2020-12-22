@@ -19,3 +19,6 @@ li{
 p{
     font-size: 14px;
 }
+strong {
+  font-weight: 500;
+}
