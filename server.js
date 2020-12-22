@@ -7,40 +7,76 @@ var mongoose = require("mongoose")
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 
-// CONNECT THE DATABASE
-https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose
+// DATABASE PORTION ------------------------------------------------------------------------------------------------------------
+// connect to local db instance
 mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
+
+// get the database obj from the connection
 var mongodb = mongoose.connection;
+
+// display connection errors
 mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
 // set up the schema and objects for the database
-const postSchema = mongoose.Schema ({
-  title: String,
-  content: String
-});
+const postSchema = mongoose.Schema ({ title: String, content: String });
+const adminSchema = mongoose.Schema ({ email: String });
+
+// set up models for objects we are using
 const Post = mongoose.model('Post', postSchema);
+const Admin = mongoose.model('Admin', adminSchema);
+
+// deprecated
 mongoose.set('useFindAndModify', false);
 
-// THIS SECTION IS FOR INITIALIZING THE APP
+var adminAccount;
+
+// get the administrator account's email
+Admin.find({}, function(err, admins) {
+  adminAccount = admins[0].email
+})
+
+// var newAdmin = new Admin({ email:"howardpearce0@gmail.com" });
+//
+// newAdmin.save(function (err, admin) {
+//   // intercept and log errors
+//   if (err) return console.error(err);
+//   // log result to console
+//   console.log(admin._id + " uploaded.");
+// });
+
+// END DATABASE PORTION --------------------------------------------------------------------------------------------------------
+
+
+// APP INIT PORTION ------------------------------------------------------------------------------------------------------------
 var app = express();
+
 // set up sessions
 app.use(session({
   resave: false,
   saveUninitialized: true,
   secret: 'SECRET'
 }));
+
 // give access to public folder
 app.use(express.static("public"));
+
+// initialize sessions
 app.use(passport.initialize());
 app.use(passport.session());
+
 // for receiving post requests
 app.use(express.urlencoded({
   extended: true
 }))
+
 // listen callback
 app.listen(3000, function(){
   console.log("Listening on port 3000!")
 });
+
+// set view engine to be pug
 app.set('view engine', 'pug');
+// END APP INIT PORTION ---------------------------------------------------------------------------------------------------------
 
 
 
@@ -184,18 +220,14 @@ app.get("/forbidden", function (req, res, next) {
 // callback to protect pages
 function authenticateUser (req, res, next) {
   // check if we're allowed to be here
-  if(!userProfile){
+  if(!req.session.login){
     res.redirect("/forbidden");
   } else {
-    // --------------------------------------------------------------------------------------------------------------------------
-    // NOTE: THIS SECTION HAS BEEN COMMENTED OUT FOR MY M3 SUBMISSION TO ALLOW MARKERS TO USE THE ADMINISTRATION INTERFACE.
-    // WILL BE RE-ADDED WITH A TEST ACCOUNT FOR MILESTONE 4
-    // --------------------------------------------------------------------------------------------------------------------------
-    //if (userProfile.emails[0].value != "howardpearce0@gmail.com") {
-    //  res.redirect("/forbidden");
-    //} else {
+    if (req.session.email != adminAccount) {
+     res.redirect("/forbidden");
+    } else {
       next();
-    //}
+    }
   }
 }
 
@@ -243,18 +275,16 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   // redirect to verify the result
   // check if the user profile has been populated
   if(userProfile){
-    // --------------------------------------------------------------------------------------------------------------------------
-    // NOTE: THIS SECTION HAS BEEN COMMENTED OUT FOR MY M3 SUBMISSION TO ALLOW MARKERS TO USE THE ADMINISTRATION INTERFACE.
-    // WILL BE RE-ADDED WITH A TEST ACCOUNT FOR MILESTONE 4
-    // --------------------------------------------------------------------------------------------------------------------------
+    req.session.login = true;
+    req.session.email = userProfile.emails[0].value;
     // check if the email for the user's profile is authorized
-    //if(userProfile.emails[0].value == "howardpearce0@gmail.com") {
-      //console.log("User email " + userProfile.emails[0].value + " successfully authenticated.");
+    if(req.session.email == adminAccount) {
+      console.log("User email " + req.session.email + " successfully authenticated.");
       res.redirect("/admin");
-    //} else {
-      //console.log("User email " + userProfile.emails[0].value + " was rejected.");
-      //res.redirect("/?login=false");
-    //}
+    } else {
+      console.log("User email " + req.session.email + " was rejected.");
+      res.redirect("/?login=false");
+    }
   } else {
     res.redirect("/?login=false");
   }
