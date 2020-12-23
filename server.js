@@ -347,7 +347,9 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
       console.log("Adding email " + req.session.email + " as the administrator account.");
       // set the administrator email to this one since it wasn't done properly
       adminAccount = req.session.email;
-      
+      // turn off the newEmail flag to rerturn to base case
+      newEmail = false;  
+
       // create new databse obj
       var newAdmin = new Admin({ email:req.session.email });
 
@@ -359,7 +361,6 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
         console.log(admin._id + " successfully uploaded.");
         // turn off flag to ensure we don't add more administrators by accident.
         addAdministrator = false;
-
       });
     }
 
