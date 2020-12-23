@@ -9,6 +9,9 @@ var fs = require("fs")
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
+// state variables
+var newEmail = false;
+var addAdministrator = false;
 
 // DATABASE PORTION ------------------------------------------------------------------------------------------------------------
 // connect to local db instance
@@ -32,20 +35,6 @@ const Admin = mongoose.model('Admin', adminSchema);
 mongoose.set('useFindAndModify', false);
 
 var adminAccount;
-
-// get the administrator account's email
-Admin.find({}, function(err, admins) {
-  adminAccount = admins[0].email
-})
-
-// var newAdmin = new Admin({ email:"howardpearce0@gmail.com" });
-//
-// newAdmin.save(function (err, admin) {
-//   // intercept and log errors
-//   if (err) return console.error(err);
-//   // log result to console
-//   console.log(admin._id + " uploaded.");
-// });
 
 // END DATABASE PORTION --------------------------------------------------------------------------------------------------------
 
@@ -79,10 +68,22 @@ app.listen(3000, function(){
 // set view engine to be pug
 app.set('view engine', 'pug');
 
+// get the administrator account's email
+Admin.find({}, function(err, admins) {
+
+  if (admins.length > 0) {
+    adminAccount = admins[0].email
+  } else {
+    console.log("Unable to find an administrator account. In new Email mode.");
+    newEmail = true;
+    console.log(newEmail);
+  }
+})
+
 // END APP INIT PORTION ---------------------------------------------------------------------------------------------------------
 
 
-// ACCESS CODE INIT PORTION -----------------------------------------------------------------------------------------------------
+// ACCESS CODE PORTION ----------------------------------------------------------------------------------------------------------
 // check if the access file doesn't exist
 if (!fs.existsSync("access.txt")) {
   // log the creation of the file
@@ -104,9 +105,10 @@ if (!fs.existsSync("access.txt")) {
     if (err) return console.log(err);
   });
 } else {
-  console.log("Access code already exists, skipping generation.")
+  // Log that we're skipping file generations
+  console.log("Access code already exists, skipping generation.");
 }
-// END ACCESS CODE INIT PORTION -------------------------------------------------------------------------------------------------
+// END ACCESS CODE PORTION -----------------------------------------------------------------------------------------------------
 
 
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
@@ -294,6 +296,41 @@ var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GO
 // pass google api to passport
 passport.use(strategy);
 
+app.get('/auth', function (req, res, next) {
+
+  if (newEmail) {
+    res.redirect('/auth/newadmin');
+  } else {
+    res.redirect('/auth/google');
+  }
+
+
+
+});
+
+app.get('/auth/newadmin', function (req, res, next) {
+  res.render('newadmin.pug');
+  res.end();
+});
+
+app.post('/auth/newadmin', function (req, res, next) {
+  // extract the code submitted by the user
+  var code = req.body.code;
+  code = crypto.createHash('sha256').update(code).digest('hex');
+
+  // get the code stored locally
+  fs.readFile('access.txt', 'utf8', function (err, data) {
+    // handle errors
+    if (err) return console.log(err);
+    // compare the submitted code to the stored one
+    if (code == data) {
+      console.log("Submitted code matches stored example. Next submitted email will become administrator account.");
+      addAdministrator = true;
+      res.redirect("/auth/google");
+    }
+  });
+});
+
 // send authentication request to google
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
 
@@ -301,9 +338,31 @@ app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'e
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
   // redirect to verify the result
   // check if the user profile has been populated
-  if(userProfile){
+  if(userProfile) {
     req.session.login = true;
     req.session.email = userProfile.emails[0].value;
+
+    // check if the submitted email should be made an administrator
+    if ( addAdministrator ) {
+      console.log("Adding email " + req.session.email + " as the administrator account.");
+      // set the administrator email to this one since it wasn't done properly
+      adminAccount = req.session.email;
+      
+      // create new databse obj
+      var newAdmin = new Admin({ email:req.session.email });
+
+      // upload to databse
+      newAdmin.save(function (err, admin) {
+        // intercept and log errors
+        if (err) return console.error(err);
+        // log result to console
+        console.log(admin._id + " successfully uploaded.");
+        // turn off flag to ensure we don't add more administrators by accident.
+        addAdministrator = false;
+
+      });
+    }
+
     // check if the email for the user's profile is authorized
     if(req.session.email == adminAccount) {
       console.log("User email " + req.session.email + " successfully authenticated.");
