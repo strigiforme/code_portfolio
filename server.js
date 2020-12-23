@@ -6,17 +6,23 @@ var session = require("express-session");
 var mongoose = require("mongoose");
 var crypto = require("crypto");
 var fs = require("fs");
-var access_code = require("./lib/accessCode.js");
-var database = require("./lib/db.js");
-var initializer = require("./lib/initializer.js");
-var utils = require("./lib/utils.js");
-
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
+// Written libraries
+const access_code = require("./lib/accessCode.js");
+const database = require("./lib/db.js");
+const initializer = require("./lib/initializer.js");
+const utils = require("./lib/utils.js");
+
 
 // state variables
 var newEmail = false;
 var addAdministrator = false;
 var adminAccount;
+
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
 
 // initialize database
 var schemas = database.connectDb();
@@ -38,7 +44,15 @@ utils.getAdminAccount(Admin, newEmail).then( result => {
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
 
-// THIS SECTION HANDLES ROUTING FOR GET REQUESTS
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// END OF INITIALIZATION ----------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// THIS SECTION HANDLES ROUTING ---------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 // get request for root page
 app.get('/', function (req, res, next) {
   var login_status = req.query.login;
@@ -187,9 +201,15 @@ function authenticateUser (req, res, next) {
   }
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// END OF ROUTING -----------------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
-// THE FOLLOWING IS FOR GOOGLE AUTHENTICATION
-// REFERENCES https://www.loginradius.com/blog/async/google-authentication-with-nodejs-and-passportjs/
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// THE FOLLOWING IS FOR GOOGLE AUTHENTICATION -------------------------------------------------------------------------------------------------
+// REFERENCES https://www.loginradius.com/blog/async/google-authentication-with-nodejs-and-passportjs/ ----------------------------------------
+// --------------------------------------------------------------------------------------------------------------------------------------------
 
 // variable that we can put the users profile information in. Needed for authentication later.
 var userProfile;
