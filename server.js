@@ -261,7 +261,8 @@ app.get('/auth', function (req, res, next) {
 });
 
 app.get('/auth/newadmin', function (req, res, next) {
-  res.render('newadmin.pug', {loggedin: req.session.login});
+  var access_status = req.query.access;
+  res.render('newadmin.pug', {loggedin: req.session.login, access: access_status});
   res.end();
 });
 
@@ -279,6 +280,8 @@ app.post('/auth/newadmin', function (req, res, next) {
       console.log("Submitted code matches stored example. Next submitted email will become administrator account.");
       addAdministrator = true;
       res.redirect("/auth/google");
+    } else {
+      res.redirect("/auth/newadmin?access=false");
     }
   });
 });

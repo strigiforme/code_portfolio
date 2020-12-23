@@ -6,7 +6,10 @@ head
       h2 New Administrator
     hr.thin-hr.padded
     div.flexbox.flex-col
-      p Please enter a valid access code to verify your email as an administrator account
+      if access
+        p.fail Invalid access code
+      else
+        p Please enter a valid access code to verify your email as an administrator account
       form.flexbox.flex-col(action="/auth/newadmin", method='POST')
         input(type="text", name="code", placeholder="Access code")
         input(type="submit" value="Submit")
