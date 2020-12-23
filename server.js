@@ -3,113 +3,40 @@ var express = require("express");
 var router = express.Router();
 var passport = require("passport");
 var session = require("express-session");
-var mongoose = require("mongoose")
-var crypto = require("crypto")
-var fs = require("fs")
+var mongoose = require("mongoose");
+var crypto = require("crypto");
+var fs = require("fs");
+var access_code = require("./lib/accessCode.js");
+var database = require("./lib/db.js");
+var initializer = require("./lib/initializer.js");
+var utils = require("./lib/utils.js");
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 // state variables
 var newEmail = false;
 var addAdministrator = false;
-
-// DATABASE PORTION ------------------------------------------------------------------------------------------------------------
-// connect to local db instance
-mongoose.connect('mongodb://127.0.0.1/my_database', {useNewUrlParser: true, useUnifiedTopology: true});
-
-// get the database obj from the connection
-var mongodb = mongoose.connection;
-
-// display connection errors
-mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-// set up the schema and objects for the database
-const postSchema = mongoose.Schema ({ title: String, content: String });
-const adminSchema = mongoose.Schema ({ email: String });
-
-// set up models for objects we are using
-const Post = mongoose.model('Post', postSchema);
-const Admin = mongoose.model('Admin', adminSchema);
-
-// deprecated
-mongoose.set('useFindAndModify', false);
-
 var adminAccount;
 
-// END DATABASE PORTION --------------------------------------------------------------------------------------------------------
+// initialize database
+var schemas = database.connectDb();
+Post = schemas[0];
+Admin = schemas[1];
 
-// APP INIT PORTION ------------------------------------------------------------------------------------------------------------
-var app = express();
+// initialize app
+var app = initializer.initApp();
 
-// set up sessions
-app.use(session({
-  resave: false,
-  saveUninitialized: true,
-  secret: 'SECRET'
-}));
-
-// give access to public folder
-app.use(express.static("public"));
-
-// initialize sessions
-app.use(passport.initialize());
-app.use(passport.session());
-
-// for receiving post requests
-app.use(express.urlencoded({
-  extended: true
-}))
-
-// listen callback
-app.listen(3000, function(){
-  console.log("Listening on port 3000!")
+// retrieve the administrator account email
+utils.getAdminAccount(Admin, newEmail).then( result => {
+  // take the values retrieved and then place them into globals
+  adminAccount = result[0];
+  newEmail = result[1];
+}, reason => {
+  console.error("ERROR: promise rejection while getting administrator account email: " + reason);
 });
 
-// set view engine to be pug
-app.set('view engine', 'pug');
-
-// get the administrator account's email
-Admin.find({}, function(err, admins) {
-
-  if (admins.length > 0) {
-    adminAccount = admins[0].email
-  } else {
-    console.log("Unable to find an administrator account. In new Email mode.");
-    newEmail = true;
-    console.log(newEmail);
-  }
-})
-
-// END APP INIT PORTION ---------------------------------------------------------------------------------------------------------
-
-
-// ACCESS CODE PORTION ----------------------------------------------------------------------------------------------------------
-// check if the access file doesn't exist
-if (!fs.existsSync("access.txt")) {
-  // log the creation of the file
-  console.log("Access code file does not exist yet, creating now.")
-
-  // access code
-  var code = 'sleipnir'
-
-  // get the hashed access code
-  var hash = crypto.createHash('sha256').update(code).digest('hex');
-
-  // create the access file
-  fs.open("access.txt", "w", function (err) {
-    if (err) return console.log(err);
-  });
-
-  // write the hash to the access file
-  fs.writeFile("access.txt", hash, function (err) {
-    if (err) return console.log(err);
-  });
-} else {
-  // Log that we're skipping file generations
-  console.log("Access code already exists, skipping generation.");
-}
-// END ACCESS CODE PORTION -----------------------------------------------------------------------------------------------------
-
+// generate the users access code if it doesn't exist
+access_code.generateAccessCode();
 
 // THIS SECTION HANDLES ROUTING FOR GET REQUESTS
 // get request for root page
@@ -348,7 +275,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
       // set the administrator email to this one since it wasn't done properly
       adminAccount = req.session.email;
       // turn off the newEmail flag to rerturn to base case
-      newEmail = false;  
+      newEmail = false;
 
       // create new databse obj
       var newAdmin = new Admin({ email:req.session.email });
@@ -366,10 +293,11 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 
     // check if the email for the user's profile is authorized
     if(req.session.email == adminAccount) {
-      console.log("User email " + req.session.email + " successfully authenticated.");
+      console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
       res.redirect("/admin");
     } else {
-      console.log("User email " + req.session.email + " was rejected.");
+      console.log("INFO: User email '" + req.session.email + "' was rejected.");
+      console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
       res.redirect("/?login=false");
     }
   } else {
