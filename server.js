@@ -56,17 +56,17 @@ access_code.generateAccessCode();
 // get request for root page
 app.get('/', function (req, res, next) {
   var login_status = req.query.login;
-  res.render('index', {login: login_status});
+  res.render('index', {loggedin: req.session.login, login: login_status});
   res.end()
 });
 
 app.get('/resume', function (req, res, next) {
-  res.render("resume");
+  res.render("resume", {loggedin: req.session.login});
 });
 
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
 app.get("/posts/add", function (req, res, next) {
-  res.render("posts/addpost");
+  res.render("posts/addpost", {loggedin: req.session.login});
   res.end()
 });
 
@@ -123,7 +123,7 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
       // catch errors
       if (err) throw err;
       // give user a page to edit the content
-      res.render("posts/editpost", {postData: post})
+      res.render("posts/editpost", {loggedin: req.session.login, postData: post})
   });
 
 });
@@ -152,7 +152,7 @@ app.get("/posts/view_posts", function (req,res,next) {
   // query mongodb for all posts
   Post.find({}, function(err, posts) {
     // send user to view posts page along with data for every post
-    res.render("posts/viewposts", { postdata: posts });
+    res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts });
     // end request
     res.end();
   })
@@ -164,7 +164,7 @@ app.get("/posts/view_post", function (req,res,next) {
   // query database for the post that corresponds to this ID
   Post.findOne({ _id: req.query.id }, function(err, post) {
     // send user to view post page with data about the post
-    res.render("posts/viewpost", { postdata: post });
+    res.render("posts/viewpost", {loggedin: req.session.login, postdata: post });
     // end request
     res.end();
   })
@@ -173,21 +173,22 @@ app.get("/posts/view_post", function (req,res,next) {
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
 // get request to logout
 app.get('/logout', function (req, res, next) {
-  userProfile = null;
+  req.session.email = null;
+  req.session.login = false;
   res.redirect('/');
 });
 
 // get request for login page
 app.get("/admin", authenticateUser, function (req, res, next){
   Post.find({}, function(err, posts) {
-    res.render('admin.pug', { postdata: posts });
+    res.render('admin.pug', {loggedin: req.session.login, postdata: posts });
     res.end();
   })
 });
 
 // send people here to tell them they're naughty
 app.get("/forbidden", function (req, res, next) {
-  res.render("forbidden");
+  res.render("forbidden", {loggedin: req.session.login});
   res.end();
 });
 
@@ -260,7 +261,7 @@ app.get('/auth', function (req, res, next) {
 });
 
 app.get('/auth/newadmin', function (req, res, next) {
-  res.render('newadmin.pug');
+  res.render('newadmin.pug', {loggedin: req.session.login});
   res.end();
 });
 
@@ -289,42 +290,39 @@ app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'e
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
   // redirect to verify the result
   // check if the user profile has been populated
-  if(userProfile) {
+  req.session.email = userProfile.emails[0].value;
+
+  // check if the submitted email should be made an administrator
+  if ( addAdministrator ) {
+    console.log("Adding email " + req.session.email + " as the administrator account.");
+    // set the administrator email to this one since it wasn't done properly
+    adminAccount = req.session.email;
+    // turn off the newEmail flag to rerturn to base case
+    newEmail = false;
+
+    // create new databse obj
+    var newAdmin = new Admin({ email:req.session.email });
+
+    // upload to databse
+    newAdmin.save(function (err, admin) {
+      // intercept and log errors
+      if (err) return console.error(err);
+      // log result to console
+      console.log("INFO: admin account " + admin.email + " successfully uploaded.");
+      // turn off flag to ensure we don't add more administrators by accident.
+      addAdministrator = false;
+    });
+  }
+
+  // check if the email for the user's profile is authorized
+  if(req.session.email == adminAccount) {
     req.session.login = true;
-    req.session.email = userProfile.emails[0].value;
-
-    // check if the submitted email should be made an administrator
-    if ( addAdministrator ) {
-      console.log("Adding email " + req.session.email + " as the administrator account.");
-      // set the administrator email to this one since it wasn't done properly
-      adminAccount = req.session.email;
-      // turn off the newEmail flag to rerturn to base case
-      newEmail = false;
-
-      // create new databse obj
-      var newAdmin = new Admin({ email:req.session.email });
-
-      // upload to databse
-      newAdmin.save(function (err, admin) {
-        // intercept and log errors
-        if (err) return console.error(err);
-        // log result to console
-        console.log(admin._id + " successfully uploaded.");
-        // turn off flag to ensure we don't add more administrators by accident.
-        addAdministrator = false;
-      });
-    }
-
-    // check if the email for the user's profile is authorized
-    if(req.session.email == adminAccount) {
-      console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
-      res.redirect("/admin");
-    } else {
-      console.log("INFO: User email '" + req.session.email + "' was rejected.");
-      console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
-      res.redirect("/?login=false");
-    }
+    console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
+    res.redirect("/admin");
   } else {
+    req.session.login = false;
+    console.log("INFO: User email '" + req.session.email + "' was rejected.");
+    console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
     res.redirect("/?login=false");
   }
 });

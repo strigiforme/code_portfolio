@@ -29,12 +29,19 @@ script(src='js/scroll.js')
 .all_elements
 nav#nav.navbar-container
   .header-card-container
-    div
-      .header-card
+    div.flex
+      if loggedin
+        .header-card
+          a.custom-underline(href='/logout')  Log out
+        .header-card
+          a.custom-underline(href='/admin')  Admin
+      else
         if login
-          a.custom-underline.fail(href='/auth')  Login Failed!
+          .header-card
+            a.custom-underline.fail(href='/auth')  Login Failed!
         else
-          a.custom-underline(href='/auth/')  Login
+          .header-card
+            a.custom-underline(href='/auth/')  Login
     .flex
       .header-card
         a.custom-underline(href='/')  Home     

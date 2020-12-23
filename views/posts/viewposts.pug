@@ -6,7 +6,7 @@ head
       h2 View Posts:
     hr.thin-hr.padded
     div.flexbox.flex-col
-      if postdata
+      if !postdata
         div.post-container
           a(href="#") No posts available yet!
       each post in postdata
