@@ -60,6 +60,10 @@ app.get('/', function (req, res, next) {
   res.end()
 });
 
+app.get('/resume', function (req, res, next) {
+  res.render("resume");
+});
+
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
 app.get("/posts/add", function (req, res, next) {
   res.render("posts/addpost");
