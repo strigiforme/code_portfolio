@@ -6,6 +6,8 @@ var session = require("express-session");
 var mongoose = require("mongoose");
 var crypto = require("crypto");
 var fs = require("fs");
+var sanitize = require('mongo-sanitize');
+var bodyParser = require('body-parser');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 // Written libraries
@@ -13,7 +15,6 @@ const access_code = require("./lib/accessCode.js");
 const database = require("./lib/db.js");
 const initializer = require("./lib/initializer.js");
 const utils = require("./lib/utils.js");
-
 
 // state variables
 var newEmail = false;
@@ -74,8 +75,8 @@ app.get("/posts/add", function (req, res, next) {
 app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
   // extract the title and content, will be validated during M4
-  var newTitle = req.body.title;
-  var newText = req.body.content;
+  var newTitle = sanitize(escape(req.body.title));
+  var newText = sanitize(escape(req.body.content));
 
   // create new db object using data
   var newPost = new Post({ title: newTitle, content: newText });
@@ -97,7 +98,7 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
 
   // extract the ID of the post from the post request
-  var id = req.body.id;
+  var id = sanitize(escape(req.body.id));
 
   // send a query to delete the post corresponding to this ID
   Post.deleteOne({_id: id}, function(err, obj) {
@@ -116,10 +117,14 @@ app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
 app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
   // extract the ID of the post from the post request
-  var id = req.body.id;
+  var id = sanitize(escape(req.body.id));
 
   // get the post using its ID
   Post.findOne({_id: id}, function(err, post) {
+      // decode special characters
+      post.title = unescape(post.title);
+      post.content = unescape(post.content);
+
       // catch errors
       if (err) throw err;
       // give user a page to edit the content
@@ -132,10 +137,11 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
 
   // get ID from the post request
-  var id = req.body.id;
-
+  var id = sanitize(escape(req.body.id));
+  var title = sanitize(escape(req.body.title));
+  var content = sanitize(escape(req.body.content));
   // construct obj with update data
-  var update = {title: req.body.title, content: req.body.content };
+  var update = {title: title, content: content };
 
   // update the post using the update data and the post's ID
   Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
@@ -151,6 +157,11 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
 app.get("/posts/view_posts", function (req,res,next) {
   // query mongodb for all posts
   Post.find({}, function(err, posts) {
+    // decode special characters in lists of posts
+    posts.forEach(function(post, index, arr) {
+      post.title = unescape(post.title);
+      post.content = unescape(post.title);
+    });
     // send user to view posts page along with data for every post
     res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts });
     // end request
@@ -160,9 +171,11 @@ app.get("/posts/view_posts", function (req,res,next) {
 
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
-  // TODO: validate get string to prevent injection
+  var id = sanitize(escape(req.query.id));
   // query database for the post that corresponds to this ID
-  Post.findOne({ _id: req.query.id }, function(err, post) {
+  Post.findOne({ _id: id }, function(err, post) {
+    post.title = unescape(post.title);
+    post.content = unescape(post.content);
     // send user to view post page with data about the post
     res.render("posts/viewpost", {loggedin: req.session.login, postdata: post });
     // end request
@@ -181,6 +194,12 @@ app.get('/logout', function (req, res, next) {
 // get request for login page
 app.get("/admin", authenticateUser, function (req, res, next){
   Post.find({}, function(err, posts) {
+    // decode special characters in lists of posts
+    posts.forEach(function(post, index, arr) {
+      post.title = unescape(post.title);
+      post.content = unescape(post.title);
+    });
+    // parsed_posts = JSON.stringify(posts, null, 2);
     res.render('admin.pug', {loggedin: req.session.login, postdata: posts });
     res.end();
   })
@@ -237,7 +256,7 @@ const GOOGLE_CLIENT_ID = '40436206251-ru4jeohin8cod771svsr5dmtp86as5kc.apps.goog
 const GOOGLE_CLIENT_SECRET = 'KknKW2b3k2KOjFAmm3F3dUXo';
 
 // create login strategy to send to passport
-var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, callbackURL: "http://localhost:3000/auth/google/callback" }, function(accessToken, refreshToken, profile, done) {
+var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, callbackURL: "http://127.0.0.1:3000/auth/google/callback" }, function(accessToken, refreshToken, profile, done) {
       // place result in userProfile
       userProfile=profile;
       // return result
@@ -249,15 +268,11 @@ var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GO
 passport.use(strategy);
 
 app.get('/auth', function (req, res, next) {
-
   if (newEmail) {
     res.redirect('/auth/newadmin');
   } else {
     res.redirect('/auth/google');
   }
-
-
-
 });
 
 app.get('/auth/newadmin', function (req, res, next) {
@@ -268,7 +283,7 @@ app.get('/auth/newadmin', function (req, res, next) {
 
 app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
-  var code = req.body.code;
+  var code = sanitize(escape(req.body.code));
   code = crypto.createHash('sha256').update(code).digest('hex');
 
   // get the code stored locally

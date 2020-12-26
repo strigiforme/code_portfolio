@@ -19,6 +19,7 @@
     "express-session": "^1.17.1",
     "express-validator": "^6.8.0",
     "font-awesome": "^4.7.0",
+    "mongo-sanitize": "^1.1.0",
     "mongoose": "^5.11.6",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
