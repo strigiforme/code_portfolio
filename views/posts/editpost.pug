@@ -6,8 +6,18 @@ head
       h2 Edit Post:
     hr.thin-hr.padded
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST')
+      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST')          
         input(type="text", name="id", value="" + postData.id hidden)
-        input(type="text", name="title", placeholder="Post Title", value="" + postData.title)
-        input(type="textarea", name="content", placeholder="Post Content", rows="4", value="" + postData.content)
-        input(type="submit" value="Edit Post")
+        label(for="title") Post Title:
+        input(type="text", name="title", value="" + postData.title)
+        label(for="type") Post type:
+        select(name="type")
+          option(value="" + postData.type selected hidden) #{postData.type}
+          option(value="blog") Blog
+          option(value="info") Info
+          option(value="project") Project
+        br
+        label(for="content") Post Content:
+        textarea(name="content", rows="4") #{postData.content}
+        br
+        input(type="submit" value="Add Post")

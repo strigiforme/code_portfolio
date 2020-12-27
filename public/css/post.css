@@ -3,7 +3,20 @@ input[type=textarea]{
 }
 
 input {
+  padding: 3px;
   margin-bottom: 1rem;
+  font-size: 16px;
+}
+
+textarea {
+  margin-bottom: 1rem;
+  font-size: 16px;
+  padding: 3px;
+}
+
+select {
+  padding: 3px;
+  font-size: 16px;
 }
 
 .post-container {
@@ -24,4 +37,12 @@ input {
 
 .post-container a i {
   font-size: 24px;
+}
+
+label {
+  font-size: 22px;
+}
+
+.blue {
+  color:#668dba;
 }

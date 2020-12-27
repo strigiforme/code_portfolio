@@ -77,9 +77,10 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
   // extract the title and content, will be validated during M4
   var newTitle = sanitize(escape(req.body.title));
   var newText = sanitize(escape(req.body.content));
+  var postType = sanitize(escape(req.body.type));
 
   // create new db object using data
-  var newPost = new Post({ title: newTitle, content: newText });
+  var newPost = new Post({ title: newTitle, type: postType, content: newText });
 
   try {
     // save this object to the database
@@ -132,6 +133,7 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
       // decode special characters
       post.title = unescape(post.title);
       post.content = unescape(post.content);
+      post.type = unescape(post.type);
 
       // catch errors
       if (err) throw err;
@@ -147,8 +149,9 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
   var id = sanitize(escape(req.body.id));
   var title = sanitize(escape(req.body.title));
   var content = sanitize(escape(req.body.content));
+  var type = sanitize(escape(req.body.type));
   // construct obj with update data
-  var update = {title: title, content: content };
+  var update = {title: title, type: type, content: content };
 
   try {
     // update the post using the update data and the post's ID
