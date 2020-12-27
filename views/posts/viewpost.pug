@@ -6,4 +6,5 @@ head
       h2 #{postdata.title}
     hr.thin-hr.padded
     div.flexbox.flex-col
-      p #{postdata.content}
+      each line in content
+        p #{line}

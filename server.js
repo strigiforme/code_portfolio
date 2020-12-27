@@ -174,7 +174,7 @@ app.get("/posts/view_posts", function (req,res,next) {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
-      post.content = unescape(post.title);
+      post.content = unescape(post.content);
     });
     // send user to view posts page along with data for every post
     res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts });
@@ -190,10 +190,19 @@ app.get("/posts/view_post", function (req,res,next) {
   Post.findOne({ _id: id }, function(err, post) {
     try {
       if (err) console.log(err);
+
+      // prepare the post to be sent (unescape input)
       post.title = unescape(post.title);
       post.content = unescape(post.content);
+      content =  post.content.split("\n");
+
+      // debug
+      console.log("DEBUG: loading post");
+      console.log("\nDEBUG: Title: \n" + post.title);
+      console.log("\nDEBUG: Content: \n" + post.content);
+
       // send user to view post page with data about the post
-      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post });
+      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
       // end request
       res.end();
     } catch {
