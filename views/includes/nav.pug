@@ -42,6 +42,13 @@ nav#nav.navbar-container
         else
           .header-card
             a.custom-underline(href='/auth/')  Login
+      if edit
+        .header-card
+          p.success(style="position:relative; top: 2px;") Successfully edited!
+      if del
+        .header-card
+          p.success(style="position:relative; top: 2px;") Successfully deleted!
+      
     .flex
       .header-card
         a.custom-underline(href='/')  Home     

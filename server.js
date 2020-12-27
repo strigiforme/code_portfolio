@@ -81,13 +81,17 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
   // create new db object using data
   var newPost = new Post({ title: newTitle, content: newText });
 
-  // save this object to the database
-  newPost.save(function (err, post) {
+  try {
+    // save this object to the database
+    newPost.save(function (err, post) {
       // intercept and log errors
-      if (err) return console.error(err);
+      if (err) throw err;
       // log result to console
       console.log(post._id + " uploaded.");
     });
+  } catch {
+    res.redirect("posts/posterror");
+  }
 
   // take user back to admin page to see result
   res.redirect("/admin");
@@ -100,13 +104,17 @@ app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
   // extract the ID of the post from the post request
   var id = sanitize(escape(req.body.id));
 
-  // send a query to delete the post corresponding to this ID
-  Post.deleteOne({_id: id}, function(err, obj) {
-    // catch errors
-    if (err) throw err;
-    // report result
-    console.log("Deleted post with id: " + id)
-  });
+  try {
+    // send a query to delete the post corresponding to this ID
+    Post.deleteOne({_id: id}, function(err, obj) {
+      // catch errors
+      if (err) throw err;
+      // report result
+      console.log("Deleted post with id: " + id)
+    });
+  } catch {
+    res.redirect("posts/posterror");
+  }
 
   // send back to admin page with result in a query string
   res.redirect("/admin?delete=true");
@@ -135,7 +143,6 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
 // upload edited post to databse
 app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
-
   // get ID from the post request
   var id = sanitize(escape(req.body.id));
   var title = sanitize(escape(req.body.title));
@@ -143,13 +150,17 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
   // construct obj with update data
   var update = {title: title, content: content };
 
-  // update the post using the update data and the post's ID
-  Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
-    // catch errors
-    if (err) throw err;
-    // take user back to admin page with result
-    res.redirect("/admin?edit=true");
-  });
+  try {
+    // update the post using the update data and the post's ID
+    Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
+      // catch errors
+      if (err) throw err;
+      // take user back to admin page with result
+      res.redirect("/admin?edit=true");
+    });
+  } catch {
+    res.redirect("posts/posterror");
+  }
 
 });
 
@@ -174,13 +185,18 @@ app.get("/posts/view_post", function (req,res,next) {
   var id = sanitize(escape(req.query.id));
   // query database for the post that corresponds to this ID
   Post.findOne({ _id: id }, function(err, post) {
-    post.title = unescape(post.title);
-    post.content = unescape(post.content);
-    // send user to view post page with data about the post
-    res.render("posts/viewpost", {loggedin: req.session.login, postdata: post });
-    // end request
-    res.end();
-  })
+    try {
+      if (err) console.log(err);
+      post.title = unescape(post.title);
+      post.content = unescape(post.content);
+      // send user to view post page with data about the post
+      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post });
+      // end request
+      res.end();
+    } catch {
+      res.render("posts/posterror");
+    }
+  });
 });
 
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
@@ -193,6 +209,10 @@ app.get('/logout', function (req, res, next) {
 
 // get request for login page
 app.get("/admin", authenticateUser, function (req, res, next){
+  // load any query strings
+  var edit_status = req.query.edit;
+  var delete_status = req.query.delete;
+
   Post.find({}, function(err, posts) {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
@@ -200,14 +220,14 @@ app.get("/admin", authenticateUser, function (req, res, next){
       post.content = unescape(post.title);
     });
     // parsed_posts = JSON.stringify(posts, null, 2);
-    res.render('admin.pug', {loggedin: req.session.login, postdata: posts });
+    res.render('admin.pug', {loggedin: req.session.login, postdata: posts, del: delete_status, edit: edit_status});
     res.end();
   })
 });
 
 // send people here to tell them they're naughty
 app.get("/forbidden", function (req, res, next) {
-  res.render("forbidden", {loggedin: req.session.login});
+  res.status(403).render("forbidden", {loggedin: req.session.login});
   res.end();
 });
 
@@ -256,7 +276,7 @@ const GOOGLE_CLIENT_ID = '40436206251-ru4jeohin8cod771svsr5dmtp86as5kc.apps.goog
 const GOOGLE_CLIENT_SECRET = 'KknKW2b3k2KOjFAmm3F3dUXo';
 
 // create login strategy to send to passport
-var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, callbackURL: "http://127.0.0.1:3000/auth/google/callback" }, function(accessToken, refreshToken, profile, done) {
+var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GOOGLE_CLIENT_SECRET, callbackURL: "http://howardpearce.ca/auth/google/callback" }, function(accessToken, refreshToken, profile, done) {
       // place result in userProfile
       userProfile=profile;
       // return result
@@ -343,4 +363,8 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
     res.redirect("/?login=false");
   }
+});
+
+app.get('*', function(req, res){
+  res.status(404).send('what???');
 });

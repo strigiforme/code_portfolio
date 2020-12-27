@@ -34,3 +34,7 @@
   padding-right: 1rem;
   color: black;
 }
+
+.success {
+  color: green;
+}
