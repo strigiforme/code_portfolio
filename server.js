@@ -150,6 +150,7 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
   var title = sanitize(escape(req.body.title));
   var content = sanitize(escape(req.body.content));
   var type = sanitize(escape(req.body.type));
+
   // construct obj with update data
   var update = {title: title, type: type, content: content };
 
@@ -229,6 +230,7 @@ app.get("/admin", authenticateUser, function (req, res, next){
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
+      post.type = unescape(post.type);
       post.content = unescape(post.title);
     });
     // parsed_posts = JSON.stringify(posts, null, 2);

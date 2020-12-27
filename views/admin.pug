@@ -12,9 +12,16 @@ head
           | &nbsp;Add post
       each post in postdata
         div.post-container
-          a(href="/posts/view_post?id=" + post.id) 
-            i.fa.fa-caret-square-o-right
-            | &nbsp;#{post.title}
+          a(href="/posts/view_post?id=" + post.id)
+            if post.type == "info"
+              i.fa.fa-info-circle
+            else if post.type == "blog"
+              i.fa.fa-book
+            else if post.type == "project"
+              i.fa.fa-code
+            else
+              i.fa.fa-question-circle
+            | &nbsp; #{post.title}
           div.edit-controls-container
             form(action="/posts/delete_post" method="POST")
               input(type="text" name="id" value=""+post.id hidden)
