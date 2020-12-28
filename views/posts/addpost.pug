@@ -6,7 +6,7 @@ head
       h2.blue Add Post:
     hr.thin-hr.padded
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/posts/upload-post", method='POST')
+      form.flexbox.flex-col(action="/posts/upload-post", method='POST', enctype="multipart/form-data")
         label(for="title") Post Title:
         input(type="text", name="title")
         label(for="type") Post type:
@@ -17,5 +17,7 @@ head
         br
         label(for="content") Post Content:
         textarea(name="content", rows="4")
+        label(for="code") Snippet:
+        input(type="file" name="code")
         br
         input(type="submit" value="Add Post")

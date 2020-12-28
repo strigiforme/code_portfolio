@@ -1,14 +1,31 @@
 // dependencies
-var express = require("express");
-var router = express.Router();
-var passport = require("passport");
-var session = require("express-session");
-var mongoose = require("mongoose");
-var crypto = require("crypto");
-var fs = require("fs");
-var sanitize = require('mongo-sanitize');
+var express    = require("express");
+var router     = express.Router();
+var passport   = require("passport");
+var session    = require("express-session");
+var mongoose   = require("mongoose");
+var crypto     = require("crypto");
+var fs         = require("fs");
+var sanitize   = require('mongo-sanitize');
 var bodyParser = require('body-parser');
+
+
+const path = require('path');
+var multer     = require('multer');
+var snippets   = multer({dest: 'snippets/' });
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'snippets/');
+    },
+
+    // By default, multer removes file extensions so let's add them back
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const { exec } = require("child_process");
 
 // Written libraries
 const access_code = require("./lib/accessCode.js");
@@ -54,6 +71,21 @@ access_code.generateAccessCode();
 // THIS SECTION HANDLES ROUTING ---------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+app.get('/test', function (req, res, next) {
+  exec("python script/hello.py", (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+    }
+    res.send(stdout);
+    res.end();
+  });
+});
+
 // get request for root page
 app.get('/', function (req, res, next) {
   var login_status = req.query.login;
@@ -66,7 +98,7 @@ app.get('/resume', function (req, res, next) {
 });
 
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
-app.get("/posts/add", function (req, res, next) {
+app.get("/posts/add", authenticateUser, function (req, res, next) {
   res.render("posts/addpost", {loggedin: req.session.login});
   res.end()
 });
@@ -74,29 +106,38 @@ app.get("/posts/add", function (req, res, next) {
 // upload a new post to database
 app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
-  // extract the title and content, will be validated during M4
-  var newTitle = sanitize(escape(req.body.title));
-  var newText = sanitize(escape(req.body.content));
-  var postType = sanitize(escape(req.body.type));
+  // get the uploaded file from the post request
+  let upload = multer({ storage: storage }).single('code');
 
-  // create new db object using data
-  var newPost = new Post({ title: newTitle, type: postType, content: newText });
+  // TODO: improve upload security for file
+  upload(req, res, function(err) {
 
-  try {
-    // save this object to the database
-    newPost.save(function (err, post) {
-      // intercept and log errors
-      if (err) throw err;
-      // log result to console
-      console.log(post._id + " uploaded.");
-    });
-  } catch {
-    res.redirect("posts/posterror");
-  }
+    var newTitle = sanitize(escape(req.body.title));
+    var newText = sanitize(escape(req.body.content));
+    var postType = sanitize(escape(req.body.type));
+    // does not need to be escaped since we generate the name here
+    var postSnippet = req.file.path;
 
-  // take user back to admin page to see result
-  res.redirect("/admin");
-  res.end();
+    // create new db object using data
+    var newPost = new Post({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
+
+    try {
+      // save this object to the database
+      newPost.save(function (err, post) {
+        // intercept and log errors
+        if (err) throw err;
+        // log result to console
+        console.log(post._id + " uploaded.");
+      });
+    } catch {
+      res.redirect("posts/posterror");
+    }
+
+    // take user back to admin page to see result
+    res.redirect("/admin");
+    res.end();
+
+  });
 });
 
 // delete a post
