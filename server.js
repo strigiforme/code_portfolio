@@ -170,15 +170,27 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
 
 // view all posts that have been created
 app.get("/posts/view_posts", function (req,res,next) {
+  // extract the query string for post postType
+  postType = req.query.type;
+
+  // if the query string was empty, search for all posts
+  if (postType == undefined || postType == "") {
+    query = {}
+  } else {
+    query = {type:postType}
+  }
+
   // query mongodb for all posts
-  Post.find({}, function(err, posts) {
+  Post.find(query, function(err, posts) {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
       post.content = unescape(post.content);
     });
+
     // send user to view posts page along with data for every post
-    res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts });
+    res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts, type: postType});
+
     // end request
     res.end();
   })

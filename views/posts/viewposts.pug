@@ -3,8 +3,15 @@ head
   include ../includes/nav.pug
   div.container.flexbox.flex-col
     div
-      h2 View Posts:
-    hr.thin-hr.padded
+      h2 Posts:
+    div.flexbox.post-nav
+      div.post-nav-item(class = type == "blog" ? "active" : "")
+        a(href="/posts/view_posts?type=blog") Blogs
+      div.post-nav-item(class = type == "info" ? "active" : "")
+        a(href="/posts/view_posts?type=info") Info
+      div.post-nav-item(class = type == "project" ? "active" : "")
+        a(href="/posts/view_posts?type=project") Projects
+    hr.thin-hr.padded.notop
     div.flexbox.flex-col
       if !postdata
         div.post-container
