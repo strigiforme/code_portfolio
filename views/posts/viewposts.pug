@@ -3,7 +3,7 @@ head
   include ../includes/nav.pug
   div.container.flexbox.flex-col
     div
-      h2 Posts:
+      h2.blue Posts:
     div.flexbox.post-nav
       div.post-nav-item(class = type == "blog" ? "active" : "")
         a(href="/posts/view_posts?type=blog") Blogs
@@ -11,6 +11,8 @@ head
         a(href="/posts/view_posts?type=info") Info
       div.post-nav-item(class = type == "project" ? "active" : "")
         a(href="/posts/view_posts?type=project") Projects
+      div.post-nav-item(class = !type ? "active" : "")
+        a(href="/posts/view_posts") All
     hr.thin-hr.padded.notop
     div.flexbox.flex-col
       if !postdata

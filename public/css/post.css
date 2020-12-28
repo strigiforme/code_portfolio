@@ -47,17 +47,23 @@ label {
   color:#668dba;
 }
 
+.post-nav {
+  text-align: center;
+}
+
 .post-nav-item {
   margin-right: 5px;
   padding: 5px;
   background-color:lightgrey;
   border-radius: 5px 5px 0px 0px;
-  border: 1px solid grey;
+  border: 1px solid lightgrey;
   border-bottom: 0px;
+  min-width: 2rem;
 }
 
 .active {
-  background-color: grey;
+  background-color: #D4AF37;
+  border-color: #D4AF37;
 }
 
 .post-nav-item a {
