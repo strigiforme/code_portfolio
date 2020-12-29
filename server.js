@@ -207,8 +207,13 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
       }
     }
 
-    // construct obj with update data
-    var update = {title: title, type: type, content: content, snippet: postSnippet };
+    if (postSnippet == undefined) {
+      // construct obj with update data
+      var update = {title: title, type: type, content: content };
+    } else {
+      // construct obj with update data
+      var update = {title: title, type: type, content: content, snippet: postSnippet };
+    }
 
     try {
       // update the post using the update data and the post's ID
