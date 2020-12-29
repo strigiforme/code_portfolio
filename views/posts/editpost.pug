@@ -6,7 +6,7 @@ head
       h2.blue Edit Post:
     hr.thin-hr.padded
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST')          
+      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST', enctype="multipart/form-data")          
         input(type="text", name="id", value="" + postData.id hidden)
         label(for="title") Post Title:
         input(type="text", name="title", value="" + postData.title)
@@ -19,5 +19,10 @@ head
         br
         label(for="content") Post Content:
         textarea(name="content", rows="4") #{postData.content}
+        div.flexbox(style="position: relative; left: 5px;")
+          input(type="checkbox", name="editSnippet" style="transform: scale(1.5); position: relative; top: 9px; right: 5px;")
+          label(for="editSnippet") edit code snippet?
+          
+        input(type="file", name="code")
         br
-        input(type="submit" value="Add Post")
+        input(type="submit", value="Add Post")

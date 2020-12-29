@@ -113,9 +113,7 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
     try {
       // save this object to the database
       newPost.save(function (err, post) {
-        // intercept and log errors
         if (err) throw err;
-        // log result to console
         console.log(post._id + " uploaded.");
       });
     } catch {
@@ -131,17 +129,22 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
 // delete a post
 app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
-
-  // extract the ID of the post from the post request
   var id = sanitize(escape(req.body.id));
 
   try {
-    // send a query to delete the post corresponding to this ID
-    Post.deleteOne({_id: id}, function(err, obj) {
-      // catch errors
-      if (err) throw err;
-      // report result
-      console.log("Deleted post with id: " + id)
+    // query to get the post
+    Post.findOne({_id: id}, function(err, post) {
+      // send a query to delete the post corresponding to this ID
+      Post.deleteOne({_id: id}, function(err, obj) {
+        // catch errors
+        if (err) throw err;
+        // remove the code snippet tied to this post if it exists
+        if(post.snippet != undefined) {
+          console.log("INFO: post has a snippet, attempting deletion.");
+          fs.unlinkSync(post.snippet);
+        }
+        console.log("Deleted post with id: " + id)
+      });
     });
   } catch {
     res.redirect("posts/posterror");
@@ -175,26 +178,50 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
 // upload edited post to databse
 app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
-  // get ID from the post request
-  var id = sanitize(escape(req.body.id));
-  var title = sanitize(escape(req.body.title));
-  var content = sanitize(escape(req.body.content));
-  var type = sanitize(escape(req.body.type));
 
-  // construct obj with update data
-  var update = {title: title, type: type, content: content };
+  // get the uploaded file from the post request
+  let upload = multer({ storage: storage }).single('code');
 
-  try {
-    // update the post using the update data and the post's ID
-    Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
-      // catch errors
-      if (err) throw err;
-      // take user back to admin page with result
-      res.redirect("/admin?edit=true");
-    });
-  } catch {
-    res.redirect("posts/posterror");
-  }
+  // TODO: improve upload security for file
+  upload(req, res, function(err) {
+
+    // get ID from the post request
+    var id = sanitize(escape(req.body.id));
+    var title = sanitize(escape(req.body.title));
+    var content = sanitize(escape(req.body.content));
+    var type = sanitize(escape(req.body.type));
+
+    if (!req.file) {
+      var postSnippet = undefined;
+    } else {
+      // does not need to be escaped since we generate the name here
+      var postSnippet = req.file.path;
+      // we have the new file, delete the old one
+      if(req.body.editSnippet != undefined) {
+        // get the post using its ID
+        Post.findOne({_id: id}, function(err, post) {
+          if (err) console.error(err);
+          console.log("INFO: Editing snippet for post, deleting old one.");
+          fs.unlinkSync(post.snippet);
+        });
+      }
+    }
+
+    // construct obj with update data
+    var update = {title: title, type: type, content: content, snippet: postSnippet };
+
+    try {
+      // update the post using the update data and the post's ID
+      Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
+        // catch errors
+        if (err) throw err;
+        // take user back to admin page with result
+        res.redirect("/admin?edit=true");
+      });
+    } catch {
+      res.redirect("posts/posterror");
+    }
+  });
 
 });
 
@@ -246,7 +273,7 @@ app.get("/posts/view_post", function (req,res,next) {
 
       // check if this post has a code snippet
       if (post.snippet != undefined) {
-        console.log("Post has a code snippet");
+        console.log("DEBUG: Post has a code snippet");
         snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
         // check if the file exists
         if (fs.existsSync(snippetPath)) {
@@ -258,30 +285,28 @@ app.get("/posts/view_post", function (req,res,next) {
             var args = "";
           }
 
-          console.log("executing cmd: 'python " + post.snippet + " " + args + "'");
+          console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
 
           // execute the snippet
           exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
+            // check for errors
             if (error) {
-              console.log(`error: ${error.message}`);
-              return;
-            }
-
-            if (stderr) {
-                console.log(`stderr: ${stderr}`);
-                return;
+              console.error(`ERROR: code failed to execute: ${error.message}`);
             }
 
             // debug
-            console.log("Code executed with output: '" + stdout + "'");
+            console.log("DEBUG: Code executed with output: '" + stdout + "'");
+
+            // preprocess the output
+            var output = unescape(stdout).split("\n")
 
             // send user to view post page with data about the post
-            res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: stdout.split("\n")});
+            res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: output });
             // end request
             res.end();
           });
         } else {
-          console.log("Couldn't find uploaded code snippet at: '" + snippetPath + "'");
+          console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
         }
       } else {
         // send user to view post page with data about the post
