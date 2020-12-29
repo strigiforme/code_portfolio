@@ -75,3 +75,14 @@ label {
 .notop {
   margin-top: 0px;
 }
+
+.code-container {
+  background-color: #101518;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.code {
+  margin: 2px;
+  color: #dadada;
+}

@@ -9,7 +9,6 @@ var fs         = require("fs");
 var sanitize   = require('mongo-sanitize');
 var bodyParser = require('body-parser');
 
-
 const path = require('path');
 var multer     = require('multer');
 var snippets   = multer({dest: 'snippets/' });
@@ -71,21 +70,6 @@ access_code.generateAccessCode();
 // THIS SECTION HANDLES ROUTING ---------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
-app.get('/test', function (req, res, next) {
-  exec("python script/hello.py", (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    res.send(stdout);
-    res.end();
-  });
-});
-
 // get request for root page
 app.get('/', function (req, res, next) {
   var login_status = req.query.login;
@@ -112,11 +96,16 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
   // TODO: improve upload security for file
   upload(req, res, function(err) {
 
+    if (!req.file) {
+      var postSnippet = undefined;
+    } else {
+      // does not need to be escaped since we generate the name here
+      var postSnippet = req.file.path;
+    }
+
     var newTitle = sanitize(escape(req.body.title));
     var newText = sanitize(escape(req.body.content));
     var postType = sanitize(escape(req.body.type));
-    // does not need to be escaped since we generate the name here
-    var postSnippet = req.file.path;
 
     // create new db object using data
     var newPost = new Post({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
@@ -255,11 +244,53 @@ app.get("/posts/view_post", function (req,res,next) {
       console.log("\nDEBUG: Title: \n" + post.title);
       console.log("\nDEBUG: Content: \n" + post.content);
 
-      // send user to view post page with data about the post
-      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
-      // end request
-      res.end();
-    } catch {
+      // check if this post has a code snippet
+      if (post.snippet != undefined) {
+        console.log("Post has a code snippet");
+        snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
+        // check if the file exists
+        if (fs.existsSync(snippetPath)) {
+
+          if (req.query.args != undefined) {
+            // sanitize input
+            var args = sanitize(escape(req.query.args));
+          } else {
+            var args = "";
+          }
+
+          console.log("executing cmd: 'python " + post.snippet + " " + args + "'");
+
+          // execute the snippet
+          exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
+            if (error) {
+              console.log(`error: ${error.message}`);
+              return;
+            }
+
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                return;
+            }
+
+            // debug
+            console.log("Code executed with output: '" + stdout + "'");
+
+            // send user to view post page with data about the post
+            res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: stdout.split("\n")});
+            // end request
+            res.end();
+          });
+        } else {
+          console.log("Couldn't find uploaded code snippet at: '" + snippetPath + "'");
+        }
+      } else {
+        // send user to view post page with data about the post
+        res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
+        // end request
+        res.end();
+      }
+    } catch(e) {
+      console.error(e);
       res.render("posts/posterror");
     }
   });
