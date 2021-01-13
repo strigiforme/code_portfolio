@@ -1,28 +1,14 @@
 // dependencies
-var express    = require("express");
-var router     = express.Router();
-var passport   = require("passport");
-var session    = require("express-session");
-var mongoose   = require("mongoose");
-var crypto     = require("crypto");
-var fs         = require("fs");
-var sanitize   = require('mongo-sanitize');
-var bodyParser = require('body-parser');
-
+const express    = require("express");
+const router     = express.Router();
+const passport   = require("passport");
+const session    = require("express-session");
+const mongoose   = require("mongoose");
+const crypto     = require("crypto");
+const fs         = require("fs");
+const sanitize   = require('mongo-sanitize');
+const bodyParser = require('body-parser');
 const path = require('path');
-var multer     = require('multer');
-var snippets   = multer({dest: 'snippets/' });
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'snippets/');
-    },
-
-    // By default, multer removes file extensions so let's add them back
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const { exec } = require("child_process");
 
@@ -31,6 +17,7 @@ const access_code = require("./lib/accessCode.js");
 const database = require("./lib/db.js");
 const initializer = require("./lib/initializer.js");
 const utils = require("./lib/utils.js");
+const multerSetup = require("./lib/multerSetup.js");
 
 // state variables
 var newEmail = false;
@@ -40,6 +27,11 @@ var adminAccount;
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------------------------------
+
+// initialize multerSetup
+var multerDependences = multerSetup.initMulter();
+var multer = multerDependences[0];
+var storage = multerDependences[1];
 
 // initialize database
 var schemas = database.connectDb();
