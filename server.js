@@ -1,8 +1,6 @@
 // dependencies
 const express        = require("express");
 const router         = express.Router();
-const https          = require("https");
-const http           = require("http");
 const passport       = require("passport");
 const session        = require("express-session");
 const mongoose       = require("mongoose");
