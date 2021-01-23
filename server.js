@@ -1,23 +1,25 @@
 // dependencies
-const express    = require("express");
-const router     = express.Router();
-const passport   = require("passport");
-const session    = require("express-session");
-const mongoose   = require("mongoose");
-const crypto     = require("crypto");
-const fs         = require("fs");
-const sanitize   = require('mongo-sanitize');
-const bodyParser = require('body-parser');
-const path = require('path');
+const express        = require("express");
+const router         = express.Router();
+const https          = require("https");
+const http           = require("http");
+const passport       = require("passport");
+const session        = require("express-session");
+const mongoose       = require("mongoose");
+const crypto         = require("crypto");
+const fs             = require("fs");
+const sanitize       = require('mongo-sanitize');
+const bodyParser     = require('body-parser');
+const path           = require('path');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const { exec } = require("child_process");
+const { exec }       = require("child_process");
 
 // Written libraries
-const access_code = require("./lib/accessCode.js");
-const database = require("./lib/db.js");
-const initializer = require("./lib/initializer.js");
-const utils = require("./lib/utils.js");
-const multerSetup = require("./lib/multerSetup.js");
+const access_code    = require("./lib/accessCode.js");
+const database       = require("./lib/db.js");
+const initializer    = require("./lib/initializer.js");
+const utils          = require("./lib/utils.js");
+const multerSetup    = require("./lib/multerSetup.js");
 
 // state variables
 var newEmail = false;
