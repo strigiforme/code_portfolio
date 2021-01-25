@@ -7,8 +7,6 @@ hr {
 }
 img{
     display: block;
-    min-width: 80px;
-    min-height: 80px;
 }
 li{
     list-style-type: none;
