@@ -20,14 +20,6 @@ const utils          = require("./lib/utils.js");
 const multerSetup    = require("./lib/init_multer.js");
 var Authenticator   = require("./lib/authenticator.js");
 
-authy = new Authenticator();
-console.log(authy.doAddAdmin);
-
-
-// state variables
-var newEmail = false;
-var addAdministrator = false;
-var adminAccount;
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
@@ -46,14 +38,8 @@ Admin = schemas[1];
 // initialize app
 var app = initializer.initApp();
 
-// retrieve the administrator account email
-utils.getAdminAccount(Admin, newEmail).then( result => {
-  // take the values retrieved and then place them into globals
-  adminAccount = result[0];
-  newEmail = result[1];
-}, reason => {
-  console.error("ERROR: promise rejection while getting administrator account email: " + reason);
-});
+// create authenticator object
+authenticator = new Authenticator(Admin);
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
@@ -362,7 +348,7 @@ function authenticateUser (req, res, next) {
   if(!req.session.login){
     res.redirect("/forbidden");
   } else {
-    if (req.session.email != adminAccount) {
+    if (req.session.email != authenticator.admin) {
      res.redirect("/forbidden");
     } else {
       next();
@@ -413,7 +399,7 @@ var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GO
 passport.use(strategy);
 
 app.get('/auth', function (req, res, next) {
-  if (newEmail) {
+  if (authenticator.doAddAdmin) {
     res.redirect('/auth/newadmin');
   } else {
     res.redirect('/auth/google');
@@ -438,7 +424,7 @@ app.post('/auth/newadmin', function (req, res, next) {
     // compare the submitted code to the stored one
     if (code == data) {
       console.log("Submitted code matches stored example. Next submitted email will become administrator account.");
-      addAdministrator = true;
+      authenticator.isAccessCodeValid = true;
       res.redirect("/auth/google");
     } else {
       res.redirect("/auth/newadmin?access=false");
@@ -456,12 +442,12 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   req.session.email = userProfile.emails[0].value;
 
   // check if the submitted email should be made an administrator
-  if ( addAdministrator ) {
+  if ( authenticator.isAccessCodeValid ) {
     console.log("Adding email " + req.session.email + " as the administrator account.");
     // set the administrator email to this one since it wasn't done properly
-    adminAccount = req.session.email;
+    authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
-    newEmail = false;
+    authenticator.doAddAdmin = false;
 
     // create new databse obj
     var newAdmin = new Admin({ email:req.session.email });
@@ -473,19 +459,19 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
       // log result to console
       console.log("INFO: admin account " + admin.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
-      addAdministrator = false;
+      authenticator.isAccessCodeValid = false;
     });
   }
 
   // check if the email for the user's profile is authorized
-  if(req.session.email == adminAccount) {
+  if(req.session.email == authenticator.admin) {
     req.session.login = true;
     console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
     res.redirect("/admin");
   } else {
     req.session.login = false;
     console.log("INFO: User email '" + req.session.email + "' was rejected.");
-    console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
+    console.log("DEBUG: Did not match administrator account '" + authenticator.admin + "'")
     res.redirect("/?login=false");
   }
 });
