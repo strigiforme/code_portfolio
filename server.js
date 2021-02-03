@@ -18,7 +18,11 @@ const database       = require("./lib/db.js");
 const initializer    = require("./lib/initializer.js");
 const utils          = require("./lib/utils.js");
 const multerSetup    = require("./lib/init_multer.js");
-const Authentictor   = require("./lib/authenticator.js");
+var Authenticator   = require("./lib/authenticator.js");
+
+authy = new Authenticator();
+console.log(authy.doAddAdmin);
+
 
 // state variables
 var newEmail = false;
