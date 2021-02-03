@@ -13,11 +13,12 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const { exec }       = require("child_process");
 
 // Written libraries
-const access_code    = require("./lib/accessCode.js");
+const access_code    = require("./lib/access_code.js");
 const database       = require("./lib/db.js");
 const initializer    = require("./lib/initializer.js");
 const utils          = require("./lib/utils.js");
-const multerSetup    = require("./lib/multerSetup.js");
+const multerSetup    = require("./lib/init_multer.js");
+const Authentictor   = require("./lib/authenticator.js");
 
 // state variables
 var newEmail = false;
