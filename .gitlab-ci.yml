@@ -20,7 +20,6 @@ image: node:latest
 test_async:
   script:
     - npm install
-    - node server.js
 
 # test_db:
 #   script:
