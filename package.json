@@ -1,14 +1,14 @@
 {
-  "name": "3172",
+  "name": "code_portfolio",
   "version": "1.0.0",
-  "description": "CSCI 3172 project",
+  "description": "Software development portfolio",
   "main": "server.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --config ./jest.config.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.cs.dal.ca/hpearce/3172.git"
+    "url": "https://git.cs.dal.ca/hpearce/code_portfolio.git"
   },
   "author": "Howard Pearce",
   "license": "ISC",

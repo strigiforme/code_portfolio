@@ -14,12 +14,11 @@ const { exec }       = require("child_process");
 
 // Written libraries
 const access_code    = require("./lib/access_code.js");
-const database       = require("./lib/db.js");
 const initializer    = require("./lib/initializer.js");
 const utils          = require("./lib/utils.js");
 const multerSetup    = require("./lib/init_multer.js");
-var Authenticator   = require("./lib/authenticator.js");
-
+var Authenticator    = require("./lib/authenticator.js");
+var Database         = require("./lib/database.js");
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
@@ -30,16 +29,12 @@ var multerDependences = multerSetup.initMulter();
 var multer = multerDependences[0];
 var storage = multerDependences[1];
 
-// initialize database
-var schemas = database.connectDb();
-Post = schemas[0];
-Admin = schemas[1];
-
 // initialize app
 var app = initializer.initApp();
 
 // create authenticator object
-authenticator = new Authenticator(Admin);
+database      = new Database('mongodb://127.0.0.1/my_database');
+authenticator = new Authenticator(database.admin_model);
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
@@ -91,7 +86,7 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
     var postType = sanitize(escape(req.body.type));
 
     // create new db object using data
-    var newPost = new Post({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
+    var newPost = new database.post_model({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
 
     try {
       // save this object to the database
@@ -116,9 +111,9 @@ app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
 
   try {
     // query to get the post
-    Post.findOne({_id: id}, function(err, post) {
+    database.post_model.findOne({_id: id}, function(err, post) {
       // send a query to delete the post corresponding to this ID
-      Post.deleteOne({_id: id}, function(err, obj) {
+      database.post_model.deleteOne({_id: id}, function(err, obj) {
         // catch errors
         if (err) throw err;
         // remove the code snippet tied to this post if it exists
@@ -145,7 +140,7 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
   var id = sanitize(escape(req.body.id));
 
   // get the post using its ID
-  Post.findOne({_id: id}, function(err, post) {
+  database.post_model.findOne({_id: id}, function(err, post) {
       // decode special characters
       post.title = unescape(post.title);
       post.content = unescape(post.content);
@@ -182,7 +177,7 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        Post.findOne({_id: id}, function(err, post) {
+        database.post_model.findOne({_id: id}, function(err, post) {
           if (err) console.error(err);
           console.log("INFO: Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
@@ -200,7 +195,7 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
 
     try {
       // update the post using the update data and the post's ID
-      Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
+      database.post_model.findOneAndUpdate( { _id: id }, update, function(err, post) {
         // catch errors
         if (err) throw err;
         // take user back to admin page with result
@@ -226,7 +221,7 @@ app.get("/posts/view_posts", function (req,res,next) {
   }
 
   // query mongodb for all posts
-  Post.find(query, function(err, posts) {
+  database.post_model.find(query, function(err, posts) {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
@@ -245,7 +240,7 @@ app.get("/posts/view_posts", function (req,res,next) {
 app.get("/posts/view_post", function (req,res,next) {
   var id = sanitize(escape(req.query.id));
   // query database for the post that corresponds to this ID
-  Post.findOne({ _id: id }, function(err, post) {
+  database.post_model.findOne({ _id: id }, function(err, post) {
     try {
       if (err) console.log(err);
 
@@ -323,7 +318,7 @@ app.get("/admin", authenticateUser, function (req, res, next){
   var edit_status = req.query.edit;
   var delete_status = req.query.delete;
 
-  Post.find({}, function(err, posts) {
+  database.post_model.find({}, function(err, posts) {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
@@ -450,7 +445,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     authenticator.doAddAdmin = false;
 
     // create new databse obj
-    var newAdmin = new Admin({ email:req.session.email });
+    var newAdmin = new databse.admin_model({ email:req.session.email });
 
     // upload to databse
     newAdmin.save(function (err, admin) {
