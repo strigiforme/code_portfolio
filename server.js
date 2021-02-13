@@ -140,18 +140,16 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
   var id = sanitize(escape(req.body.id));
 
   // get the post using its ID
-  database.post_model.findOne({_id: id}, function(err, post) {
+  var to_edit = database.find_post(id);
+  to_edit.then(function(post) {
       // decode special characters
       post.title = unescape(post.title);
       post.content = unescape(post.content);
       post.type = unescape(post.type);
 
-      // catch errors
-      if (err) throw err;
       // give user a page to edit the content
       res.render("posts/editpost", {loggedin: req.session.login, postData: post})
   });
-
 });
 
 // upload edited post to databse
@@ -177,8 +175,8 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        database.post_model.findOne({_id: id}, function(err, post) {
-          if (err) console.error(err);
+        var edit_update = database.find_post(id);
+        edit_update.then( function(post) {
           console.log("INFO: Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         });
@@ -239,68 +237,64 @@ app.get("/posts/view_posts", function (req,res,next) {
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
   var id = sanitize(escape(req.query.id));
-  // query database for the post that corresponds to this ID
-  database.post_model.findOne({ _id: id }, function(err, post) {
-    try {
-      if (err) console.log(err);
 
-      // prepare the post to be sent (unescape input)
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
-      content =  post.content.split("\n");
+  database.find_post(id).then( function(post) {
 
-      // debug
-      console.log("DEBUG: loading post");
-      console.log("\nDEBUG: Title: \n" + post.title);
-      console.log("\nDEBUG: Content: \n" + post.content);
+    // prepare the post to be sent (unescape input)
+    post.title = unescape(post.title);
+    post.content = unescape(post.content);
+    content =  post.content.split("\n");
 
-      // check if this post has a code snippet
-      if (post.snippet != undefined) {
-        console.log("DEBUG: Post has a code snippet");
-        snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
-        // check if the file exists
-        if (fs.existsSync(snippetPath)) {
+    // debug
+    console.log("DEBUG: loading post");
+    console.log("DEBUG: Title: \n" + post.title);
+    console.log("DEBUG: Content: \n" + post.content);
 
-          if (req.query.args != undefined) {
-            // sanitize input
-            var args = sanitize(escape(req.query.args));
-          } else {
-            var args = "";
+    // check if this post has a code snippet -- This should be moved somewhere else
+    if (post.snippet != undefined) {
+      console.log("DEBUG: Post has a code snippet");
+      snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
+      // check if the file exists
+      if (fs.existsSync(snippetPath)) {
+
+        if (req.query.args != undefined) {
+          // sanitize input
+          var args = sanitize(escape(req.query.args));
+        } else {
+          var args = "";
+        }
+
+        console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
+
+        // execute the snippet
+        exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
+          // check for errors
+          if (error) {
+            console.error(`ERROR: code failed to execute: ${error.message}`);
           }
 
-          console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
+          // debug
+          console.log("DEBUG: Code executed with output: '" + stdout + "'");
 
-          // execute the snippet
-          exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
-            // check for errors
-            if (error) {
-              console.error(`ERROR: code failed to execute: ${error.message}`);
-            }
+          // preprocess the output
+          var output = unescape(stdout).split("\n")
 
-            // debug
-            console.log("DEBUG: Code executed with output: '" + stdout + "'");
-
-            // preprocess the output
-            var output = unescape(stdout).split("\n")
-
-            // send user to view post page with data about the post
-            res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: output });
-            // end request
-            res.end();
-          });
-        } else {
-          console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
-        }
+          // send user to view post page with data about the post
+          res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: output });
+          // end request
+          res.end();
+        });
       } else {
-        // send user to view post page with data about the post
-        res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
-        // end request
-        res.end();
+        console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
       }
-    } catch(e) {
-      console.error(e);
-      res.render("posts/posterror");
+    } else {
+      // send user to view post page with data about the post
+      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
+      // end request
+      res.end();
     }
+  }).catch( err => {
+      database.post_fail(res);
   });
 });
 
