@@ -117,28 +117,15 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
   var id = sanitize(escape(req.body.id));
 
-  try {
-    // query to get the post
-    database.post_model.findOne({_id: id}, function(err, post) {
-      // send a query to delete the post corresponding to this ID
-      database.post_model.deleteOne({_id: id}, function(err, obj) {
-        // catch errors
-        if (err) throw err;
-        // remove the code snippet tied to this post if it exists
-        if(post.snippet != undefined) {
-          console.log("INFO: post has a snippet, attempting deletion.");
-          fs.unlinkSync(post.snippet);
-        }
-        console.log("Deleted post with id: " + id)
-      });
-    });
-  } catch {
-    res.redirect("posts/posterror");
-  }
-
-  // send back to admin page with result in a query string
-  res.redirect("/admin?delete=true");
-  res.end();
+  // get database to delete post
+  database.delete_post(id).then( result => {
+    // send back to admin page with result in a query string
+    res.redirect("/admin?delete=true");
+    res.end();
+  }).catch( err => {
+    // TODO: send to proper error location, this says error loading post.
+    database.post_fail(res);
+  });
 });
 
 // take user to page to edit post
@@ -433,6 +420,7 @@ app.post('/auth/newadmin', function (req, res, next) {
 // send authentication request to google
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
 
+// TODO: Move this to authenticator
 // receive the final response from google after logging in
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
   // redirect to verify the result
@@ -447,10 +435,10 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     // turn off the newEmail flag to rerturn to base case
     authenticator.doAddAdmin = false;
 
-    // create new databse obj
+    // create new database obj
     var newAdmin = new database.admin_model({ email:req.session.email });
 
-    // upload to databse
+    // upload to database
     newAdmin.save(function (err, admin) {
       // intercept and log errors
       if (err) return console.error(err);
