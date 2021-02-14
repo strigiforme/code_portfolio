@@ -448,7 +448,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     authenticator.doAddAdmin = false;
 
     // create new databse obj
-    var newAdmin = new databse.admin_model({ email:req.session.email });
+    var newAdmin = new database.admin_model({ email:req.session.email });
 
     // upload to databse
     newAdmin.save(function (err, admin) {
