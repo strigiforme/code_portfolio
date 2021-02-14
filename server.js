@@ -1,3 +1,13 @@
+/**
+
+File: server.js
+Author: Howard Pearce
+Last Edit: Febuary 13, 2021
+Description: Main route and logic handler for node application. Everything that
+             happens on the website starts here.
+
+**/
+
 // dependencies
 const express        = require("express");
 const router         = express.Router();
@@ -15,8 +25,6 @@ const { exec }       = require("child_process");
 // Written libraries
 const access_code    = require("./lib/access_code.js");
 const initializer    = require("./lib/initializer.js");
-const utils          = require("./lib/utils.js");
-const multerSetup    = require("./lib/init_multer.js");
 var Authenticator    = require("./lib/authenticator.js");
 var Database         = require("./lib/database.js");
 
@@ -25,7 +33,7 @@ var Database         = require("./lib/database.js");
 // ------------------------------------------------------------------------------------------------------------------------------------------
 
 // initialize multerSetup
-var multerDependences = multerSetup.initMulter();
+var multerDependences = initializer.initMulter();
 var multer = multerDependences[0];
 var storage = multerDependences[1];
 
@@ -34,7 +42,7 @@ var app = initializer.initApp();
 
 // create authenticator object
 database      = new Database('mongodb://127.0.0.1/my_database');
-authenticator = new Authenticator(database.admin_model);
+authenticator = new Authenticator(database);
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
@@ -140,8 +148,7 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
   var id = sanitize(escape(req.body.id));
 
   // get the post using its ID
-  var to_edit = database.find_post(id);
-  to_edit.then(function(post) {
+  database.find_post(id).then( post => {
       // decode special characters
       post.title = unescape(post.title);
       post.content = unescape(post.content);
@@ -149,6 +156,8 @@ app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
 
       // give user a page to edit the content
       res.render("posts/editpost", {loggedin: req.session.login, postData: post})
+  }).catch( err => {
+      database.post_fail(res);
   });
 });
 
@@ -175,10 +184,11 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        var edit_update = database.find_post(id);
-        edit_update.then( function(post) {
+        database.find_post(id).then( post => {
           console.log("INFO: Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
+        }).catch( err => {
+            database.post_fail(res);
         });
       }
     }
@@ -219,27 +229,26 @@ app.get("/posts/view_posts", function (req,res,next) {
   }
 
   // query mongodb for all posts
-  database.post_model.find(query, function(err, posts) {
+  database.find_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
       post.content = unescape(post.content);
     });
-
     // send user to view posts page along with data for every post
     res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts, type: postType});
-
     // end request
     res.end();
-  })
+  }).catch( err => {
+      database.post_fail(res);
+  });
 });
 
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
   var id = sanitize(escape(req.query.id));
 
-  database.find_post(id).then( function(post) {
-
+  database.find_post(id).then( post =>  {
     // prepare the post to be sent (unescape input)
     post.title = unescape(post.title);
     post.content = unescape(post.content);
@@ -312,7 +321,7 @@ app.get("/admin", authenticateUser, function (req, res, next){
   var edit_status = req.query.edit;
   var delete_status = req.query.delete;
 
-  database.post_model.find({}, function(err, posts) {
+  database.find_posts({}).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post.title = unescape(post.title);
