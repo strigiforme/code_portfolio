@@ -89,27 +89,18 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
       var postSnippet = req.file.path;
     }
 
+    // sanitize the inputs
     var newTitle = sanitize(escape(req.body.title));
     var newText = sanitize(escape(req.body.content));
     var postType = sanitize(escape(req.body.type));
 
     // create new db object using data
-    var newPost = new database.post_model({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
-
-    try {
-      // save this object to the database
-      newPost.save(function (err, post) {
-        if (err) throw err;
-        console.log(post._id + " uploaded.");
-      });
-    } catch {
+    database.create_post({ title: newTitle, type: postType, snippet: postSnippet, content: newText }).then( result => {
+      res.redirect("/admin");
+      res.end();
+    }).catch (err => {
       res.redirect("posts/posterror");
-    }
-
-    // take user back to admin page to see result
-    res.redirect("/admin");
-    res.end();
-
+    });
   });
 });
 
@@ -163,6 +154,7 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
     var content = sanitize(escape(req.body.content));
     var type = sanitize(escape(req.body.type));
 
+    // check if new post edit has a file
     if (!req.file) {
       var postSnippet = undefined;
     } else {
@@ -180,27 +172,21 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
       }
     }
 
+    // decide whether or not to include snippet in update
     if (postSnippet == undefined) {
-      // construct obj with update data
       var update = {title: title, type: type, content: content };
     } else {
-      // construct obj with update data
       var update = {title: title, type: type, content: content, snippet: postSnippet };
     }
 
-    try {
-      // update the post using the update data and the post's ID
-      database.post_model.findOneAndUpdate( { _id: id }, update, function(err, post) {
-        // catch errors
-        if (err) throw err;
-        // take user back to admin page with result
-        res.redirect("/admin?edit=true");
-      });
-    } catch {
+    // update the post using the update data and the post's ID
+    database.edit_post( id, update ).then( post => {
+      // take user back to admin page with result
+      res.redirect("/admin?edit=true");
+    }).catch(err => {
       res.redirect("posts/posterror");
-    }
+    });
   });
-
 });
 
 // view all posts that have been created
@@ -463,5 +449,5 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 });
 
 app.get('*', function(req, res){
-  res.status(404).send('what???');
+  res.status(404).send('does not exist.');
 });
