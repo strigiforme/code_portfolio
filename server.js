@@ -10,14 +10,11 @@ Description: Main route and logic handler for node application. Everything that
 
 // dependencies
 const express        = require("express");
-const router         = express.Router();
 const passport       = require("passport");
 const session        = require("express-session");
 const mongoose       = require("mongoose");
 const crypto         = require("crypto");
 const fs             = require("fs");
-const sanitize       = require('mongo-sanitize');
-const bodyParser     = require('body-parser');
 const path           = require('path');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const { exec }       = require("child_process");
@@ -25,9 +22,10 @@ const { exec }       = require("child_process");
 // Written libraries
 const access_code    = require("./lib/access_code.js");
 const initializer    = require("./lib/initializer.js");
-var Authenticator    = require("./lib/authenticator.js");
-var Database         = require("./lib/database.js");
-var Post             = require("./lib/post.js");
+const Sanitizer      = require("./lib/sanitizer.js");
+const Authenticator    = require("./lib/authenticator.js");
+const Database         = require("./lib/database.js");
+const Post             = require("./lib/post.js");
 
 // initialize multerSetup
 var multerDependences = initializer.initMulter();
@@ -92,7 +90,7 @@ app.post("/posts/upload-post", authenticate, function (req, res, next) {
 
 // delete a post
 app.post("/posts/delete_post", authenticate, function (req, res, next) {
-  var id = sanitize(escape(req.body.id));
+  var id = Sanitizer.clean(req.body.id);
 
   // get database to delete post
   database.delete_post(id).then( result => {
@@ -109,7 +107,7 @@ app.post("/posts/delete_post", authenticate, function (req, res, next) {
 app.post("/posts/edit_post", authenticate, function (req, res, next) {
 
   // extract the ID of the post from the post request
-  var id = sanitize(escape(req.body.id));
+  var id = Sanitizer.clean(req.body.id);
 
   // get the post using its ID
   database.find_post(id).then( post => {
@@ -172,8 +170,8 @@ app.get("/posts/view_posts", function (req,res,next) {
   database.find_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
+      post.title = Sanitizer.prepare(post.title);
+      post.content = Sanitizer.prepare(post.content);
     });
     // send user to view posts page along with data for every post
     res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts, type: postType});
@@ -186,7 +184,7 @@ app.get("/posts/view_posts", function (req,res,next) {
 
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
-  var id = sanitize(escape(req.query.id));
+  var id = Sanitizer.clean(req.query.id);
 
   database.find_post(id).then( post =>  {
     var to_view = new Post(post);
@@ -200,7 +198,7 @@ app.get("/posts/view_post", function (req,res,next) {
         // check for snippet arguments
         if (req.query.args != undefined) {
           // sanitize input
-          var args = sanitize(escape(req.query.args));
+          var args = Sanitize.clean(req.query.args);
         } else {
           var args = "";
         }
@@ -328,7 +326,7 @@ app.get('/auth/newadmin', function (req, res, next) {
 
 app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
-  var code = sanitize(escape(req.body.code));
+  var code = Sanitizer.clean(req.body.code);
   code = crypto.createHash('sha256').update(code).digest('hex');
 
   // get the code stored locally
