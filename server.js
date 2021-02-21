@@ -2,7 +2,7 @@
 
 File: server.js
 Author: Howard Pearce
-Last Edit: Febuary 13, 2021
+Last Edit: Febuary 21, 2021
 Description: Main route and logic handler for node application. Everything that
              happens on the website starts here.
 
@@ -29,10 +29,6 @@ var Authenticator    = require("./lib/authenticator.js");
 var Database         = require("./lib/database.js");
 var Post             = require("./lib/post.js");
 
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-
 // initialize multerSetup
 var multerDependences = initializer.initMulter();
 var multer = multerDependences[0];
@@ -43,15 +39,11 @@ var app = initializer.initApp();
 
 // create authenticator object
 database      = new Database('mongodb://127.0.0.1/my_database');
-authenticator = new Authenticator(database);
+authenticator = new Authenticator.Authenticator(database);
+authenticate  = Authenticator.AuthenticatorCallback;
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-// END OF INITIALIZATION ----------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // THIS SECTION HANDLES ROUTING ---------------------------------------------------------------------------------------------------------------
@@ -69,13 +61,13 @@ app.get('/resume', function (req, res, next) {
 });
 
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
-app.get("/posts/add", authenticateUser, function (req, res, next) {
+app.get("/posts/add", authenticate, function (req, res, next) {
   res.render("posts/addpost", {loggedin: req.session.login});
   res.end()
 });
 
 // upload a new post to database
-app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
+app.post("/posts/upload-post", authenticate, function (req, res, next) {
 
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
@@ -99,7 +91,7 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 });
 
 // delete a post
-app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
+app.post("/posts/delete_post", authenticate, function (req, res, next) {
   var id = sanitize(escape(req.body.id));
 
   // get database to delete post
@@ -109,51 +101,38 @@ app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
     res.end();
   }).catch( err => {
     // TODO: send to proper error location, this says error loading post.
-    database.post_fail(res);
+    database.post_fail(res, err);
   });
 });
 
 // take user to page to edit post
-app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
+app.post("/posts/edit_post", authenticate, function (req, res, next) {
 
   // extract the ID of the post from the post request
   var id = sanitize(escape(req.body.id));
 
   // get the post using its ID
   database.find_post(id).then( post => {
-      // decode special characters
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
-      post.type = unescape(post.type);
-
+      // load the found post
+      var to_edit = new Post(post);
       // give user a page to edit the content
-      res.render("posts/editpost", {loggedin: req.session.login, postData: post})
+      res.render("posts/editpost", {loggedin: req.session.login, postData: to_edit.export_to_view()})
   }).catch( err => {
-      database.post_fail(res);
+      database.post_fail(res, err);
   });
 });
 
 // upload edited post to databse
-app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
-
+app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
-
   // TODO: improve upload security for file
   upload(req, res, function(err) {
-
-    // get ID from the post request
-    var id = sanitize(escape(req.body.id));
-    var title = sanitize(escape(req.body.title));
-    var content = sanitize(escape(req.body.content));
-    var type = sanitize(escape(req.body.type));
-
+    var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
     // check if new post edit has a file
-    if (!req.file) {
-      var postSnippet = undefined;
-    } else {
+    if (req.file) {
       // does not need to be escaped since we generate the name here
-      var postSnippet = req.file.path;
+      post_args.snippet = req.file.path;
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
@@ -161,20 +140,14 @@ app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) 
           console.log("INFO: Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         }).catch( err => {
-            database.post_fail(res);
+            database.post_fail(res, err);
         });
       }
     }
-
-    // decide whether or not to include snippet in update
-    if (postSnippet == undefined) {
-      var update = {title: title, type: type, content: content };
-    } else {
-      var update = {title: title, type: type, content: content, snippet: postSnippet };
-    }
-
-    // update the post using the update data and the post's ID
-    database.edit_post( id, update ).then( post => {
+    // place the arguments into a post obj
+    var to_edit = new Post(post_args);
+    // update the post using the post obj and it's ID
+    database.edit_post( to_edit.id, to_edit.export_to_db() ).then( post => {
       // take user back to admin page with result
       res.redirect("/admin?edit=true");
     }).catch(err => {
@@ -217,17 +190,14 @@ app.get("/posts/view_post", function (req,res,next) {
 
   database.find_post(id).then( post =>  {
     var to_view = new Post(post);
-
-    // debug
-    console.log("DEBUG: loading post");
-
     // check if this post has a code snippet -- This should be moved somewhere else
     if (to_view.has_snippet) {
-      console.log("DEBUG: Post has a code snippet");
+      console.log("DEBUG: Loaded post has a code snippet");
+      // extract the snippet path of the post
       snippetPath = to_view.post_snippet_path;
       // check if the file exists
       if (fs.existsSync(snippetPath)) {
-
+        // check for snippet arguments
         if (req.query.args != undefined) {
           // sanitize input
           var args = sanitize(escape(req.query.args));
@@ -240,16 +210,11 @@ app.get("/posts/view_post", function (req,res,next) {
         // execute the snippet
         exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
           // check for errors
-          if (error) {
-            console.error(`ERROR: code failed to execute: ${error.message}`);
-          }
-
-          // debug
+          if (error) { console.error(`ERROR: code failed to execute: ${error.message}`); }
+          // debug the output
           console.log("DEBUG: Code executed with output: '" + stdout + "'");
-
           // preprocess the output
           var output = unescape(stdout).split("\n")
-
           // send user to view post page with data about the post
           res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view(), code: output });
           // end request
@@ -279,20 +244,22 @@ app.get('/logout', function (req, res, next) {
 });
 
 // get request for login page
-app.get("/admin", authenticateUser, function (req, res, next){
+app.get("/admin", authenticate, function (req, res, next){
   // load any query strings
   var edit_status = req.query.edit;
   var delete_status = req.query.delete;
 
+  // iterate over all the posts in the database
   database.find_posts({}).then( posts => {
+    var all_posts = new Array();
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post.title = unescape(post.title);
-      post.type = unescape(post.type);
-      post.content = unescape(post.title);
+      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
+      var temp_post = new Post(post_args);
+      all_posts.push(temp_post.export_to_view());
     });
     // parsed_posts = JSON.stringify(posts, null, 2);
-    res.render('admin.pug', {loggedin: req.session.login, postdata: posts, del: delete_status, edit: edit_status});
+    res.render('admin.pug', {loggedin: req.session.login, postdata: all_posts, del: delete_status, edit: edit_status});
     res.end();
   })
 });
@@ -302,20 +269,6 @@ app.get("/forbidden", function (req, res, next) {
   res.status(403).render("forbidden", {loggedin: req.session.login});
   res.end();
 });
-
-// callback to protect pages
-function authenticateUser (req, res, next) {
-  // check if we're allowed to be here
-  if(!req.session.login){
-    res.redirect("/forbidden");
-  } else {
-    if (req.session.email != authenticator.admin) {
-     res.redirect("/forbidden");
-    } else {
-      next();
-    }
-  }
-}
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // END OF ROUTING -----------------------------------------------------------------------------------------------------------------------------
