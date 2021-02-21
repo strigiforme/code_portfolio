@@ -27,6 +27,7 @@ const access_code    = require("./lib/access_code.js");
 const initializer    = require("./lib/initializer.js");
 var Authenticator    = require("./lib/authenticator.js");
 var Database         = require("./lib/database.js");
+var Post             = require("./lib/post.js");
 
 // ------------------------------------------------------------------------------------------------------------------------------------------
 // INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
@@ -78,24 +79,17 @@ app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
 
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
-
   // TODO: improve upload security for file
   upload(req, res, function(err) {
-
-    if (!req.file) {
-      var postSnippet = undefined;
-    } else {
-      // does not need to be escaped since we generate the name here
-      var postSnippet = req.file.path;
-    }
-
-    // sanitize the inputs
-    var newTitle = sanitize(escape(req.body.title));
-    var newText = sanitize(escape(req.body.content));
-    var postType = sanitize(escape(req.body.type));
-
+    // construct args for post object
+    var post_args = {id:"", title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
+    // TODO: expand file check to differentiate between images and code snippets
+    // check if a file was submitted with this post (a code snippet)
+    if (req.file) { post_args.snippet = req.file.path; }
+    // create a post object from the extracted args
+    var new_post = new Post(post_args);
     // create new db object using data
-    database.create_post({ title: newTitle, type: postType, snippet: postSnippet, content: newText }).then( result => {
+    database.create_post(new_post.export_to_db()).then( result => {
       res.redirect("/admin");
       res.end();
     }).catch (err => {
@@ -222,20 +216,15 @@ app.get("/posts/view_post", function (req,res,next) {
   var id = sanitize(escape(req.query.id));
 
   database.find_post(id).then( post =>  {
-    // prepare the post to be sent (unescape input)
-    post.title = unescape(post.title);
-    post.content = unescape(post.content);
-    content =  post.content.split("\n");
+    var to_view = new Post(post);
 
     // debug
     console.log("DEBUG: loading post");
-    console.log("DEBUG: Title: \n" + post.title);
-    console.log("DEBUG: Content: \n" + post.content);
 
     // check if this post has a code snippet -- This should be moved somewhere else
-    if (post.snippet != undefined) {
+    if (to_view.has_snippet) {
       console.log("DEBUG: Post has a code snippet");
-      snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
+      snippetPath = to_view.post_snippet_path;
       // check if the file exists
       if (fs.existsSync(snippetPath)) {
 
@@ -249,7 +238,7 @@ app.get("/posts/view_post", function (req,res,next) {
         console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
 
         // execute the snippet
-        exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
+        exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
           // check for errors
           if (error) {
             console.error(`ERROR: code failed to execute: ${error.message}`);
@@ -262,7 +251,7 @@ app.get("/posts/view_post", function (req,res,next) {
           var output = unescape(stdout).split("\n")
 
           // send user to view post page with data about the post
-          res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: output });
+          res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view(), code: output });
           // end request
           res.end();
         });
@@ -270,13 +259,14 @@ app.get("/posts/view_post", function (req,res,next) {
         console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
       }
     } else {
+      console.log("INFO: viewing normal post:");
       // send user to view post page with data about the post
-      res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
+      res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view()});
       // end request
       res.end();
     }
   }).catch( err => {
-      database.post_fail(res);
+      database.post_fail(res, err);
   });
 });
 
