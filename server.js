@@ -20,20 +20,20 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const { exec }       = require("child_process");
 
 // Written libraries
-const access_code    = require("./lib/access_code.js");
-const initializer    = require("./lib/initializer.js");
-const Sanitizer      = require("./lib/sanitizer.js");
+const access_code      = require("./lib/access_code.js");
+const Initializer      = require("./lib/initializer.js");
+const Sanitizer        = require("./lib/sanitizer.js");
 const Authenticator    = require("./lib/authenticator.js");
 const Database         = require("./lib/database.js");
 const Post             = require("./lib/post.js");
 
-// initialize multerSetup
-var multerDependences = initializer.initMulter();
+// initialize multer setup
+var multerDependences = Initializer.initMulter();
 var multer = multerDependences[0];
 var storage = multerDependences[1];
 
 // initialize app
-var app = initializer.initApp();
+var app = Initializer.initApp();
 
 // create authenticator object
 database      = new Database('mongodb://127.0.0.1/my_database');
@@ -66,7 +66,6 @@ app.get("/posts/add", authenticate, function (req, res, next) {
 
 // upload a new post to database
 app.post("/posts/upload-post", authenticate, function (req, res, next) {
-
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
   // TODO: improve upload security for file
@@ -105,10 +104,8 @@ app.post("/posts/delete_post", authenticate, function (req, res, next) {
 
 // take user to page to edit post
 app.post("/posts/edit_post", authenticate, function (req, res, next) {
-
   // extract the ID of the post from the post request
   var id = Sanitizer.clean(req.body.id);
-
   // get the post using its ID
   database.find_post(id).then( post => {
       // load the found post
@@ -146,7 +143,6 @@ app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
     var to_edit = new Post(post_args);
     // update the post using the post obj and it's ID
     database.edit_post( to_edit.id, to_edit.export_to_db() ).then( post => {
-      // take user back to admin page with result
       res.redirect("/admin?edit=true");
     }).catch(err => {
       res.redirect("posts/posterror");
@@ -156,25 +152,25 @@ app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
 
 // view all posts that have been created
 app.get("/posts/view_posts", function (req,res,next) {
+  var all_posts = new Array();
   // extract the query string for post postType
   postType = req.query.type;
-
   // if the query string was empty, search for all posts
-  if (postType == undefined || postType == "") {
+  if ( postType == undefined || postType == "" ) {
     query = {}
   } else {
-    query = {type:postType}
+    query = { type:postType };
   }
-
   // query mongodb for all posts
   database.find_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post.title = Sanitizer.prepare(post.title);
-      post.content = Sanitizer.prepare(post.content);
+      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
+      var temp_post = new Post(post_args);
+      all_posts.push(temp_post.export_to_view());
     });
     // send user to view posts page along with data for every post
-    res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts, type: postType});
+    res.render("posts/viewposts", {loggedin: req.session.login, postdata: all_posts, type: postType});
     // end request
     res.end();
   }).catch( err => {
@@ -185,7 +181,6 @@ app.get("/posts/view_posts", function (req,res,next) {
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
   var id = Sanitizer.clean(req.query.id);
-
   database.find_post(id).then( post =>  {
     var to_view = new Post(post);
     // check if this post has a code snippet -- This should be moved somewhere else
@@ -202,9 +197,7 @@ app.get("/posts/view_post", function (req,res,next) {
         } else {
           var args = "";
         }
-
         console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
-
         // execute the snippet
         exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
           // check for errors
@@ -246,7 +239,6 @@ app.get("/admin", authenticate, function (req, res, next){
   // load any query strings
   var edit_status = req.query.edit;
   var delete_status = req.query.delete;
-
   // iterate over all the posts in the database
   database.find_posts({}).then( posts => {
     var all_posts = new Array();
