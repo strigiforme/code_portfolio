@@ -1,62 +1,47 @@
+/**
+
+File: server.js
+Author: Howard Pearce
+Last Edit: Febuary 21, 2021
+Description: Main route and logic handler for node application. Everything that
+             happens on the website starts here.
+
+**/
+
 // dependencies
 const express        = require("express");
-const router         = express.Router();
 const passport       = require("passport");
 const session        = require("express-session");
 const mongoose       = require("mongoose");
 const crypto         = require("crypto");
 const fs             = require("fs");
-const sanitize       = require('mongo-sanitize');
-const bodyParser     = require('body-parser');
 const path           = require('path');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const { exec }       = require("child_process");
 
 // Written libraries
-const access_code    = require("./lib/accessCode.js");
-const database       = require("./lib/db.js");
-const initializer    = require("./lib/initializer.js");
-const utils          = require("./lib/utils.js");
-const multerSetup    = require("./lib/multerSetup.js");
+const access_code      = require("./lib/access_code.js");
+const Initializer      = require("./lib/initializer.js");
+const Sanitizer        = require("./lib/sanitizer.js");
+const Authenticator    = require("./lib/authenticator.js");
+const Database         = require("./lib/database.js");
+const Post             = require("./lib/post.js");
 
-// state variables
-var newEmail = false;
-var addAdministrator = false;
-var adminAccount;
-
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// INITIALIZE EVERYTHING WE NEED FOR THE APP TO START ---------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-
-// initialize multerSetup
-var multerDependences = multerSetup.initMulter();
+// initialize multer setup
+var multerDependences = Initializer.initMulter();
 var multer = multerDependences[0];
 var storage = multerDependences[1];
 
-// initialize database
-var schemas = database.connectDb();
-Post = schemas[0];
-Admin = schemas[1];
-
 // initialize app
-var app = initializer.initApp();
+var app = Initializer.initApp();
 
-// retrieve the administrator account email
-utils.getAdminAccount(Admin, newEmail).then( result => {
-  // take the values retrieved and then place them into globals
-  adminAccount = result[0];
-  newEmail = result[1];
-}, reason => {
-  console.error("ERROR: promise rejection while getting administrator account email: " + reason);
-});
+// create authenticator object
+database      = new Database('mongodb://127.0.0.1/my_database');
+authenticator = new Authenticator.Authenticator(database);
+authenticate  = Authenticator.AuthenticatorCallback;
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();
-
-// --------------------------------------------------------------------------------------------------------------------------------------------
-// END OF INITIALIZATION ----------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------------------------------
-
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // THIS SECTION HANDLES ROUTING ---------------------------------------------------------------------------------------------------------------
@@ -74,247 +59,170 @@ app.get('/resume', function (req, res, next) {
 });
 
 // THIS SECTION IS FOR HANDLING THE GENERATION AND VIEWING OF POSTS
-app.get("/posts/add", authenticateUser, function (req, res, next) {
+app.get("/posts/add", authenticate, function (req, res, next) {
   res.render("posts/addpost", {loggedin: req.session.login});
   res.end()
 });
 
 // upload a new post to database
-app.post("/posts/upload-post", authenticateUser, function (req, res, next) {
-
+app.post("/posts/upload-post", authenticate, function (req, res, next) {
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
-
   // TODO: improve upload security for file
   upload(req, res, function(err) {
-
-    if (!req.file) {
-      var postSnippet = undefined;
-    } else {
-      // does not need to be escaped since we generate the name here
-      var postSnippet = req.file.path;
-    }
-
-    var newTitle = sanitize(escape(req.body.title));
-    var newText = sanitize(escape(req.body.content));
-    var postType = sanitize(escape(req.body.type));
-
+    // construct args for post object
+    var post_args = {id:"", title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
+    // TODO: expand file check to differentiate between images and code snippets
+    // check if a file was submitted with this post (a code snippet)
+    if (req.file) { post_args.snippet = req.file.path; }
+    // create a post object from the extracted args
+    var new_post = new Post(post_args);
     // create new db object using data
-    var newPost = new Post({ title: newTitle, type: postType, snippet: postSnippet, content: newText });
-
-    try {
-      // save this object to the database
-      newPost.save(function (err, post) {
-        if (err) throw err;
-        console.log(post._id + " uploaded.");
-      });
-    } catch {
+    database.create_post(new_post.export_to_db()).then( result => {
+      res.redirect("/admin");
+      res.end();
+    }).catch (err => {
       res.redirect("posts/posterror");
-    }
-
-    // take user back to admin page to see result
-    res.redirect("/admin");
-    res.end();
-
+    });
   });
 });
 
 // delete a post
-app.post("/posts/delete_post", authenticateUser, function (req, res, next) {
-  var id = sanitize(escape(req.body.id));
+app.post("/posts/delete_post", authenticate, function (req, res, next) {
+  var id = Sanitizer.clean(req.body.id);
 
-  try {
-    // query to get the post
-    Post.findOne({_id: id}, function(err, post) {
-      // send a query to delete the post corresponding to this ID
-      Post.deleteOne({_id: id}, function(err, obj) {
-        // catch errors
-        if (err) throw err;
-        // remove the code snippet tied to this post if it exists
-        if(post.snippet != undefined) {
-          console.log("INFO: post has a snippet, attempting deletion.");
-          fs.unlinkSync(post.snippet);
-        }
-        console.log("Deleted post with id: " + id)
-      });
-    });
-  } catch {
-    res.redirect("posts/posterror");
-  }
-
-  // send back to admin page with result in a query string
-  res.redirect("/admin?delete=true");
-  res.end();
+  // get database to delete post
+  database.delete_post(id).then( result => {
+    // send back to admin page with result in a query string
+    res.redirect("/admin?delete=true");
+    res.end();
+  }).catch( err => {
+    // TODO: send to proper error location, this says error loading post.
+    database.post_fail(res, err);
+  });
 });
 
 // take user to page to edit post
-app.post("/posts/edit_post", authenticateUser, function (req, res, next) {
-
+app.post("/posts/edit_post", authenticate, function (req, res, next) {
   // extract the ID of the post from the post request
-  var id = sanitize(escape(req.body.id));
-
+  var id = Sanitizer.clean(req.body.id);
   // get the post using its ID
-  Post.findOne({_id: id}, function(err, post) {
-      // decode special characters
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
-      post.type = unescape(post.type);
-
-      // catch errors
-      if (err) throw err;
+  database.find_post(id).then( post => {
+      // load the found post
+      var to_edit = new Post(post);
       // give user a page to edit the content
-      res.render("posts/editpost", {loggedin: req.session.login, postData: post})
+      res.render("posts/editpost", {loggedin: req.session.login, postData: to_edit.export_to_view()})
+  }).catch( err => {
+      database.post_fail(res, err);
   });
-
 });
 
 // upload edited post to databse
-app.post("/posts/upload-post-edit", authenticateUser, function (req, res, next) {
-
+app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
   // get the uploaded file from the post request
   let upload = multer({ storage: storage }).single('code');
-
   // TODO: improve upload security for file
   upload(req, res, function(err) {
-
-    // get ID from the post request
-    var id = sanitize(escape(req.body.id));
-    var title = sanitize(escape(req.body.title));
-    var content = sanitize(escape(req.body.content));
-    var type = sanitize(escape(req.body.type));
-
-    if (!req.file) {
-      var postSnippet = undefined;
-    } else {
+    var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
+    // check if new post edit has a file
+    if (req.file) {
       // does not need to be escaped since we generate the name here
-      var postSnippet = req.file.path;
+      post_args.snippet = req.file.path;
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        Post.findOne({_id: id}, function(err, post) {
-          if (err) console.error(err);
+        database.find_post(id).then( post => {
           console.log("INFO: Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
+        }).catch( err => {
+            database.post_fail(res, err);
         });
       }
     }
-
-    if (postSnippet == undefined) {
-      // construct obj with update data
-      var update = {title: title, type: type, content: content };
-    } else {
-      // construct obj with update data
-      var update = {title: title, type: type, content: content, snippet: postSnippet };
-    }
-
-    try {
-      // update the post using the update data and the post's ID
-      Post.findOneAndUpdate( { _id: id }, update, function(err, post) {
-        // catch errors
-        if (err) throw err;
-        // take user back to admin page with result
-        res.redirect("/admin?edit=true");
-      });
-    } catch {
+    // place the arguments into a post obj
+    var to_edit = new Post(post_args);
+    // update the post using the post obj and it's ID
+    database.edit_post( to_edit.id, to_edit.export_to_db() ).then( post => {
+      res.redirect("/admin?edit=true");
+    }).catch(err => {
       res.redirect("posts/posterror");
-    }
+    });
   });
-
 });
 
 // view all posts that have been created
 app.get("/posts/view_posts", function (req,res,next) {
+  var all_posts = new Array();
   // extract the query string for post postType
   postType = req.query.type;
-
   // if the query string was empty, search for all posts
-  if (postType == undefined || postType == "") {
+  if ( postType == undefined || postType == "" ) {
     query = {}
   } else {
-    query = {type:postType}
+    query = { type:postType };
   }
-
   // query mongodb for all posts
-  Post.find(query, function(err, posts) {
+  database.find_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
+      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
+      var temp_post = new Post(post_args);
+      all_posts.push(temp_post.export_to_view());
     });
-
     // send user to view posts page along with data for every post
-    res.render("posts/viewposts", {loggedin: req.session.login, postdata: posts, type: postType});
-
+    res.render("posts/viewposts", {loggedin: req.session.login, postdata: all_posts, type: postType});
     // end request
     res.end();
-  })
+  }).catch( err => {
+      database.post_fail(res);
+  });
 });
 
 // view individual post
 app.get("/posts/view_post", function (req,res,next) {
-  var id = sanitize(escape(req.query.id));
-  // query database for the post that corresponds to this ID
-  Post.findOne({ _id: id }, function(err, post) {
-    try {
-      if (err) console.log(err);
-
-      // prepare the post to be sent (unescape input)
-      post.title = unescape(post.title);
-      post.content = unescape(post.content);
-      content =  post.content.split("\n");
-
-      // debug
-      console.log("DEBUG: loading post");
-      console.log("\nDEBUG: Title: \n" + post.title);
-      console.log("\nDEBUG: Content: \n" + post.content);
-
-      // check if this post has a code snippet
-      if (post.snippet != undefined) {
-        console.log("DEBUG: Post has a code snippet");
-        snippetPath = path.dirname(require.main.filename) + "\\" + post.snippet.replace("\\","/");
-        // check if the file exists
-        if (fs.existsSync(snippetPath)) {
-
-          if (req.query.args != undefined) {
-            // sanitize input
-            var args = sanitize(escape(req.query.args));
-          } else {
-            var args = "";
-          }
-
-          console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
-
-          // execute the snippet
-          exec("python " + post.snippet + " " + args, (error, stdout, stderr) => {
-            // check for errors
-            if (error) {
-              console.error(`ERROR: code failed to execute: ${error.message}`);
-            }
-
-            // debug
-            console.log("DEBUG: Code executed with output: '" + stdout + "'");
-
-            // preprocess the output
-            var output = unescape(stdout).split("\n")
-
-            // send user to view post page with data about the post
-            res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content, code: output });
-            // end request
-            res.end();
-          });
+  var id = Sanitizer.clean(req.query.id);
+  database.find_post(id).then( post =>  {
+    var to_view = new Post(post);
+    // check if this post has a code snippet -- This should be moved somewhere else
+    if (to_view.has_snippet) {
+      console.log("DEBUG: Loaded post has a code snippet");
+      // extract the snippet path of the post
+      snippetPath = to_view.post_snippet_path;
+      // check if the file exists
+      if (fs.existsSync(snippetPath)) {
+        // check for snippet arguments
+        if (req.query.args != undefined) {
+          // sanitize input
+          var args = Sanitize.clean(req.query.args);
         } else {
-          console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
+          var args = "";
         }
+        console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
+        // execute the snippet
+        exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
+          // check for errors
+          if (error) { console.error(`ERROR: code failed to execute: ${error.message}`); }
+          // debug the output
+          console.log("DEBUG: Code executed with output: '" + stdout + "'");
+          // preprocess the output
+          var output = unescape(stdout).split("\n")
+          // send user to view post page with data about the post
+          res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view(), code: output });
+          // end request
+          res.end();
+        });
       } else {
-        // send user to view post page with data about the post
-        res.render("posts/viewpost", {loggedin: req.session.login, postdata: post, content: content});
-        // end request
-        res.end();
+        console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
       }
-    } catch(e) {
-      console.error(e);
-      res.render("posts/posterror");
+    } else {
+      console.log("INFO: viewing normal post:");
+      // send user to view post page with data about the post
+      res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view()});
+      // end request
+      res.end();
     }
+  }).catch( err => {
+      database.post_fail(res, err);
   });
 });
 
@@ -327,20 +235,21 @@ app.get('/logout', function (req, res, next) {
 });
 
 // get request for login page
-app.get("/admin", authenticateUser, function (req, res, next){
+app.get("/admin", authenticate, function (req, res, next){
   // load any query strings
   var edit_status = req.query.edit;
   var delete_status = req.query.delete;
-
-  Post.find({}, function(err, posts) {
+  // iterate over all the posts in the database
+  database.find_posts({}).then( posts => {
+    var all_posts = new Array();
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post.title = unescape(post.title);
-      post.type = unescape(post.type);
-      post.content = unescape(post.title);
+      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
+      var temp_post = new Post(post_args);
+      all_posts.push(temp_post.export_to_view());
     });
     // parsed_posts = JSON.stringify(posts, null, 2);
-    res.render('admin.pug', {loggedin: req.session.login, postdata: posts, del: delete_status, edit: edit_status});
+    res.render('admin.pug', {loggedin: req.session.login, postdata: all_posts, del: delete_status, edit: edit_status});
     res.end();
   })
 });
@@ -350,20 +259,6 @@ app.get("/forbidden", function (req, res, next) {
   res.status(403).render("forbidden", {loggedin: req.session.login});
   res.end();
 });
-
-// callback to protect pages
-function authenticateUser (req, res, next) {
-  // check if we're allowed to be here
-  if(!req.session.login){
-    res.redirect("/forbidden");
-  } else {
-    if (req.session.email != adminAccount) {
-     res.redirect("/forbidden");
-    } else {
-      next();
-    }
-  }
-}
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 // END OF ROUTING -----------------------------------------------------------------------------------------------------------------------------
@@ -408,7 +303,7 @@ var strategy = new GoogleStrategy({ clientID: GOOGLE_CLIENT_ID, clientSecret: GO
 passport.use(strategy);
 
 app.get('/auth', function (req, res, next) {
-  if (newEmail) {
+  if (authenticator.doAddAdmin) {
     res.redirect('/auth/newadmin');
   } else {
     res.redirect('/auth/google');
@@ -423,7 +318,7 @@ app.get('/auth/newadmin', function (req, res, next) {
 
 app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
-  var code = sanitize(escape(req.body.code));
+  var code = Sanitizer.clean(req.body.code);
   code = crypto.createHash('sha256').update(code).digest('hex');
 
   // get the code stored locally
@@ -433,7 +328,7 @@ app.post('/auth/newadmin', function (req, res, next) {
     // compare the submitted code to the stored one
     if (code == data) {
       console.log("Submitted code matches stored example. Next submitted email will become administrator account.");
-      addAdministrator = true;
+      authenticator.isAccessCodeValid = true;
       res.redirect("/auth/google");
     } else {
       res.redirect("/auth/newadmin?access=false");
@@ -444,6 +339,7 @@ app.post('/auth/newadmin', function (req, res, next) {
 // send authentication request to google
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
 
+// TODO: Move this to authenticator
 // receive the final response from google after logging in
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
   // redirect to verify the result
@@ -451,40 +347,40 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   req.session.email = userProfile.emails[0].value;
 
   // check if the submitted email should be made an administrator
-  if ( addAdministrator ) {
+  if ( authenticator.isAccessCodeValid ) {
     console.log("Adding email " + req.session.email + " as the administrator account.");
     // set the administrator email to this one since it wasn't done properly
-    adminAccount = req.session.email;
+    authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
-    newEmail = false;
+    authenticator.doAddAdmin = false;
 
-    // create new databse obj
-    var newAdmin = new Admin({ email:req.session.email });
+    // create new database obj
+    var newAdmin = new database.admin_model({ email:req.session.email });
 
-    // upload to databse
+    // upload to database
     newAdmin.save(function (err, admin) {
       // intercept and log errors
       if (err) return console.error(err);
       // log result to console
       console.log("INFO: admin account " + admin.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
-      addAdministrator = false;
+      authenticator.isAccessCodeValid = false;
     });
   }
 
   // check if the email for the user's profile is authorized
-  if(req.session.email == adminAccount) {
+  if(req.session.email == authenticator.admin) {
     req.session.login = true;
     console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
     res.redirect("/admin");
   } else {
     req.session.login = false;
     console.log("INFO: User email '" + req.session.email + "' was rejected.");
-    console.log("DEBUG: Did not match administrator account '" + adminAccount + "'")
+    console.log("DEBUG: Did not match administrator account '" + authenticator.admin + "'")
     res.redirect("/?login=false");
   }
 });
 
 app.get('*', function(req, res){
-  res.status(404).send('what???');
+  res.status(404).send('does not exist.');
 });

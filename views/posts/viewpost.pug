@@ -6,12 +6,12 @@ head
       h2.blue #{postdata.title}
     hr.thin-hr.padded
     div.flexbox.flex-col
-      each line in content
+      each line in postdata.content
         p #{line}
     if postdata.snippet
       h3.blue Code snippet:
       form.flexbox.flex-col(action="?", method='GET')
-        input(type="hidden", name="id", value="" + postdata._id)
+        input(type="hidden", name="id", value="" + postdata.id)
         input(type="text", name="args", placeholder="args")
         input(type="submit")
       div.code-container
