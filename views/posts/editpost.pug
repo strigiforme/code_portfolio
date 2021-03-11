@@ -4,23 +4,24 @@ head
   div.container.flexbox.flex-col
     div
       h2.blue Edit Post:
-    hr.thin-hr.padded
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST', enctype="multipart/form-data")          
+      form.flexbox.flex-col(action="/posts/upload-post-edit", method='POST', enctype="multipart/form-data")
         input(type="text", name="id", value="" + postData.id hidden)
-        label(for="title") Post Title:
-        input(type="text", name="title", value="" + postData.title)
-        label(for="type") Post type:
-        select(name="type")
-          option(value="" + postData.type selected hidden) #{postData.type}
-          option(value="blog") Blog
-          option(value="info") Info
-          option(value="project") Project
-        br
-        label(for="content") Post Content:
-        textarea(name="content", rows="4") #{postData.content}
+        div.input-container
+          label(for="title").floating-label Post Title:
+          input(type="text", name="title", value="" + postData.title).floating-input
+        div.input-container
+          label(for="type").floating-label Post type:
+          select(name="type").floating-input
+            option(value="" + postData.type selected hidden) #{postData.type}
+            option(value="blog") Blog
+            option(value="info") Info
+            option(value="project") Project
+        div.input-container
+          label(for="content").floating-label Post Content:
+          textarea(name="content", rows="4").floating-input #{postData.content}
         div.flexbox(style="position: relative; left: 5px;")
-          input(type="checkbox", name="editSnippet" style="transform: scale(1.5); position: relative; top: 9px; right: 5px;")
+          input(type="checkbox", name="editSnippet" style="transform: scale(1.5); position: relative; right: 5px;")
           label(for="editSnippet") edit code snippet?
           
         input(type="file", name="code")
