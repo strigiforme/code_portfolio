@@ -12,7 +12,9 @@ head
       h3.blue Code snippet:
       form.flexbox.flex-col(action="?", method='GET')
         input(type="hidden", name="id", value="" + postdata.id)
-        input(type="text", name="args", placeholder="args")
+        div.input-container
+          label(for="args").floating-label Arguments
+          input(type="text", name="args").floating-input
         input(type="submit")
       div.code-container
         each line in code

@@ -2,10 +2,34 @@ input[type=textarea]{
   height: 100px;
 }
 
-input {
-  padding: 3px;
+input[type=text]{
   margin-bottom: 1rem;
   font-size: 16px;
+}
+
+label {
+  font-size: 16px;
+}
+
+.floating-label {
+  font-size: 16px;
+  position: absolute;
+  left: 10px;
+  top: -15px;
+  background-color: white;
+  padding: 3px;
+}
+
+.floating-input {
+  padding: 10px;
+  margin-bottom: 1rem;
+  font-size: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.input-container{
+  position: relative;
 }
 
 textarea {
@@ -37,10 +61,6 @@ select {
 
 .post-container a i {
   font-size: 24px;
-}
-
-label {
-  font-size: 22px;
 }
 
 .blue {

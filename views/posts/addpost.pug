@@ -4,19 +4,20 @@ head
   div.container.flexbox.flex-col
     div
       h2.blue Add Post:
-    hr.thin-hr.padded
     div.flexbox.flex-col
       form.flexbox.flex-col(action="/posts/upload-post", method='POST', enctype="multipart/form-data")
-        label(for="title") Post Title:
-        input(type="text", name="title")
-        label(for="type") Post type:
-        select(name="type")
-          option(value="blog") Blog
-          option(value="info") Info
-          option(value="project") Project
-        br
-        label(for="content") Post Content:
-        textarea(name="content", rows="4")
+        div.input-container
+          label(for="title").floating-label Post Title:
+          input(type="text", name="title").floating-input
+        div.input-container
+          label(for="type").floating-label Post type:
+          select(name="type").floating-input
+            option(value="blog") Blog
+            option(value="info") Info
+            option(value="project") Project
+        div.input-container
+          label(for="content").floating-label Post Content:
+          textarea(name="content", rows="4").floating-input
         label(for="code") Snippet:
         input(type="file" name="code")
         br

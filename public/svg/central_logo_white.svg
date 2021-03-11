@@ -12,7 +12,7 @@
   </style>
   <rect x="120" y="10" width="50" height="300" fill="#D4AF37"
       transform="skewX(-20)" />
-  <rect x="185" y="10" width="50" height="300" fill="#02117E"
+  <rect x="185" y="10" width="50" height="300" fill="#042861"
       transform="skewX(-20)" />
   <rect x="250" y="10" width="50" height="300" fill="#B8CAD1"
       transform="skewX(-20)" />
