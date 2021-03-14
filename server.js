@@ -2,30 +2,31 @@
 
 File: server.js
 Author: Howard Pearce
-Last Edit: Febuary 21, 2021
+Last Edit: March 13, 2021
 Description: Main route and logic handler for node application. Everything that
              happens on the website starts here.
 
 **/
 
 // dependencies
-const express        = require("express");
-const passport       = require("passport");
-const session        = require("express-session");
-const mongoose       = require("mongoose");
-const crypto         = require("crypto");
-const fs             = require("fs");
-const path           = require('path');
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const { exec }       = require("child_process");
+const express        = require("express")
+const passport       = require("passport")
+const session        = require("express-session")
+const mongoose       = require("mongoose")
+const crypto         = require("crypto")
+const fs             = require("fs")
+const path           = require('path')
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
+const { exec }       = require("child_process")
 
 // Written libraries
-const access_code      = require("./lib/access_code.js");
-const Initializer      = require("./lib/initializer.js");
-const Sanitizer        = require("./lib/sanitizer.js");
-const Authenticator    = require("./lib/authenticator.js");
-const Database         = require("./lib/database.js");
-const Post             = require("./lib/post.js");
+const access_code      = require("./lib/access_code.js")
+const Initializer      = require("./lib/initializer.js")
+const Sanitizer        = require("./lib/sanitizer.js")
+const Authenticator    = require("./lib/authenticator.js")
+const Database         = require("./lib/database.js")
+const Post             = require("./lib/post.js")
+var   logger           = require("./lib/logger.js")
 
 // initialize multer setup
 var multerDependences = Initializer.initMulter();
@@ -132,7 +133,7 @@ app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
         database.find_post(id).then( post => {
-          console.log("INFO: Editing snippet for post, deleting old one.");
+          logger.log_info("Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         }).catch( err => {
             database.post_fail(res, err);
@@ -165,7 +166,7 @@ app.get("/posts/view_posts", function (req,res,next) {
   database.find_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
+      post_args = { id: post.id, title: post.title, content: post.content, type: post.type};
       var temp_post = new Post(post_args);
       all_posts.push(temp_post.export_to_view());
     });
@@ -185,7 +186,7 @@ app.get("/posts/view_post", function (req,res,next) {
     var to_view = new Post(post);
     // check if this post has a code snippet -- This should be moved somewhere else
     if (to_view.has_snippet) {
-      console.log("DEBUG: Loaded post has a code snippet");
+      logger.log_debug("Loaded post has a code snippet");
       // extract the snippet path of the post
       snippetPath = to_view.post_snippet_path;
       // check if the file exists
@@ -193,17 +194,17 @@ app.get("/posts/view_post", function (req,res,next) {
         // check for snippet arguments
         if (req.query.args != undefined) {
           // sanitize input
-          var args = Sanitize.clean(req.query.args);
+          var args = Sanitizer.clean(req.query.args);
         } else {
           var args = "";
         }
-        console.log("DEBUG: executing cmd: 'python " + post.snippet + " " + args + "'");
+        logger.log_info(`Executing cmd: 'python ${post.snippet} ${args}`);
         // execute the snippet
         exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
           // check for errors
-          if (error) { console.error(`ERROR: code failed to execute: ${error.message}`); }
+          if (error) { logger.log_error(`Code failed to execute: ${error.message}`); }
           // debug the output
-          console.log("DEBUG: Code executed with output: '" + stdout + "'");
+          logger.log_debug(`Code executed with output: '${stdout}'`);
           // preprocess the output
           var output = unescape(stdout).split("\n")
           // send user to view post page with data about the post
@@ -212,10 +213,10 @@ app.get("/posts/view_post", function (req,res,next) {
           res.end();
         });
       } else {
-        console.error("ERROR: Couldn't find uploaded code snippet at: '" + snippetPath + "'");
+        logger.log_error("Couldn't find uploaded code snippet at: '" + snippetPath + "'");
       }
     } else {
-      console.log("INFO: viewing normal post:");
+      logger.log_info("Viewing normal post:");
       // send user to view post page with data about the post
       res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view()});
       // end request
@@ -327,7 +328,7 @@ app.post('/auth/newadmin', function (req, res, next) {
     if (err) return console.log(err);
     // compare the submitted code to the stored one
     if (code == data) {
-      console.log("Submitted code matches stored example. Next submitted email will become administrator account.");
+      logger.log_info("Submitted code matches stored example. Next submitted email will become administrator account.");
       authenticator.isAccessCodeValid = true;
       res.redirect("/auth/google");
     } else {
@@ -348,7 +349,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 
   // check if the submitted email should be made an administrator
   if ( authenticator.isAccessCodeValid ) {
-    console.log("Adding email " + req.session.email + " as the administrator account.");
+    logger.log_info("Adding email " + req.session.email + " as the administrator account.");
     // set the administrator email to this one since it wasn't done properly
     authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
@@ -362,7 +363,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
       // intercept and log errors
       if (err) return console.error(err);
       // log result to console
-      console.log("INFO: admin account " + admin.email + " successfully uploaded.");
+      logger.log_info("Admin account " + admin.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
       authenticator.isAccessCodeValid = false;
     });
@@ -371,12 +372,12 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   // check if the email for the user's profile is authorized
   if(req.session.email == authenticator.admin) {
     req.session.login = true;
-    console.log("INFO: User email '" + req.session.email + "' successfully authenticated.");
+    logger.log_info("User email '" + req.session.email + "' successfully authenticated.");
     res.redirect("/admin");
   } else {
     req.session.login = false;
-    console.log("INFO: User email '" + req.session.email + "' was rejected.");
-    console.log("DEBUG: Did not match administrator account '" + authenticator.admin + "'")
+    logger.log_info("User email '" + req.session.email + "' was rejected.");
+    logger.log_debug("Did not match administrator account '" + authenticator.admin + "'")
     res.redirect("/?login=false");
   }
 });
