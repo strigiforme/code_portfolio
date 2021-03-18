@@ -22,6 +22,7 @@ var session            = require("express-session");
 var passport           = require("passport");
 var http               = require("http");
 var https              = require("https");
+var bodyParser = require('body-parser');
 
 var app = express();
 
@@ -47,6 +48,7 @@ app.use(express.static("public"));
 // initialize sessions
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(auth);
 app.use(user);
