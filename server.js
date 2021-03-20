@@ -48,7 +48,7 @@ app.use(express.static("public"));
 // initialize sessions
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
 app.use(auth);
 app.use(user);
