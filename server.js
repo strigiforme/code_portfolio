@@ -2,7 +2,7 @@
 
 File: server.js
 Author: Howard Pearce
-Last Edit: March 13, 2021
+Last Edit: March 18, 2021
 Description: Main route and logic handler for node application. Everything that
              happens on the website starts here.
 
@@ -22,7 +22,7 @@ var session            = require("express-session");
 var passport           = require("passport");
 var http               = require("http");
 var https              = require("https");
-var bodyParser = require('body-parser');
+var bodyParser         = require('body-parser');
 
 var app = express();
 
@@ -48,7 +48,7 @@ app.use(express.static("public"));
 // initialize sessions
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
 app.use(auth);
 app.use(user);

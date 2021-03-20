@@ -7,7 +7,7 @@ Description: Test suite for post.js
 
 **/
 
-var Post = require("../lib/post.js");
+var Post = require("../lib/core/post.js");
 
 // variables to load into the post
 const test_id = "123";

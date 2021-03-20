@@ -7,7 +7,7 @@ Description: Test suite for database.js
 
 **/
 
-var Database = require("../lib/database.js");
+var Database = require("../lib/core/database.js");
 
 // TODO: Implement unit tests for the database
 test("Database", () => {
