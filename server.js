@@ -50,6 +50,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
+// Routing logic
 app.use(auth);
 app.use(user);
 app.use(admin);
