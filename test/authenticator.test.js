@@ -2,7 +2,7 @@
 
 File: authenticator.test.js
 Author: Howard Pearce
-Last Edit: Febuary 4, 2021
+Last Edit: May 2, 2021
 Description: Test suite for authenticator.js
 
 **/

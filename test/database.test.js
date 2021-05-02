@@ -2,7 +2,7 @@
 
 File: database.test.js
 Author: Howard Pearce
-Last Edit: Febuary 5, 2021
+Last Edit: May 2, 2021
 Description: Test suite for database.js
 
 **/
