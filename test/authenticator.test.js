@@ -7,7 +7,7 @@ Description: Test suite for authenticator.js
 
 **/
 
-var Authenticator = require("../lib/core/authenticator.js");
+var Authenticator = require("../lib/core/access/authenticator.js");
 
 // TODO: Implement unit tests for the authenticator
 test("Authenticator", () => {

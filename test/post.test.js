@@ -2,12 +2,12 @@
 
 File: post.test.js
 Author: Howard Pearce
-Last Edit: March 10, 2021
+Last Edit: May 2, 2021
 Description: Test suite for post.js
 
 **/
 
-var Post = require("../lib/core/post.js");
+var Post = require("../lib/core/database/post.js");
 
 // variables to load into the post
 const test_id = "123";
