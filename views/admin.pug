@@ -6,6 +6,28 @@ head
       h2.blue Welcome, Howard!
     hr.thin-hr.padded
     div.flexbox.flex-col
+      h3 Visitors
+      div
+        table
+          thead
+            tr
+              th country
+              th region
+              th city
+              th visits
+              th ip
+          tbody
+            each visitor in visitors
+              tr
+                td #{visitor.location.country}
+                td #{visitor.location.region}
+                td #{visitor.location.city}
+                td #{visitor.visits}
+                td #{visitor.ip}
+      br
+      br
+      hr.thin-hr
+      h3 Posts
       div.post-container
         a.post-link(href='/posts/add') 
           i.fa.fa-plus-circle
