@@ -2,12 +2,12 @@
 
 File: authenticator.test.js
 Author: Howard Pearce
-Last Edit: Febuary 4, 2021
+Last Edit: May 2, 2021
 Description: Test suite for authenticator.js
 
 **/
 
-var Authenticator = require("../lib/core/authenticator.js");
+var Authenticator = require("../lib/core/access/authenticator.js");
 
 // TODO: Implement unit tests for the authenticator
 test("Authenticator", () => {
