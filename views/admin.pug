@@ -6,6 +6,14 @@ head
       h2.blue Welcome, Howard!
     hr.thin-hr.padded
     div.flexbox.flex-col
+      h3 Search
+      div
+        form(action="" onsubmit="lookup(this); return false;" method="GET").input-container
+          label(for="search").floating-label 
+            i.fa.fa-search
+            | &nbsp; Search for posts
+          input(type="text", name="search", id="search").floating-input
+          input(type="submit" hidden)
       h3 Visitors
       div
         table
@@ -24,9 +32,6 @@ head
                 td #{visitor.location.city}
                 td #{visitor.visits}
                 td #{visitor.ip}
-      br
-      br
-      hr.thin-hr
       h3 Posts
       div.post-container
         a.post-link(href='/posts/add') 

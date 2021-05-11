@@ -27,3 +27,14 @@ test("Visitor Constructor Test", () => {
   expect(test_visitor.ip).toBe('28e8582c19...');
   expect(test_visitor.location_string).toBe(test_location_string)
 });
+
+test("Export test", () => {
+  var test_visitor = new Visitor(test_visitor_args);
+  var exp = test_visitor.export_to_pug();
+  expect(exp.id).toBe(test_id);
+  expect(exp.first_visit).toBe(test_first_visit);
+  expect(exp.last_visit).toBe(test_last_visit);
+  expect(exp.visits).toBe(test_visits);
+  expect(exp.ip).toBe('28e8582c19...');
+  expect(exp.location_string).toBe(exp.location_string);
+});
