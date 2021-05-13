@@ -6,7 +6,7 @@ head
       h2.blue Welcome, Howard!
     hr.thin-hr.padded
     div.flexbox.flex-col
-      h3 Search
+      h3 Search for Posts
       div
         form(action="" onsubmit="lookup(this); return false;" method="GET").input-container
           label(for="search").floating-label 
@@ -14,6 +14,7 @@ head
             | &nbsp; Search for posts
           input(type="text", name="search", id="search").floating-input
           input(type="submit" hidden)
+        div#post_search_container
       h3 Visitors
       div
         table
