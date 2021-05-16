@@ -53,6 +53,12 @@ select {
   justify-content: space-between;
 }
 
+.post-container p {
+  font-size: 24px;
+  padding: 1rem;
+  margin: 0px;
+}
+
 .post-container a {
   font-size: 24px;
   padding: 1rem;
