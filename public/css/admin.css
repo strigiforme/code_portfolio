@@ -40,13 +40,17 @@
 }
 
 table {
-  table-layout: fixed;
+  border-collapse: collapse;
   display: block;
   max-width: 100%;
 }
 
+thead {
+  border-bottom: 2px solid black;
+}
+
 td {
   text-align: center;
-  width: 25%;
-  padding: 0 10px;
+  width: 22%;
+  border-bottom: 1px solid lightgrey;
 }
