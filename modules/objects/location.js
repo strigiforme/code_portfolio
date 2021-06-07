@@ -8,9 +8,9 @@ Description: Class for location. Extracts fields from a string to store location
 
 **/
 
-
-const Sanitizer  = require('../utils/sanitizer.js')
-var logger       = require("../utils/logger.js")
+var middleware   = require("middleware")
+var Sanitizer    = middleware.sanitizer;
+var logger       = require("logger")
 const path       = require('path')
 
 module.exports = class Location {

@@ -13,11 +13,12 @@ var express        = require("express");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var passport       = require("passport");
 var session        = require("express-session");
-var database       = require("../core/database/database.js");
-var logger         = require("../core/utils/logger.js");
-var Sanitizer      = require("../core/utils/sanitizer.js");
-var access         = require("../core/access/access_code.js");
-var authenticator  = require("../core/access/authenticator");
+var database       = require("database");
+var logger         = require("logger");
+var middleware     = require("middleware");
+var access         = require("access_code");
+var authenticator  = require("authenticator");
+var Sanitizer = middleware.sanitizer;
 
 var app = module.exports = express();
 

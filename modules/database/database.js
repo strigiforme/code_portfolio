@@ -9,7 +9,7 @@ Description: Manages MONGODB database connections and sends queries
 
 const mongoose = require("mongoose")
 const fs       = require("fs")
-var   logger   = require("../utils/logger.js")
+var   logger   = require("logger")
 
 class Database {
 

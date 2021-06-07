@@ -9,8 +9,10 @@ Description: Class for posts, does some basic operations on a post such as
 **/
 
 const post_types = { blog:"blog", info:"info", project:"project", unknown:"unknown" };
-const Sanitizer  = require('../utils/sanitizer.js')
-var logger       = require("../utils/logger.js")
+var middleware   = require("middleware")
+var Sanitizer    = middleware.sanitizer;
+var logger       = require("logger")
+const path        = require('path');
 
 module.exports = class Post {
 

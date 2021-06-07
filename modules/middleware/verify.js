@@ -7,7 +7,7 @@ Description: Callback function to create limited access areas of software
 
 **/
 
-var authenticator = require("../access/authenticator.js");
+var authenticator = require("authenticator");
 
 var auth_callback = function (req, res, next) {
   // check if we're allowed to be here

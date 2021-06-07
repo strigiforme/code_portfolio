@@ -11,13 +11,13 @@ Description: Main route and logic handler for node application. Everything that
 // dependencies
 var express            = require("express");
 var fs                 = require("fs");
-var access_code        = require("./lib/core/access/access_code.js");
-var authenticator      = require("./lib/core/access/authenticator.js");
-var database           = require("./lib/core/database/database.js");
-var logger             = require("./lib/core/utils/logger.js");
-var auth               = require("./lib/auth");
-var user               = require("./lib/user");
-var admin              = require("./lib/admin");
+var access_code        = require("access_code");
+var authenticator      = require("authenticator");
+var database           = require("database");
+var logger             = require("logger");
+var auth               = require("./routes/auth");
+var user               = require("./routes/user");
+var admin              = require("./routes/admin");
 var session            = require("express-session");
 var passport           = require("passport");
 var http               = require("http");

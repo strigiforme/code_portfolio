@@ -9,8 +9,9 @@ Description: Class for visitors, does some basic operations on a post such as
 **/
 
 
-const Sanitizer  = require('../utils/sanitizer.js')
-var logger       = require("../utils/logger.js")
+var middleware   = require("middleware")
+var Sanitizer    = middleware.sanitizer;
+var logger       = require("logger")
 var Location     = require("./location.js")
 
 module.exports = class Visitor {

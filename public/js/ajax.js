@@ -1,5 +1,7 @@
 var typeMap = { "blog": "<i class = 'fa fa-book'></i>", "info": "<i class = 'fa fa-info-circle'></i>", "project": "<i class = 'fa fa-code'></i>"}
 
+/* Called as action for any form to perform an AJAX search request
+ */
 function lookup(form) {
   // extract the search value
   var searchValue = form.search.value;

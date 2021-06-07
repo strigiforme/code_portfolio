@@ -2,7 +2,7 @@
 
 File: index.js
 Author: Howard Pearce
-Last Edit: May 2, 2021
+Last Edit: May 17, 2021
 Description: Handles all logic for the administration of the portfolio
 
 **/
@@ -11,16 +11,20 @@ var express       = require("express");
 const fs          = require("fs");
 var { exec }      = require("child_process");
 const path        = require('path');
-var database      = require("../core/database/database.js");
-var Post          = require("../core/database/post.js");
-var Visitor       = require("../core/database/visitor.js");
-var Location      = require("../core/database/location.js");
-var Sanitizer     = require("../core/utils/sanitizer.js");
-var logger        = require("../core/utils/logger.js");
-var fileManager   = require("../core/utils/fileManager.js");
-var authenticate  = require("../core/middleware/verify.js");
-var record        = require("../core/middleware/ip_logger.js");
-var authenticator = require("../core/access/authenticator.js");
+var database      = require("database");
+var objects       = require("objects");
+var logger        = require("logger");
+var snippets      = require("file_upload");
+var record        = require("ip_logger");
+var authenticator = require("authenticator");
+var middleware    = require("middleware");
+var Sanitizer     = middleware.sanitizer;
+var authenticate  = middleware.verify;
+
+const upload = snippets.multer;
+var Post          = objects.Post;
+var Visitor       = objects.Visitor;
+var Location      = objects.Location;
 
 var app = module.exports = express();
 
@@ -52,19 +56,24 @@ app.get("/posts/add", authenticate, function (req, res, next) {
   res.end()
 });
 
+
+
 // upload a new post to database
-app.post("/posts/upload-post", authenticate, function (req, res, next) {
+app.post("/posts/upload-post", upload.single("code"), function (req, res, next) {
+  console.log(req.body);
+  console.log(req.file);
   // get the uploaded file from the post request
-  let upload = fileManager.get_code_upload();
+  // let upload = fileManager.get_code_upload();
   // TODO: improve upload security for file
-  upload(req, res, function(err) {
+  //upload(req, res, function(err) {
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
-    } else if (err) {
-      logger.log_warning("Rejecting file upload: " + err);
-      return res.redirect("uploaderror");
     }
+    // else if (err) {
+    //   logger.log_warning("Rejecting file upload: " + err);
+    //   return res.redirect("uploaderror");
+    // }
     // construct args for post object
     var post_args = {id:"", title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
     // check if a file was submitted with this post (a code snippet)
@@ -78,7 +87,7 @@ app.post("/posts/upload-post", authenticate, function (req, res, next) {
     }).catch (err => {
       res.redirect("posts/posterror");
     });
-  });
+  //});
 });
 
 // delete a post
@@ -111,12 +120,14 @@ app.post("/posts/edit_post", authenticate, function (req, res, next) {
 });
 
 // upload edited post to databse
-app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
+app.post("/posts/upload-post-edit", authenticate, upload.single("code"), function (req, res, next) {
   // get the uploaded file from the post request
-  let upload = fileManager.get_code_upload();
+  //let upload = fileManager.get_code_upload();
+  //console.log(req.body);
+  //console.log(req);
   // load the request into arguments to construct a post
   var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
-  upload(req, res, function(err) {
+  //upload(req, res, function(err) {
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
@@ -148,7 +159,7 @@ app.post("/posts/upload-post-edit", authenticate, function (req, res, next) {
     }).catch(err => {
       res.redirect("posts/posterror");
     });
-  });
+  //});
 });
 
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY

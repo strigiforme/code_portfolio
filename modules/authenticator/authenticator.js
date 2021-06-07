@@ -8,8 +8,8 @@ Description: Manages authentication for portfolio application. This includes
 
 **/
 
-var database = require("../database/database.js");
-var logger   = require("../utils/logger.js");
+var database = require("database");
+var logger   = require("logger");
 
 class Authenticator {
 

@@ -8,13 +8,15 @@ Description: Handles all logic for users
 **/
 
 var express    = require("express");
-var database   = require("../core/database/database.js");
-var Post       = require("../core/database/post.js");
-var Sanitizer  = require("../core/utils/sanitizer.js");
-var logger     = require("../core/utils/logger.js");
+var database   = require("database");
+var objects    = require("objects");
+var middleware = require("middleware");
+var logger     = require("logger");
 const fs       = require("fs");
 var { exec }   = require("child_process");
-var record     = require("../core/middleware/ip_logger.js");
+var record     = require("ip_logger");
+var Sanitizer  = middleware.sanitizer;
+var Post       = objects.Post;
 
 var app = module.exports = express();
 
@@ -40,7 +42,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
   } else {
     query = { type:postType };
   }
-
+  console.log(query);
   // query mongodb for all posts
   database.find_posts(query).then( posts => {
     // decode special characters in lists of posts

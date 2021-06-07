@@ -4,7 +4,8 @@
   "description": "Software development portfolio",
   "main": "server.js",
   "scripts": {
-    "test": "jest --config ./jest.config.js"
+    "test": "jest --config ./jest.config.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -13,24 +14,36 @@
   "author": "Howard Pearce",
   "license": "ISC",
   "dependencies": {
+    "access_code": "file:modules/access_code",
     "angular": "^1.8.2",
-    "crypto": "^1.0.1",
+    "authenticator": "file:modules/authenticator",
+    "database": "file:modules/database",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.8.0",
+    "file_upload": "file:modules/file_upload",
     "font-awesome": "^4.7.0",
     "generate-changelog": "^1.8.0",
     "geoip-lite": "^1.4.2",
     "https": "^1.0.0",
+    "ip_logger": "file:modules/ip_logger",
+    "logger": "file:modules/logger",
+    "middleware": "file:modules/middleware",
     "mongo-sanitize": "^1.1.0",
     "mongoose": "^5.12.1",
     "multer": "^1.4.2",
+    "objects": "file:modules/objects",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
     "prompt-sync": "^4.2.0",
     "pug": "^3.0.2"
   },
   "devDependencies": {
-    "jest": "^26.6.3"
-  }
+    "jest": "^27.0.1"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "keywords": []
 }

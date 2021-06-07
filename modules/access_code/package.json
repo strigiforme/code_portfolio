@@ -1,0 +1,19 @@
+{
+  "name": "access_code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "access_code.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "authenticator": "file:../authenticator",
+    "crypto": "^1.0.1",
+    "fs": "0.0.1-security",
+    "logger": "file:../logger",
+    "prompt-sync": "^4.2.0"
+  }
+}

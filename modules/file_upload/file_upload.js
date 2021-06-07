@@ -1,13 +1,14 @@
 /**
 
-File: post.js
+File: snippetUpload.js
 Author: Howard Pearce
-Last Edit: May 2, 2021
-Description: Class for management of file uploads via multer
+Last Edit: May 17, 2021
+Description:  Class for management of code snippet uploads via multer.
+              handles initialization and multer setup.
 **/
 
 var multer        = require('multer');
-var snippets      = multer({dest: 'snippets/' });
+var snippets      = multer({dest: '../snippets/' });
 const fs          = require("fs");
 const path        = require('path');
 
@@ -34,13 +35,15 @@ class fileManager {
             cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
         }
     });
+
+    this.multer = multer({storage: this.storage });
   }
 
   /**
    * Return multer upload single to be used for an upload in the codebase
    * @return {multer} The upload object to validate the file against
    */
-  get_code_upload() {
+  single() {
     // Max filesize is 1mb (1042 * 1024)
     return multer({ storage: this.storage,
                     fileFilter: this.codeFilter,

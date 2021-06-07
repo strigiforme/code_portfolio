@@ -7,7 +7,8 @@ Description: Unit test suite for visitor.js
 
 **/
 
-var Visitor = require("../lib/core/database/visitor.js");
+var objects = require("objects");
+var Visitor = objects.Visitor;
 
 const test_id              = "123"
 const test_first_visit     = "2021-04-30T20:08:52.002+00:00"
