@@ -10,8 +10,8 @@ Description: Handles generation and management of the application's access code.
 var fs =            require("fs");
 var crypto =        require("crypto");
 const prompt =      require("prompt-sync")();
-var logger =        require("../utils/logger.js");
-var authenticator = require("../access/authenticator.js");
+var logger =        require("logger");
+var authenticator = require("authenticator");
 
 // generate an access code file for the user
 exports.generateAccessCode = function() {

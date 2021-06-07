@@ -7,8 +7,8 @@ Description: Logs IP addresses of visitors to the website
 
 **/
 
-var database = require("../database/database.js");
-var logger   = require("../utils/logger.js");
+var database = require("database");
+var logger   = require("logger");
 var locate   = require("geoip-lite");
 var crypto   = require("crypto");
 
