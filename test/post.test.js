@@ -6,8 +6,8 @@ Last Edit: May 2, 2021
 Description: Test suite for post.js
 
 **/
-
-var Post = require("../lib/core/database/post.js");
+var objects = require("objects");
+var Post = objects.Post;
 
 // variables to load into the post
 const test_id = "123";

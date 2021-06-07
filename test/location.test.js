@@ -7,7 +7,8 @@ Description: Unit test suite for location.js
 
 **/
 
-var Location = require("../lib/core/database/location.js");
+var objects = require("objects");
+var Location = objects.Location;
 
 const location_string = '{"range":[2671878144,2671886335],"country":"US","region":"NJ","eu":"0","timezone":"America/New_York","city":"Clifton","ll":[40.8364,-74.1403],"metro":501,"area":1000}'
 
