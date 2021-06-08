@@ -99,8 +99,8 @@ app.post("/posts/delete_post", authenticate, function (req, res, next) {
     res.redirect("/admin?delete=true");
     res.end();
   }).catch( err => {
-    // TODO: send to proper error location, this says error loading post.
-    database.post_fail(res, err);
+    logger.log_error(err)
+    next(err);
   });
 });
 
@@ -147,7 +147,8 @@ app.post("/posts/upload-post-edit", authenticate, upload.single("code"), functio
           logger.log_info("Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         }).catch( err => {
-            database.post_fail(res, err);
+          logger.log_error(err);
+          next(err);
         });
       }
     }

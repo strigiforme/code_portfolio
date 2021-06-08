@@ -28,7 +28,7 @@ const bodyParser         = require('body-parser');
 var app = express();
 
 // start the database
-database.connect();
+database.connect('mongodb://127.0.0.1/my_database');
 // fetch the administrator's email address after connecting
 authenticator.fetchAdminAccount();
 
