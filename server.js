@@ -2,29 +2,35 @@
 
 File: server.js
 Author: Howard Pearce
-Last Edit: March 18, 2021
+Last Edit: June 8, 2021
 Description: Main route and logic handler for node application. Everything that
              happens on the website starts here.
 
 **/
 
 // dependencies
-var express            = require("express");
-var fs                 = require("fs");
-var access_code        = require("access_code");
-var authenticator      = require("authenticator");
-var database           = require("database");
-var logger             = require("logger");
-var auth               = require("./routes/auth");
-var user               = require("./routes/user");
-var admin              = require("./routes/admin");
-var session            = require("express-session");
-var passport           = require("passport");
-var http               = require("http");
-var https              = require("https");
-var bodyParser         = require('body-parser');
+const express            = require("express");
+const fs                 = require("fs");
+const access_code        = require("access_code");
+const authenticator      = require("authenticator");
+const database           = require("database");
+const logger             = require("logger");
+const auth               = require("./routes/auth");
+const user               = require("./routes/user");
+const admin              = require("./routes/admin");
+const session            = require("express-session");
+const passport           = require("passport");
+const http               = require("http");
+const https              = require("https");
+const bodyParser         = require('body-parser');
 
+// gotta do this idk why
 var app = express();
+
+// start the database
+database.connect();
+// fetch the administrator's email address after connecting
+authenticator.fetchAdminAccount();
 
 // generate the users access code if it doesn't exist
 access_code.generateAccessCode();

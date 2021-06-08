@@ -2,27 +2,30 @@
 
 File: database.js
 Author: Howard Pearce
-Last Edit: May 2, 2021
+Last Edit: June 8, 2021
 Description: Manages MONGODB database connections and sends queries
 
 **/
 
 const mongoose = require("mongoose")
+const logger   = require("logger")
 const fs       = require("fs")
-var   logger   = require("logger")
 
 class Database {
 
   constructor(connection_uri) {
-    this.mongodb = undefined;
-    this.postSchema = undefined;
+    this.mongodb     = undefined;
+    this.postSchema  = undefined;
     this.adminSchema = undefined;
-    this.postModel = undefined;
-    this.adminModel = undefined;
+    this.postModel   = undefined;
+    this.adminModel  = undefined;
+    this.uri         = connection_uri;
+  }
 
-    logger.log_info(`Connecting to MongoDB instance at: '${connection_uri}'...`);
+  connect() {
+    logger.log_info(`Connecting to MongoDB instance at: '${this.uri}'...`);
     // connect to local db instance
-    mongoose.connect(connection_uri, {useNewUrlParser: true, useUnifiedTopology: true});
+    mongoose.connect(this.uri, {useNewUrlParser: true, useUnifiedTopology: true});
     // deprecated, disable to stop warnings
     mongoose.set('useFindAndModify', false);
 
@@ -41,7 +44,6 @@ class Database {
     this.adminModel = mongoose.model('Admin', this.adminSchema);
     this.visitorModel = mongoose.model("Visitor", this.visitorSchema);
   }
-
 
   /**
    * Upload a visitor object to MONGODB
