@@ -57,7 +57,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
     res.end();
   }).catch( err => {
       logger.log_error(err);
-      database.post_fail(res);
+      next(err);
   });
 });
 
@@ -105,6 +105,7 @@ app.get("/posts/view_post", record, function (req,res,next) {
       res.end();
     }
   }).catch( err => {
-      database.post_fail(res, err);
+    logger.log_error(err);
+    next(err);
   });
 });

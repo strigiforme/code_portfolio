@@ -2,46 +2,48 @@
 
 File: database.js
 Author: Howard Pearce
-Last Edit: May 2, 2021
+Last Edit: June 8, 2021
 Description: Manages MONGODB database connections and sends queries
 
 **/
 
 const mongoose = require("mongoose")
+const logger   = require("logger")
 const fs       = require("fs")
-var   logger   = require("logger")
 
 class Database {
 
-  constructor(connection_uri) {
-    this.mongodb = undefined;
-    this.postSchema = undefined;
-    this.adminSchema = undefined;
-    this.postModel = undefined;
-    this.adminModel = undefined;
+  constructor() {
+    this.mongodb     = undefined;
+    this.post_schema  = undefined;
+    this.admin_schema = undefined;
+    this.post_model   = undefined;
+    this.admin_model  = undefined;
+  }
 
-    logger.log_info(`Connecting to MongoDB instance at: '${connection_uri}'...`);
+  /**
+   * Connect and initialize the database
+   * @param {String} uri The location of the database - must be a MONGODB instance
+   */
+  connect(uri) {
+    logger.log_info(`Connecting to MongoDB instance at: '${uri}'...`);
     // connect to local db instance
-    mongoose.connect(connection_uri, {useNewUrlParser: true, useUnifiedTopology: true});
-    // deprecated, disable to stop warnings
+    mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
+    // useFindAndModify is deprecated, disable it to stop warnings
     mongoose.set('useFindAndModify', false);
 
     // get the database obj from the connection
     this.mongodb = mongoose.connection;
-    this.mongodb.on('error', console.error.bind(console, 'MongoDB connection error:'));
     logger.log_info(`Connected successfully.`);
-
-    // set up the schema and objects for the database
-    this.postSchema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
-    this.adminSchema = mongoose.Schema ({ email: String });
+    // set up the schemas for the database - these represent the individual objects in mongodb
+    this.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
+    this.admin_schema = mongoose.Schema ({ email: String });
     this.visitorSchema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
-
-    // set up models for objects we are using
-    this.postModel = mongoose.model('Post', this.postSchema);
-    this.adminModel = mongoose.model('Admin', this.adminSchema);
+    // set up models - these represent the mongodb data stores for each type of object we want to store
+    this.post_model = mongoose.model('Post', this.post_schema);
+    this.admin_model = mongoose.model('Admin', this.admin_schema);
     this.visitorModel = mongoose.model("Visitor", this.visitorSchema);
   }
-
 
   /**
    * Upload a visitor object to MONGODB
@@ -129,9 +131,9 @@ class Database {
    */
   create_post(data) {
     // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
+    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query for the post
-      var new_post = new postModel(data);
+      var new_post = new post_model(data);
       // Using a callback here is inconsistent with the rest of the Software
       // I am feeling lazy right now, and this works well.
       new_post.save( ( err, post ) => {
@@ -149,9 +151,9 @@ class Database {
    */
   find_posts(query) {
     // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
+    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query for the post
-      var post_query = postModel.find(query);
+      var post_query = post_model.find(query);
       // send the query
       post_query.exec().then( posts => {
           resolve(posts);
@@ -168,9 +170,9 @@ class Database {
    */
   find_post(id) {
     // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
+    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query for the post
-      var post_query = postModel.findOne({ _id : id });
+      var post_query = post_model.findOne({ _id : id });
       // send the query
       post_query.exec().then( post => {
           resolve(post);
@@ -187,11 +189,11 @@ class Database {
   getAdminAccount() {
     var newEmail = false;
     // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, adminModel=this.adminModel ) => {
+    return new Promise(  ( resolve, reject, admin_model=this.admin_model ) => {
       // the email of the administator's account
       var adminAccount;
       // create a query to get all admin accounts
-      var admin_query = adminModel.find({});
+      var admin_query = admin_model.find({});
       // send the query
       admin_query.exec().then( admins => {
         if (admins.length > 1) {
@@ -223,9 +225,9 @@ class Database {
    * @return {Promise} Promise object with result
    */
   delete_post(id) {
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
+    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query to delete the post
-      var delete_query = postModel.findOneAndDelete( { _id: id } );
+      var delete_query = post_model.findOneAndDelete( { _id: id } );
       // send the query
       delete_query.exec().then( post => {
         // check if the post was found in the database
@@ -236,9 +238,9 @@ class Database {
               logger.log_info("post has a snippet, attempting deletion.");
               fs.unlinkSync(post.snippet);
             }
-          } catch (e) {
-            logger.log_error(`Unable to delete code snippet: ${e}`);
-            reject(e);
+          } catch (err) {
+            logger.log_error(`Unable to delete code snippet: ${err}`);
+            reject(err);
           }
           logger.log_info(`Successfully deleted post with id '${id}'`);
           resolve(post);
@@ -258,9 +260,9 @@ class Database {
    * @return {Promise} Promise object with result
    */
   edit_post(id, new_post) {
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
+    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query to edit the post
-      var edit_query = postModel.findOneAndUpdate( { _id: id }, new_post );
+      var edit_query = post_model.findOneAndUpdate( { _id: id }, new_post );
       // send the query
       edit_query.exec().then( post => {
         logger.log_info(`Successfully edited post with id: '${id}' and update data: ${new_post}`);
@@ -271,37 +273,8 @@ class Database {
       });
     });
   }
-
-  // method to handle posts failing to load - this seems like an ass backwards way to do this. Come back to it later.
-  post_fail(res, err) {
-    logger.log_error("Unable to find the given post in mongodb.");
-    logger.log_error(`Details -> ${err}`);
-    res.render("posts/posterror.pug");
-  }
-
-  // Get and set methods -------------------------------------------------------
-
-  get post_model() { return this.postModel; }
-
-  get admin_model() { return this.adminModel; }
-
-  get post_schema() { return this.postSchema; }
-
-  get admin_schema() { return this.adminSchema; }
-
-  get mongo_connection() { return this.mongodb; }
-
-  set post_model(value) { this.postModel = value; }
-
-  set admin_model(value) { this.adminModel = value; }
-
-  set post_schema(value) { this.postSchema = value; }
-
-  set admin_schema(value) { this.adminSchema = value; }
-
-  set mongo_connection(value) { this.mongodb = value; }
-
 }
 
-var database = new Database('mongodb://127.0.0.1/my_database');
-module.exports = database;
+// The database is a singleton, so only want one instance to ever exist.
+// Exporting the database like this handles it.
+module.exports = new Database();
