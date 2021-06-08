@@ -34,7 +34,7 @@ app.get("/search_posts", authenticate, function(req, res, next) {
     // search for any title that contains the substring provided by the user
     var regex = new RegExp(params, 'i');
     var search_args = { title: {$regex: regex} };
-    database.find_posts(search_args).then(posts => {
+    database.query_for_posts(search_args).then(posts => {
       // logic for presenting search results is in ajax.js
       res.send( { posts: posts } );
       res.end();
@@ -109,7 +109,7 @@ app.post("/posts/edit_post", authenticate, function (req, res, next) {
   // extract the ID of the post from the post request
   var id = Sanitizer.clean(req.body.id);
   // get the post using its ID
-  database.find_post(id).then( post => {
+  database.find_post_by_id(id).then( post => {
       // load the found post
       var to_edit = new Post(post);
       // give user a page to edit the content
@@ -143,7 +143,7 @@ app.post("/posts/upload-post-edit", authenticate, upload.single("code"), functio
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        database.find_post(req.body.id).then( post => {
+        database.find_post_by_id(req.body.id).then( post => {
           logger.log_info("Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         }).catch( err => {
@@ -174,7 +174,7 @@ app.get('/logout', function (req, res, next) {
 // get request for login page
 app.get("/admin", record, authenticate, function (req, res, next){
   // iterate over all the posts in the database
-  database.find_posts({}).then( posts => {
+  database.get_all_posts({}).then( posts => {
     var all_posts = new Array();
     // TODO: Move this to the post class?
     // decode special characters in lists of posts
@@ -184,7 +184,7 @@ app.get("/admin", record, authenticate, function (req, res, next){
       all_posts.push(temp_post.export_to_view());
     });
     // get the visitor information as well and pass it to pug page
-    database.find_visitors({}).then( visitors => {
+    database.query_for_visitors({}).then( visitors => {
       var all_visitors = new Array();
       visitors.forEach(function(visit, index, arr) {
         visitor_args = { id: visit._id, last_visit: visit.last_visit, first_visit: visit.first_visit, location_string: visit.location_string, ip: visit.ip, visits: visit.visits };

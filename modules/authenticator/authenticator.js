@@ -22,7 +22,7 @@ class Authenticator {
 
   fetchAdminAccount() {
     // retrieve the administrator account's email
-    database.getAdminAccount().then( result => {
+    database.get_admin_account().then( result => {
       this.adminAccount = result.account;
       this.addAdmin = result.new;
     }).catch( reason => {

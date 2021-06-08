@@ -27,7 +27,7 @@ var ip_callback = function(req, res, next) {
   // hash the IP to protect the users privacy
   var hash = crypto.createHash('sha256').update(visitorAddress).digest('hex');
 
-  database.find_visitor(hash).then(visitor => {
+  database.find_visitor_by_ip(hash).then(visitor => {
     // we haven't seen this IP before
     if (visitor == null) {
       // Get their physical location using their IP

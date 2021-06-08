@@ -65,11 +65,18 @@ class Database {
   }
 
   /**
+   * Returns all available visitors - a wrapper for query_for_visitors
+   */
+  get_all_visitors(){
+    return this.query_for_visitors({});
+  }
+
+  /**
    * Query for visitor(s) stored within MONGODB
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  find_visitors(query) {
+  query_for_visitors(query) {
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
       // create a query for the post
@@ -89,7 +96,7 @@ class Database {
    * @param {String} ip An IP to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_visitor(ip) {
+  find_visitor_by_ip(ip) {
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
       // create a query for the post
@@ -145,11 +152,18 @@ class Database {
   }
 
   /**
+   * Returns all available posts - a wrapper for query_for_posts
+   */
+  get_all_posts() {
+    return this.query_for_posts({});
+  }
+
+  /**
    * Query for post stored within MONGODB
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  find_posts(query) {
+  query_for_posts(query) {
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query for the post
@@ -168,7 +182,7 @@ class Database {
    * @param {String} id An ID to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_post(id) {
+  find_post_by_id(id) {
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
       // create a query for the post
@@ -186,7 +200,7 @@ class Database {
    * Retrieve the administrator account from MONGODB
    * @return {Promise} Promise object with admin account, and whether a new email is needed.
    */
-  getAdminAccount() {
+  get_admin_account() {
     var newEmail = false;
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, admin_model=this.admin_model ) => {
