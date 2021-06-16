@@ -19,12 +19,13 @@ var create_record = function(data, db_model) {
   return new Promise(  ( resolve, reject, model=db_model ) => {
     // create a query for the post
     var new_entry = new model(data);
-    // Using a callback here is inconsistent with the rest of the Software
-    // I am feeling lazy right now, and this works well.
-    new_entry.save( ( err, data ) => {
-        if (err) { reject(err); }
+    // create a query for the object
+    new_entry.save().then( data => {
         logger.log_trace(`Successfully uploaded record with id: '${new_entry._id}'`);
         resolve(new_entry);
+    }).catch( err => {
+      logger.log_error('Error occurred while uploading record.');
+      reject(err);
     });
   });
 }
@@ -45,7 +46,7 @@ var find_single_record = function(query, db_model) {
         logger.log_trace(`Successfully performed query for single record: ${new_query}`);
         resolve(data);
     }).catch( err => {
-        logger.log_trace('Error occurred performing query for single record.');
+        logger.log_error('Error occurred performing query for single record.');
         reject(err);
     });
   });
@@ -61,7 +62,7 @@ var find_many_records = function(query, db_model) {
         logger.log_trace(`Successfully performed query for many records: ${new_query}`);
         resolve(data);
     }).catch( err => {
-        logger.log_trace('Error occurred performing query for many records.');
+        logger.log_error('Error occurred performing query for many records.');
         reject(err);
     });
   });
