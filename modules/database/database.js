@@ -10,6 +10,7 @@ Description: Manages MONGODB database connections and sends queries
 const mongoose = require("mongoose")
 const logger   = require("logger")
 const fs       = require("fs")
+const queries  = require("./queries")
 
 class Database {
 
@@ -51,17 +52,8 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
   create_visitor(data) {
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
-      // create a query for the post
-      var new_visitor = new visitorModel(data);
-      // Using a callback here is inconsistent with the rest of the Software
-      // I am feeling lazy right now, and this works well.
-      new_visitor.save( ( err, post ) => {
-          if (err) { reject(err); }
-          logger.log_debug(`Successfully uploaded visitor with id: '${new_visitor._id}'`);
-          resolve(new_visitor);
-      });
-    });
+    logger.log_debug("Attempting to create visitor record.");
+    return queries.create_record(data, this.visitorModel);
   }
 
   /**
@@ -137,18 +129,8 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
   create_post(data) {
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
-      // create a query for the post
-      var new_post = new post_model(data);
-      // Using a callback here is inconsistent with the rest of the Software
-      // I am feeling lazy right now, and this works well.
-      new_post.save( ( err, post ) => {
-          if (err) { reject(err); }
-          logger.log_info(`Successfully uploaded post with id: '${new_post._id}'`);
-          resolve(new_post);
-      });
-    });
+    logger.log_debug("Attempting to create a post record.");
+    return queries.create_record(data, this.post_model);
   }
 
   /**
