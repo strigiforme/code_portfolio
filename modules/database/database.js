@@ -39,11 +39,11 @@ class Database {
     // set up the schemas for the database - these represent the individual objects in mongodb
     this.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
     this.admin_schema = mongoose.Schema ({ email: String });
-    this.visitorSchema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
+    this.visitor_schema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
     // set up models - these represent the mongodb data stores for each type of object we want to store
     this.post_model = mongoose.model('Post', this.post_schema);
     this.admin_model = mongoose.model('Admin', this.admin_schema);
-    this.visitorModel = mongoose.model("Visitor", this.visitorSchema);
+    this.visitor_model = mongoose.model("Visitor", this.visitor_schema);
   }
 
   /**
@@ -53,7 +53,7 @@ class Database {
    */
   create_visitor(data) {
     logger.log_debug("Attempting to create visitor record.");
-    return queries.create_record(data, this.visitorModel);
+    return queries.create_record(data, this.visitor_model);
   }
 
   /**
@@ -69,19 +69,9 @@ class Database {
    * @return {Promise} Promise object with query result
    */
   query_for_visitors(query) {
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
-      // create a query for the post
-      var visitor_query = visitorModel.find(query);
-      // send the query
-      visitor_query.exec().then( visitors => {
-          resolve(visitors);
-      }).catch( err => {
-          reject(err);
-      });
-    });
+    logger.log_debug(`Attempting to query for visitors using query: ${query}`)
+    return queries.find_many_records(query, this.visitor_model);
   }
-
 
   /**
    * Retrieve a single visitor stored within MONGODB
@@ -89,17 +79,8 @@ class Database {
    * @return {Promise} Promise object with result
    */
   find_visitor_by_ip(ip) {
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
-      // create a query for the post
-      var query = visitorModel.findOne({ ip : ip });
-      // send the query
-      query.exec().then( visitor => {
-          resolve(visitor);
-      }).catch( err => {
-          reject(err);
-      });
-    });
+    logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
+    return queries.find_single_record({ ip: ip }, this.visitor_model);
   }
 
   /**
@@ -109,9 +90,9 @@ class Database {
    * @return {Promise} Promise object with result
    */
   edit_visitor(id, new_visitor) {
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
+    return new Promise(  ( resolve, reject, visitor_model=this.visitor_model ) => {
       // create a query to edit the post
-      var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
+      var edit_query = visitor_model.findOneAndUpdate( { _id: id }, new_visitor );
       // send the query
       edit_query.exec().then( visitor => {
         logger.log_trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
@@ -129,7 +110,7 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
   create_post(data) {
-    logger.log_debug("Attempting to create a post record.");
+    logger.log_debug(`Attempting to create post record: ${data}`);
     return queries.create_record(data, this.post_model);
   }
 
@@ -146,17 +127,8 @@ class Database {
    * @return {Promise} Promise object with query result
    */
   query_for_posts(query) {
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
-      // create a query for the post
-      var post_query = post_model.find(query);
-      // send the query
-      post_query.exec().then( posts => {
-          resolve(posts);
-      }).catch( err => {
-          reject(err);
-      });
-    });
+    logger.log_debug(`Attempting to query for posts using query: ${query}`)
+    return queries.find_many_records(query, this.post_model);
   }
 
   /**
@@ -165,17 +137,8 @@ class Database {
    * @return {Promise} Promise object with result
    */
   find_post_by_id(id) {
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
-      // create a query for the post
-      var post_query = post_model.findOne({ _id : id });
-      // send the query
-      post_query.exec().then( post => {
-          resolve(post);
-      }).catch( err => {
-          reject(err);
-      });
-    });
+    logger.log_debug(`Attempting to query for single post with ID '${id}'`);
+    return queries.find_single_record({ _id: id }, this.post_model);
   }
 
   /**
