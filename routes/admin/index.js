@@ -121,20 +121,17 @@ app.post("/posts/edit_post", authenticate, function (req, res, next) {
 
 // upload edited post to databse
 app.post("/posts/upload-post-edit", authenticate, upload.single("code"), function (req, res, next) {
-  // get the uploaded file from the post request
-  //let upload = fileManager.get_code_upload();
-  //console.log(req.body);
-  //console.log(req);
   // load the request into arguments to construct a post
   var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
   //upload(req, res, function(err) {
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
-    } else if (err) {
-      logger.log_warning("Rejecting file upload: " + err);
-      return res.redirect("uploaderror");
     }
+    // else if (err) {
+    //   logger.log_warning("Rejecting file upload: " + err);
+    //   return res.redirect("uploaderror");
+    // }
     // check if new post edit has a file
     if (req.file) {
       logger.log_info("New code snippet submitted.")
@@ -160,7 +157,6 @@ app.post("/posts/upload-post-edit", authenticate, upload.single("code"), functio
     }).catch(err => {
       res.redirect("posts/posterror");
     });
-  //});
 });
 
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY

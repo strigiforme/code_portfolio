@@ -46,6 +46,8 @@ class Database {
     this.visitor_model = mongoose.model("Visitor", this.visitor_schema);
   }
 
+  // Visitor related queries ---------------------------------------------------
+
   /**
    * Upload a visitor object to MONGODB
    * @param {Visitor} data The required data for a visitor object
@@ -104,6 +106,8 @@ class Database {
     });
   }
 
+  // Post related Queries ------------------------------------------------------
+
   /**
    * Upload a new post object to MONGODB
    * @param {post} data The required data for a post object
@@ -116,6 +120,7 @@ class Database {
 
   /**
    * Returns all available posts - a wrapper for query_for_posts
+   * @return {Promise} Promise object with all available posts in database
    */
   get_all_posts() {
     return this.query_for_posts({});
@@ -142,40 +147,14 @@ class Database {
   }
 
   /**
-   * Retrieve the administrator account from MONGODB
-   * @return {Promise} Promise object with admin account, and whether a new email is needed.
+   * Modify a single post stored within MONGODB
+   * @param {String} id An ID to search for within MONGODB
+   * @param {Post} new_post post object with update data
+   * @return {Promise} Promise object with result
    */
-  get_admin_account() {
-    var newEmail = false;
-    // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, admin_model=this.admin_model ) => {
-      // the email of the administator's account
-      var adminAccount;
-      // create a query to get all admin accounts
-      var admin_query = admin_model.find({});
-      // send the query
-      admin_query.exec().then( admins => {
-        if (admins.length > 1) {
-          // there should only be one admin account. Log an warning and move on.
-          logger.log_warning("More than one admin account is present. This currently should not be possible. "
-          + "Manual removal of 1 or more accounts should be performed. Selecting the first admin account in the collection.")
-          // select the first one
-          adminAccount = admins[0].email;
-          logger.log_info(`Retrieved ${adminAccount} as administrator account email.`)
-        } else if (admins.length == 1) {
-          // this is the expected case, return the email at index 0
-          adminAccount = admins[0].email;
-          logger.log_info(`Retrieved '${adminAccount}' as administrator account email.`)
-        } else {
-          logger.log_info("Unable to find an administrator account. In new Email mode.");
-          newEmail = true;
-        }
-        // return the extracted values
-        resolve({account:adminAccount, new:newEmail});
-      }).catch( err => {
-        reject(err);
-      });
-    });
+  edit_post(id, new_post) {
+    logger.log_debug(`Attempting edit query for post with ID '${id}'`);
+    return queries.edit_record({ _id : id }, new_post, this.post_model);
   }
 
   /**
@@ -212,22 +191,40 @@ class Database {
     });
   }
 
+  // Admin related Queries -----------------------------------------------------
+
   /**
-   * Modify a single post stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @param {Post} new_post post object with update data
-   * @return {Promise} Promise object with result
+   * Retrieve the administrator account from MONGODB
+   * @return {Promise} Promise object with admin account, and whether a new email is needed.
    */
-  edit_post(id, new_post) {
-    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
-      // create a query to edit the post
-      var edit_query = post_model.findOneAndUpdate( { _id: id }, new_post );
+  get_admin_account() {
+    var newEmail = false;
+    // return a promise for the caller to handle
+    return new Promise(  ( resolve, reject, admin_model=this.admin_model ) => {
+      // the email of the administator's account
+      var adminAccount;
+      // create a query to get all admin accounts
+      var admin_query = admin_model.find({});
       // send the query
-      edit_query.exec().then( post => {
-        logger.log_info(`Successfully edited post with id: '${id}' and update data: ${new_post}`);
-        resolve(post);
+      admin_query.exec().then( admins => {
+        if (admins.length > 1) {
+          // there should only be one admin account. Log an warning and move on.
+          logger.log_warning("More than one admin account is present. This currently should not be possible. "
+          + "Manual removal of 1 or more accounts should be performed. Selecting the first admin account in the collection.")
+          // select the first one
+          adminAccount = admins[0].email;
+          logger.log_info(`Retrieved ${adminAccount} as administrator account email.`)
+        } else if (admins.length == 1) {
+          // this is the expected case, return the email at index 0
+          adminAccount = admins[0].email;
+          logger.log_info(`Retrieved '${adminAccount}' as administrator account email.`)
+        } else {
+          logger.log_info("Unable to find an administrator account. In new Email mode.");
+          newEmail = true;
+        }
+        // return the extracted values
+        resolve({account:adminAccount, new:newEmail});
       }).catch( err => {
-        logger.log_error(`Unable to edit post with id: '${id}': ${err}`);
         reject(err);
       });
     });
