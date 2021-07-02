@@ -44,7 +44,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
   }
   console.log(query);
   // query mongodb for all posts
-  database.find_posts(query).then( posts => {
+  database.query_for_posts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post_args = { id: post.id, title: post.title, content: post.content, type: post.type};
@@ -57,14 +57,14 @@ app.get("/posts/view_posts", record, function (req, res, next) {
     res.end();
   }).catch( err => {
       logger.log_error(err);
-      database.post_fail(res);
+      next(err);
   });
 });
 
 // view individual post
 app.get("/posts/view_post", record, function (req,res,next) {
   var id = Sanitizer.clean(req.query.id);
-  database.find_post(id).then( post =>  {
+  database.find_post_by_id(id).then( post =>  {
     var to_view = new Post(post);
     // check if this post has a code snippet -- This should be moved somewhere else
     if (to_view.has_snippet) {
@@ -105,6 +105,7 @@ app.get("/posts/view_post", record, function (req,res,next) {
       res.end();
     }
   }).catch( err => {
-      database.post_fail(res, err);
+    logger.log_error(err);
+    next(err);
   });
 });

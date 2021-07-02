@@ -2,7 +2,7 @@
 
 File: authenticator.js
 Author: Howard Pearce
-Last Edit: May 2, 2021
+Last Edit: June 8, 2021
 Description: Manages authentication for portfolio application. This includes
              login, logout, current administrators, etc.
 
@@ -18,13 +18,15 @@ class Authenticator {
     this.addAdmin = false;
     this.accessCodeValid = false;
     this.database = database;
+  }
 
+  fetchAdminAccount() {
     // retrieve the administrator account's email
-    database.getAdminAccount().then( result => {
+    database.get_admin_account().then( result => {
       this.adminAccount = result.account;
       this.addAdmin = result.new;
     }).catch( reason => {
-      logger.error("ERROR: promise rejection while getting administrator account email: " + reason);
+      logger.log_error("ERROR: promise rejection while getting administrator account email: " + reason);
     });
   }
 

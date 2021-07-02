@@ -34,7 +34,7 @@ app.get("/search_posts", authenticate, function(req, res, next) {
     // search for any title that contains the substring provided by the user
     var regex = new RegExp(params, 'i');
     var search_args = { title: {$regex: regex} };
-    database.find_posts(search_args).then(posts => {
+    database.query_for_posts(search_args).then(posts => {
       // logic for presenting search results is in ajax.js
       res.send( { posts: posts } );
       res.end();
@@ -99,8 +99,8 @@ app.post("/posts/delete_post", authenticate, function (req, res, next) {
     res.redirect("/admin?delete=true");
     res.end();
   }).catch( err => {
-    // TODO: send to proper error location, this says error loading post.
-    database.post_fail(res, err);
+    logger.log_error(err)
+    next(err);
   });
 });
 
@@ -109,7 +109,7 @@ app.post("/posts/edit_post", authenticate, function (req, res, next) {
   // extract the ID of the post from the post request
   var id = Sanitizer.clean(req.body.id);
   // get the post using its ID
-  database.find_post(id).then( post => {
+  database.find_post_by_id(id).then( post => {
       // load the found post
       var to_edit = new Post(post);
       // give user a page to edit the content
@@ -121,20 +121,17 @@ app.post("/posts/edit_post", authenticate, function (req, res, next) {
 
 // upload edited post to databse
 app.post("/posts/upload-post-edit", authenticate, upload.single("code"), function (req, res, next) {
-  // get the uploaded file from the post request
-  //let upload = fileManager.get_code_upload();
-  //console.log(req.body);
-  //console.log(req);
   // load the request into arguments to construct a post
   var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
   //upload(req, res, function(err) {
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
-    } else if (err) {
-      logger.log_warning("Rejecting file upload: " + err);
-      return res.redirect("uploaderror");
     }
+    // else if (err) {
+    //   logger.log_warning("Rejecting file upload: " + err);
+    //   return res.redirect("uploaderror");
+    // }
     // check if new post edit has a file
     if (req.file) {
       logger.log_info("New code snippet submitted.")
@@ -143,11 +140,12 @@ app.post("/posts/upload-post-edit", authenticate, upload.single("code"), functio
       // we have the new file, delete the old one
       if(req.body.editSnippet != undefined) {
         // get the post using its ID
-        database.find_post(req.body.id).then( post => {
+        database.find_post_by_id(req.body.id).then( post => {
           logger.log_info("Editing snippet for post, deleting old one.");
           fs.unlinkSync(post.snippet);
         }).catch( err => {
-            database.post_fail(res, err);
+          logger.log_error(err);
+          next(err);
         });
       }
     }
@@ -159,7 +157,6 @@ app.post("/posts/upload-post-edit", authenticate, upload.single("code"), functio
     }).catch(err => {
       res.redirect("posts/posterror");
     });
-  //});
 });
 
 // THIS SECTION ALL RELATES TO HANDLING REQUESTS FOR LOGGING IN / CONFIRMING IDENTITY
@@ -173,7 +170,7 @@ app.get('/logout', function (req, res, next) {
 // get request for login page
 app.get("/admin", record, authenticate, function (req, res, next){
   // iterate over all the posts in the database
-  database.find_posts({}).then( posts => {
+  database.get_all_posts({}).then( posts => {
     var all_posts = new Array();
     // TODO: Move this to the post class?
     // decode special characters in lists of posts
@@ -183,7 +180,7 @@ app.get("/admin", record, authenticate, function (req, res, next){
       all_posts.push(temp_post.export_to_view());
     });
     // get the visitor information as well and pass it to pug page
-    database.find_visitors({}).then( visitors => {
+    database.query_for_visitors({}).then( visitors => {
       var all_visitors = new Array();
       visitors.forEach(function(visit, index, arr) {
         visitor_args = { id: visit._id, last_visit: visit.last_visit, first_visit: visit.first_visit, location_string: visit.location_string, ip: visit.ip, visits: visit.visits };
