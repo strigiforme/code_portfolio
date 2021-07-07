@@ -26,6 +26,12 @@ class Logger {
   constructor(args) {
     // default log level
     this.log_limit = 3;
+  }
+
+  /**
+   *
+   */
+  intitialize(args) {
     this.log_info("Starting logger module")
     // configure the logging level via the arguments it's constructed with
     if ( !args.level ) {
@@ -127,5 +133,5 @@ class Logger {
   }
 }
 
-logger = new Logger( {level:"DEBUG"} )
+logger = new Logger();
 module.exports = logger;
