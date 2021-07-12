@@ -17,6 +17,9 @@ const levels = new Map([
   ["TRACE",   5]
 ])
 
+// create a variable that will serve as our logging function
+//let log_function = function(){};
+
 class Logger {
 
   /**
@@ -26,35 +29,73 @@ class Logger {
   constructor(args) {
     // default log level
     this.log_limit = 3;
+    // empty logging function to be overridden in initialization
+    this.log_function = function(){};
+  }
+
+  /**
+   * Start the logger
+   * @param {json} args list of arguments to provide the logger
+   */
+  initialize(args) {
     this.log_info("Starting logger module")
-    // configure the logging level via the arguments it's constructed with
+
+    // check if argument was provided
     if ( !args.level ) {
       throw new Error("Log level was not provided. Unable to proceed.")
     }
-    // get the log scale for the provided level
-    var log_level = this.is_level(args.level);
-    // check if the log level is usable
-    if ( log_level > 0) {
-      this.log_info("Setting log limit to '" + args.level + "', which is a log scale of '" + log_level + "'" )
-      this.log_limit = log_level
+
+    // allows us to change behaviour in the logging function if need be.
+    if ( !args.log_function ) {
+      this.log_function = function(msg) { console.log(msg); };
     } else {
-      throw new Error("Log level '" + args.level + "' does not exist.")
+      this.log_function = args.log_function;
     }
+
+    this.set_level(args.level);
   }
+
+  /**
+   * Set the logging level after checking it's valid
+   * @param {String} level The new logging level
+   */
+  set_level(level) {
+    this.log_limit = this.get_level(level);
+  }
+
+  /**
+   * Set the logging function to be the one provided
+   * @param {Function} func The new logging function to be used
+   */
+   set_function(func) {
+     this.log_function = func;
+   }
 
   /**
    * Check if the log level provided exists within the logger
    * @param {String} level The level to be verified
-   * @return {Integer} 0 if the level does not exist, if it does exist, the corresponding log level as an integer
+   * @return {Boolean} false if the level does not exist, true if it does
    */
   is_level(level) {
     if ( levels.has(level) ) {
-      this.log_debug("Log level '" + level + "' exists. Has scale of '" + levels.get(level) + "'")
-      return levels.get(level)
+      return true
     }
-    this.log_debug("Log level '" + level + "' could not be found. Returning value of 0")
-    return 0;
+    return false;
   }
+
+  /**
+   * Get the number corresponding to the log level provided
+   * @param {String} level The level to search for
+   * @throws error if the level does not exist
+   */
+   get_level(level) {
+     if ( this.is_level(level) ) {
+       return levels.get(level);
+     } else {
+       throw new Error(`Logging level \'${level}\' provided does not exist.
+                        Check provided level exists before trying to set it.`);
+     }
+   }
 
   /**
    * Check if the provided log level is within the log limit
@@ -69,7 +110,8 @@ class Logger {
         return false;
       }
     } else {
-      return false;
+      throw new Error(`Logging level \'${level}\' provided does not exist.
+                       Check provided level exists before trying to check it.`);
     }
   }
 
@@ -78,7 +120,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log_info(msg) {
-    this.log("INFO", msg)
+    return this.log("INFO", msg);
   }
 
   /**
@@ -86,7 +128,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log_warning(msg) {
-    this.log("WARNING", msg)
+    return this.log("WARNING", msg);
   }
 
   /**
@@ -94,7 +136,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log_error(msg) {
-    this.log("ERROR", msg)
+    return this.log("ERROR", msg);
   }
 
   /**
@@ -102,7 +144,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log_debug(msg) {
-    this.log("DEBUG", msg)
+    return this.log("DEBUG", msg);
   }
 
   /**
@@ -110,7 +152,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log_trace(msg) {
-    this.log("TRACE", msg)
+    return this.log("TRACE", msg);
   }
 
   /**
@@ -120,12 +162,12 @@ class Logger {
    */
   log(level, msg) {
     if ( this.within_limit(level)) {
-      var now = new Date()
-      var format_date = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate() + " " + ('0' + now.getHours()).slice(-2) + ":" + ('0' + now.getMinutes()).slice(-2) + ":" + ('0' + now.getSeconds()).slice(-2)
-      console.log(format_date + ": "+ level + ": " + msg)
+      var now = new Date();
+      var format_date = `${now.getFullYear()}-${(now.getMonth() + 1)}-${now.getDate()} ${('0' + now.getHours()).slice(-2)}:${('0' + now.getMinutes()).slice(-2)}:${('0' + now.getSeconds()).slice(-2)}`;
+      return this.log_function(`${format_date} ${level}: ${msg}`);
     }
   }
 }
 
-logger = new Logger( {level:"DEBUG"} )
+logger = new Logger();
 module.exports = logger;

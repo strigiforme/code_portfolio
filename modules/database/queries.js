@@ -38,7 +38,7 @@ var create_record = function(data, db_model) {
  */
 var find_single_record = function(query, db_model) {
   // return a promise for the caller to handle
-  return new Promise(  ( resolve, reject, model=db_model ) => {
+  return new Promise( ( resolve, reject, model=db_model ) => {
     // create a query for the post
     var new_query = model.findOne(query);
     // send the query

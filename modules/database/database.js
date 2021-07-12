@@ -27,24 +27,34 @@ class Database {
    * @param {String} uri The location of the database - must be a MONGODB instance
    */
   connect(uri) {
-    logger.log_info(`Connecting to MongoDB instance at: '${uri}'...`);
-    // connect to local db instance
-    mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
-    // useFindAndModify is deprecated, disable it to stop warnings
-    mongoose.set('useFindAndModify', false);
-
-    // get the database obj from the connection
-    this.mongodb = mongoose.connection;
-    logger.log_info(`Connected successfully.`);
-    // set up the schemas for the database - these represent the individual objects in mongodb
-    this.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
-    this.admin_schema = mongoose.Schema ({ email: String });
-    this.visitor_schema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
-    // set up models - these represent the mongodb data stores for each type of object we want to store
-    this.post_model = mongoose.model('Post', this.post_schema);
-    this.admin_model = mongoose.model('Admin', this.admin_schema);
-    this.visitor_model = mongoose.model("Visitor", this.visitor_schema);
+    return new Promise( async (resolve, reject) => {
+      logger.log_info(`Connecting to MongoDB instance at: '${uri}'...`);
+      let ctx = this;
+      // connect to local db instance
+      mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
+        // get the database obj from the connection
+        ctx.mongodb = mongoose.connection;
+        logger.log_info(`Connected successfully.`);
+        // set up the schemas for the database - these represent the individual objects in mongodb
+        ctx.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
+        ctx.admin_schema = mongoose.Schema ({ email: String });
+        ctx.visitor_schema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
+        // set up models - these represent the mongodb data stores for each type of object we want to store
+        ctx.post_model = mongoose.model('Post', ctx.post_schema);
+        ctx.admin_model = mongoose.model('Admin', ctx.admin_schema);
+        ctx.visitor_model = mongoose.model("Visitor", ctx.visitor_schema);
+      }).catch( err => {
+        logger.log_error("Unable to connect database module. " + err);
+      });
+    });
   }
+
+  /**
+   * Disconnect the database
+   */
+   disconnect() {
+     return mongoose.disconnect();
+   }
 
   // Visitor related queries ---------------------------------------------------
 
