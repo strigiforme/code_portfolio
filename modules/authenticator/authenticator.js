@@ -20,14 +20,15 @@ class Authenticator {
     this.database = database;
   }
 
-  fetchAdminAccount() {
-    // retrieve the administrator account's email
-    database.get_admin_account().then( result => {
+  async fetchAdminAccount() {
+    try {
+      // retrieve the administrator account's email
+      var result = await database.get_admin_account();
       this.adminAccount = result.account;
       this.addAdmin = result.new;
-    }).catch( reason => {
-      logger.log_error("ERROR: promise rejection while getting administrator account email: " + reason);
-    });
+    } catch (error) {
+      logger.log_error("ERROR: promise rejection while getting administrator account email: " + error);
+    }
   }
 
   get adminExists() {

@@ -9,15 +9,15 @@ Description: Handles authentication for portfolio
 
 // REFERENCES https://www.loginradius.com/blog/async/google-authentication-with-nodejs-and-passportjs/ ----------------------------------------
 
-var express        = require("express");
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-var passport       = require("passport");
-var session        = require("express-session");
-var database       = require("database");
-var logger         = require("logger");
-var middleware     = require("middleware");
-var access         = require("access_code");
-var authenticator  = require("authenticator");
+var express         = require("express");
+var GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
+var passport        = require("passport");
+var session         = require("express-session");
+var database        = require("database");
+var logger          = require("logger");
+var middleware      = require("middleware");
+var access_code_mgr = require("access_code");
+var authenticator   = require("authenticator");
 var Sanitizer = middleware.sanitizer;
 
 var app = module.exports = express();
@@ -69,8 +69,9 @@ app.get('/auth/newadmin', function (req, res, next) {
 app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
   var code = Sanitizer.clean(req.body.code);
-  access.compareAccessCode(code, 'access.txt').then( result => {
-    if (result) {
+  try {
+    var matches = access_code_mgr.check_access(code);
+    if (matches) {
       logger.log_info("Submitted code matches stored example. Next submitted email will become administrator account.");
       authenticator.isAccessCodeValid = true;
       res.redirect("/auth/google");
@@ -79,10 +80,10 @@ app.post('/auth/newadmin', function (req, res, next) {
       authenticator.isAccessCodeValid = false;
       res.redirect("/auth/newadmin?access=false");
     }
-  }).catch( err => {
+  } catch( err ) {
     logger.log_error("Error occurred while comparing access code: " + err);
     res.redirect("/");
-  });
+  }
 });
 
 // send authentication request to google

@@ -3,7 +3,7 @@
 File: logger.test.js
 Author: Howard Pearce
 Last Edit: July 12, 2021
-Description: Test suite for database.js
+Description: Test suite for logger
 
 **/
 
@@ -32,7 +32,7 @@ test("Set logger level to unknown value", () => {
 test("Test within limit", () => {
   expect( () => {
     logger.within_limit("BAD_VALUE");
-  }).toThrow());
+  }).toThrow();
 });
 
 test("Set logging function", () => {

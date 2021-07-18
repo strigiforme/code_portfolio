@@ -11,7 +11,7 @@ Description: Main route and logic handler for node application. Everything that
 // dependencies
 const express            = require("express");
 const fs                 = require("fs");
-const access_code        = require("access_code");
+const access_code_mgr    = require("access_code");
 const authenticator      = require("authenticator");
 const database           = require("database");
 const logger             = require("logger");
@@ -37,13 +37,13 @@ database.connect('mongodb://127.0.0.1/my_database').then( () => {
 logger.initialize( { level:"DEBUG" } );
 
 // generate the users access code if it doesn't exist
-access_code.generateAccessCode();
+access_code_mgr.create_access_code({});
 
 // initialize app
-var options = {
-  key: fs.readFileSync('C:/Certbot/live/howardpearce.ca/privkey.pem'),
-  cert: fs.readFileSync('C:/Certbot/live/howardpearce.ca/fullchain.pem')
-};
+// var options = {
+//   key: fs.readFileSync('C:/Certbot/live/howardpearce.ca/privkey.pem'),
+//   cert: fs.readFileSync('C:/Certbot/live/howardpearce.ca/fullchain.pem')
+// };
 
 // set up sessions
 app.use(session({
@@ -71,9 +71,10 @@ app.use(express.urlencoded({
 }))
 
 // Create an HTTP service.
-http.createServer(app).listen(80);
+//http.createServer(app).listen(80);
 // Create an HTTPS service identical to the HTTP service.
-https.createServer(options, app).listen(443);
+//https.createServer(options, app).listen(443);
+app.listen( 3000, ()  => {} );
 
 // set view engine to be pug
 app.set('view engine', 'pug');
