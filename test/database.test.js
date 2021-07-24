@@ -17,8 +17,10 @@ const Visitor               = objects.Visitor;
 
 var { MongoMemoryServer } = require('mongodb-memory-server');
 
+// need a long timeout to download binaries
+jest.setTimeout(10000);
 // create mongodb database in memory to test on
-mongod = new MongoMemoryServer();
+mongod = new MongoMemoryServer({binary: {version: 'latest'}});
 
 // data to be used in tests.
 const test_post_args         = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
