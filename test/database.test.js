@@ -119,6 +119,9 @@ test("Delete Post With Snippet", async () => {
     // create a new post since we deleted the old one
     var new_post = await database.create_post(test_snippet_post_args);
     // create an empty file that corresponds to a snippet
+    if (!fs.existsSync("test/snippets")) {
+      fs.mkdirSync("test/snippets");
+    }
     await fs.writeFile("test/snippets/testfile.txt", "test", function (err) { if (err) throw err; });
     await database.delete_post(new_post._id);
     // confirm there are no posts left
