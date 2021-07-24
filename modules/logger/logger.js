@@ -31,7 +31,7 @@ class Logger {
   /**
    *
    */
-  intitialize(args) {
+  initialize(args) {
     this.log_info("Starting logger module")
     // configure the logging level via the arguments it's constructed with
     if ( !args.level ) {

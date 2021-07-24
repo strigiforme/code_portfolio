@@ -120,3 +120,4 @@ exports.create_record       = create_record;
 exports.find_single_record  = find_single_record;
 exports.find_many_records   = find_many_records;
 exports.edit_record         = edit_record;
+exports.delete_record       = delete_record;

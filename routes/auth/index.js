@@ -90,25 +90,19 @@ app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'e
 
 // receive the final response from google after logging in
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/?login=false' }), function(req, res) {
-  // check if the user profile has been populated
   req.session.email = userProfile.emails[0].value;
   // check if the submitted email should be made an administrator
   if ( authenticator.isAccessCodeValid ) {
     logger.log_info("Adding email " + req.session.email + " as the administrator account.");
-    // set the administrator email to this one since it wasn't done properly
     authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
     authenticator.doAddAdmin = false;
-    // create new database obj
-    var newAdmin = new database.admin_model({ email:req.session.email });
-    // upload to database
-    newAdmin.save(function (err, admin) {
-      // intercept and log errors
-      if (err) return console.error(err);
-      // log result to console
-      logger.log_info("Admin account " + admin.email + " successfully uploaded.");
+    database.create_admin(req.session.email).then( () => {
+      logger.log_info("Admin account " + req.session.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
       authenticator.isAccessCodeValid = false;
+    }).catch(err => {
+      logger.log_error(`Error occurred adding administrator email: ${err}`);
     });
   }
 
