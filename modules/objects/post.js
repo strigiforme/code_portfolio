@@ -12,7 +12,7 @@ const post_types = { blog:"blog", info:"info", project:"project", unknown:"unkno
 var middleware   = require("middleware")
 var Sanitizer    = middleware.sanitizer;
 var logger       = require("logger")
-const path        = require('path');
+const path       = require('path');
 
 module.exports = class Post {
 

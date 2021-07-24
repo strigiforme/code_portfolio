@@ -62,18 +62,10 @@ app.get("/posts/add", authenticate, function (req, res, next) {
 app.post("/posts/upload-post", upload.single("code"), function (req, res, next) {
   console.log(req.body);
   console.log(req.file);
-  // get the uploaded file from the post request
-  // let upload = fileManager.get_code_upload();
-  // TODO: improve upload security for file
-  //upload(req, res, function(err) {
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
     }
-    // else if (err) {
-    //   logger.log_warning("Rejecting file upload: " + err);
-    //   return res.redirect("uploaderror");
-    // }
     // construct args for post object
     var post_args = {id:"", title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
     // check if a file was submitted with this post (a code snippet)
@@ -87,7 +79,6 @@ app.post("/posts/upload-post", upload.single("code"), function (req, res, next) 
     }).catch (err => {
       res.redirect("posts/posterror");
     });
-  //});
 });
 
 // delete a post

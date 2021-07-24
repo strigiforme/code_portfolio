@@ -2,7 +2,7 @@
 
 File: server.js
 Author: Howard Pearce
-Last Edit: June 8, 2021
+Last Edit: July 7, 2021
 Description: Main route and logic handler for node application. Everything that
              happens on the website starts here.
 

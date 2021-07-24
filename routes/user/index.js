@@ -42,7 +42,6 @@ app.get("/posts/view_posts", record, function (req, res, next) {
   } else {
     query = { type:postType };
   }
-  console.log(query);
   // query mongodb for all posts
   database.query_for_posts(query).then( posts => {
     // decode special characters in lists of posts

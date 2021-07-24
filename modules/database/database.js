@@ -2,7 +2,7 @@
 
 File: database.js
 Author: Howard Pearce
-Last Edit: June 8, 2021
+Last Edit: July 7, 2021
 Description: Manages MONGODB database connections and sends queries
 
 **/
@@ -38,13 +38,14 @@ class Database {
         // set up the schemas for the database - these represent the individual objects in mongodb
         ctx.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
         ctx.admin_schema = mongoose.Schema ({ email: String });
-        ctx.visitor_schema = mongoose.Schema ({ lastvisit: Date, firstvisit: Date, location_string: String, ip: String, visits: Number });
+        ctx.visitor_schema = mongoose.Schema ({ last_visit: Date, first_visit: Date, location_string: String, ip: String, visits: Number });
         // set up models - these represent the mongodb data stores for each type of object we want to store
         ctx.post_model = mongoose.model('Post', ctx.post_schema);
         ctx.admin_model = mongoose.model('Admin', ctx.admin_schema);
         ctx.visitor_model = mongoose.model("Visitor", ctx.visitor_schema);
+        resolve();
       }).catch( err => {
-        logger.log_error("Unable to connect database module. " + err);
+        reject(`Unable to connect database module. ${err}`);
       });
     });
   }
@@ -93,6 +94,16 @@ class Database {
   find_visitor_by_ip(ip) {
     logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
     return queries.find_single_record({ ip: ip }, this.visitor_model);
+  }
+
+  /**
+   * Delete a visitor in the database by their ID
+   * @param {String} id Unique ID of the visitor in MONGODB
+   * @return {Promise} Promise object with result
+   */
+  delete_visitor(id) {
+    logger.log_debug(`Attempting to delete visitor with ID '${id}'`);
+    return queries.delete_record({ _id : id }, this.visitor_model);
   }
 
   /**
@@ -202,6 +213,26 @@ class Database {
   }
 
   // Admin related Queries -----------------------------------------------------
+
+  /**
+   * Upload a new admin object to MONGODB
+   * @param {String} email The email address of the admin account
+   * @return {Promise} Promise object with upload result
+   */
+   create_admin(email) {
+     logger.log_debug(`Attempting to create admin with email: ${email}`);
+     return queries.create_record({email: email}, this.admin_model);
+   }
+
+   /**
+    * Query for admins stored within MONGODB
+    * @param {map} query Information to query by. { _id: 102301234 } for example.
+    * @return {Promise} Promise object with query result
+    */
+   query_for_admins(query) {
+     logger.log_debug(`Attempting to query for posts using query: ${query}`);
+     return queries.find_many_records(query, this.admin_model);
+   }
 
   /**
    * Retrieve the administrator account from MONGODB
