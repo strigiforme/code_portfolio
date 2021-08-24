@@ -19,14 +19,6 @@ test("Test Access Code fails for small string", () => {
   }).toThrow();
 });
 
-test("Set Filename test", () => {
-  try {
-    expect(access_code_mgr.set_filename("test"));
-  } catch (e) {
-    expect(e.message).toBe("Filename does not end in .txt")
-  }
-});
-
 test("Test Check Access", () => {
   access_code_mgr.check_access( "test" ).then( result => {
     expect(result).toBe(true);
@@ -34,5 +26,12 @@ test("Test Check Access", () => {
   access_code_mgr.check_access( "bad_value" ).then( result => {
     expect(result).toBe(false);
   })
-  access_code_mgr.set_filename()
+});
+
+test("Set Filename test", () => {
+  try {
+    expect(access_code_mgr.set_filename("test"));
+  } catch (e) {
+    expect(e.message).toBe("Filename does not end in .txt")
+  }
 });
