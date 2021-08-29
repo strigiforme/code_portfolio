@@ -86,7 +86,6 @@ class AccessCodeManager {
      }
    }
 
-
   /**
    * Delete the access file
    * @throw {Error} filesystem error when deleting

@@ -15,7 +15,7 @@ class Authenticator {
 
   constructor(database) {
     this.adminAccount = undefined;
-    this.addAdmin = false;
+    this.addAdminFlag = false;
     this.accessCodeValid = false;
     this.database = database;
   }
@@ -25,7 +25,7 @@ class Authenticator {
       // retrieve the administrator account's email
       var result = await database.get_admin_account();
       this.adminAccount = result.account;
-      this.addAdmin = result.new;
+      this.addAdminFlag = result.new;
     } catch (error) {
       logger.log_error("ERROR: promise rejection while getting administrator account email: " + error);
     }
@@ -36,11 +36,11 @@ class Authenticator {
   }
 
   get doAddAdmin() {
-    return this.addAdmin;
+    return this.addAdminFlag;
   }
 
   set doAddAdmin(value) {
-    this.addAdmin = value;
+    this.addAdminFlag = value;
   }
 
   get admin() {
