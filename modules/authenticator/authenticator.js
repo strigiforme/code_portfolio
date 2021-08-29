@@ -13,51 +13,42 @@ var logger   = require("logger");
 
 class Authenticator {
 
+  /**
+   * Construct the Authenticator
+   * @param {String} adminAccount The email address of the administrators account.
+   * @param {Boolean} addAdminFlag boolean flag that identifies if we are in 'new' mode. (No admin exists, and we need to add one)
+   * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the access_code module.
+   * @param {Database} database reference to the database module.
+   */
   constructor(database) {
     this.adminAccount = undefined;
-    this.addAdmin = false;
+    this.addAdminFlag = false;
     this.accessCodeValid = false;
     this.database = database;
   }
 
+  /**
+   * Retrieve the admin account from database.
+   */
   async fetchAdminAccount() {
     try {
       // retrieve the administrator account's email
       var result = await database.get_admin_account();
       this.adminAccount = result.account;
-      this.addAdmin = result.new;
+      this.addAdminFlag = result.new;
     } catch (error) {
       logger.log_error("ERROR: promise rejection while getting administrator account email: " + error);
     }
   }
 
-  get adminExists() {
-    return !(this.adminAccount == undefined);
-  }
-
-  get doAddAdmin() {
-    return this.addAdmin;
-  }
-
-  set doAddAdmin(value) {
-    this.addAdmin = value;
-  }
-
-  get admin() {
-    return this.adminAccount;
-  }
-
-  set admin(value) {
-    this.adminAccount = value;
-  }
-
-  get isAccessCodeValid() {
-    return this.accessCodeValid;
-  }
-
-  set isAccessCodeValid(value) {
-    this.accessCodeValid = value
-  }
+  /** Getters and Setters **/
+  get adminExists() { return !(this.adminAccount == undefined); }
+  get doAddAdmin() { return this.addAdminFlag; }
+  set doAddAdmin(value) { this.addAdminFlag = value; }
+  get admin() { return this.adminAccount; }
+  set admin(value) { this.adminAccount = value; }
+  get isAccessCodeValid() { return this.accessCodeValid; }
+  set isAccessCodeValid(value) { this.accessCodeValid = value; }
 }
 
 var auth = new Authenticator(database);
