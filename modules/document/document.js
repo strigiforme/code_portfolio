@@ -29,7 +29,12 @@ module.exports = class Document {
   * @Returns HTML for the document
   */
   render() {
-
+    var render_str = "<div class = 'document'>"
+    this.modules.forEach(function (item, index) {
+      render_str += item.render()
+    })
+    render_str += "</div>"
+    return render_str
   }
 
   /**
@@ -44,7 +49,7 @@ module.exports = class Document {
    * @param newModule the new module to add
    */
    addModule(newModule) {
-
+     this.modules.push(newModule)
    }
 
   /**
