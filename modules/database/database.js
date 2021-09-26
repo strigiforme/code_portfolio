@@ -20,6 +20,7 @@ class Database {
     this.admin_schema = undefined;
     this.post_model   = undefined;
     this.admin_model  = undefined;
+    this.document_model = undefined;
   }
 
   /**
@@ -36,10 +37,12 @@ class Database {
         ctx.mongodb = mongoose.connection;
         logger.log_info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
+        ctx.document_schema = mongoose.Schema ({ title: String, metadata: { date: Date, tags: String }, modules: [{ id: String, html: String, numInputs: Number, inputFields: [{type: String}] }] });
         ctx.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
         ctx.admin_schema = mongoose.Schema ({ email: String });
         ctx.visitor_schema = mongoose.Schema ({ last_visit: Date, first_visit: Date, location_string: String, ip: String, visits: Number });
         // set up models - these represent the mongodb data stores for each type of object we want to store
+        ctx.document_model = mongoose.model('Document', ctx.document_schema);
         ctx.post_model = mongoose.model('Post', ctx.post_schema);
         ctx.admin_model = mongoose.model('Admin', ctx.admin_schema);
         ctx.visitor_model = mongoose.model("Visitor", ctx.visitor_schema);
@@ -56,6 +59,13 @@ class Database {
    disconnect() {
      return mongoose.disconnect();
    }
+
+  // Document related queries --------------------------------------------------
+
+  create_document(data) {
+    logger.log_debug("Attempting to create document");
+    return queries.create_record(data, this.document_model);
+  }
 
   // Visitor related queries ---------------------------------------------------
 
