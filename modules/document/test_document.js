@@ -1,5 +1,5 @@
 var logger       = require("logger")
-var factory = require("./module_factory.js")
+var factory = require("./moduleFactory.js")
 var Document = require("./document")
 logger.initialize()
 
@@ -12,3 +12,5 @@ console.log(mod)
 var newDoc = new Document({title: "test"})
 newDoc.addModule(mod)
 console.log(newDoc.render())
+
+console.log(newDoc.export());
