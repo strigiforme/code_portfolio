@@ -7,12 +7,18 @@ Description: Data structure that is responible for storing and loading user gene
 
 **/
 
+var middleware   = require("middleware")
+var Sanitizer    = middleware.sanitizer;
+
 module.exports = class Document {
 
   constructor(args) {
     this.title = args.title;
     this.id = args.id || args._id;
-    this.metadata = args.metadata;
+    this.metadata = args.metadata || {};
+    if ( !this.metadata.date ) {
+      this.metadata.date = new Date();
+    }
     this.modules = args.modules || [];
   }
 
@@ -21,7 +27,20 @@ module.exports = class Document {
    * @Returns JSON with all of the document's attributes
    */
    export() {
+     var exportedModuleArray = []
+     // export the modules as well
+     this.modules.forEach((module, index) => {
+       exportedModuleArray.push(module.export())
+     })
 
+     var exportedDocument = {
+       title: Sanitizer.clean(this.title),
+       id: this.id,
+       metadata: this.metadata,
+       modules: exportedModuleArray
+     }
+
+     return exportedDocument;
    }
 
   /**
@@ -30,8 +49,8 @@ module.exports = class Document {
   */
   render() {
     var render_str = "<div class = 'document'>"
-    this.modules.forEach(function (item, index) {
-      render_str += item.render()
+    this.modules.forEach(function (mod, index) {
+      render_str += mod.render()
     })
     render_str += "</div>"
     return render_str
@@ -41,7 +60,9 @@ module.exports = class Document {
    * Sanitizes all of the document's fields to prevent injection
    */
   clean() {
-
+    this.modules.forEach(function (mod, index) {
+      mod.clean();
+    });
   }
 
   /**
@@ -49,7 +70,7 @@ module.exports = class Document {
    * @param newModule the new module to add
    */
    addModule(newModule) {
-     this.modules.push(newModule)
+     this.modules.push(newModule);
    }
 
   /**

@@ -8,13 +8,15 @@ Description: Data structure that is a subcomponent of the document.
 **/
 
 var RenderError = require("./RenderError")
+var middleware   = require("middleware")
+var Sanitizer    = middleware.sanitizer;
 
 module.exports = class Module {
 
   constructor(args) {
     this.id = args.id || args._id;
     this.html = args.html;
-    this.num_inputs = (this.html.match(/\?/g) || []).length
+    this.numInputs = (this.html.match(/\?/g) || []).length;
     this.inputFields = args.inputFields || [];
   }
 
@@ -23,7 +25,14 @@ module.exports = class Module {
    * @Returns JSON with all of the document's attributes
    */
   export() {
+    var exportedInputFields = []
+    // Sanitize fields to prevent database injection
+    this.inputFields.forEach(function (input, index) {
+      exportedInputFields.push(Sanitizer.clean(input));
+    });
 
+    // return as JSON
+    return { id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
   }
 
   /**
@@ -31,7 +40,7 @@ module.exports = class Module {
    * @param input the new input to be added
    */
   add_input(input) {
-    this.inputFields.push(input)
+    this.inputFields.push(input);
   }
 
   /**
@@ -39,27 +48,19 @@ module.exports = class Module {
   * @Returns HTML for the document
   */
   render() {
-    if (this.inputFields.length != this.num_inputs) {
-      throw new RenderError("Number of Inputs (" + this.num_inputs +
+    if (this.inputFields.length != this.numInputs) {
+      throw new RenderError("Number of Inputs (" + this.numInputs +
        ") does not match number of inputs provided (" +
-       this.inputFields.length + ")")
+       this.inputFields.length + ")");
     }
 
-    var render_str = this.html
-    var i = 0
+    var render_str = this.html;
+    var i = 0;
     while( render_str.indexOf("?") != -1) {
-      var index = render_str.indexOf("?")
-      render_str = render_str.slice(0, index) + this.inputFields[i] + render_str.slice(index+1)
-      i++
+      var index = render_str.indexOf("?");
+      render_str = render_str.slice(0, index) + this.inputFields[i] + render_str.slice(index+1);
+      i++;
     }
     return render_str
   }
-
-  /**
-   * Sanitizes all of the module's fields to prevent injection
-   */
-  clean() {
-
-  }
-
 }
