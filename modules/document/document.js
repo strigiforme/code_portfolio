@@ -9,10 +9,12 @@ Description: Data structure that is responible for storing and loading user gene
 
 var middleware   = require("middleware")
 var Sanitizer    = middleware.sanitizer;
-
+var Module       = require("./module")
 module.exports = class Document {
 
   constructor(args) {
+    this.sanitized = args.sanitized || false;
+    // load in arguments
     this.title = args.title;
     this.id = args.id || args._id;
     this.metadata = args.metadata || {};
@@ -20,6 +22,18 @@ module.exports = class Document {
       this.metadata.date = new Date();
     }
     this.modules = args.modules || [];
+
+    // unescape characters if sanitized
+    if ( this.sanitized ) {
+      console.log("Document was sanitized. Load in info.")
+      Sanitizer.prepare(this.title);
+      this.modules.forEach( (module, index) => {
+        console.log("Module " + index + " : " + module)
+        this.modules[index] = new Module(module);
+        //this.modules[index].prepare();
+      })
+    }
+    
   }
 
   /**
@@ -34,10 +48,11 @@ module.exports = class Document {
      })
 
      var exportedDocument = {
-       title: Sanitizer.clean(this.title),
-       id: this.id,
-       metadata: this.metadata,
-       modules: exportedModuleArray
+       sanitized : true,
+       title : Sanitizer.clean(this.title),
+       id : this.id,
+       metadata : this.metadata,
+       modules : exportedModuleArray
      }
 
      return exportedDocument;

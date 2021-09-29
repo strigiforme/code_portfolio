@@ -37,10 +37,10 @@ class Database {
         ctx.mongodb = mongoose.connection;
         logger.log_info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
-        ctx.document_schema = mongoose.Schema ({ title: String, metadata: { date: Date, tags: String }, modules: [{ id: String, html: String, numInputs: Number, inputFields: [{type: String}] }] });
-        ctx.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
-        ctx.admin_schema = mongoose.Schema ({ email: String });
-        ctx.visitor_schema = mongoose.Schema ({ last_visit: Date, first_visit: Date, location_string: String, ip: String, visits: Number });
+        ctx.document_schema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
+        ctx.post_schema = mongoose.Schema ({ title : String, type: String, snippet : String, content : String });
+        ctx.admin_schema = mongoose.Schema ({ email : String });
+        ctx.visitor_schema = mongoose.Schema ({ last_visit : Date, first_visit : Date, location_string : String, ip : String, visits : Number });
         // set up models - these represent the mongodb data stores for each type of object we want to store
         ctx.document_model = mongoose.model('Document', ctx.document_schema);
         ctx.post_model = mongoose.model('Post', ctx.post_schema);
@@ -65,6 +65,16 @@ class Database {
   create_document(data) {
     logger.log_debug("Attempting to create document");
     return queries.create_record(data, this.document_model);
+  }
+
+  find_document_by_id(id) {
+    logger.log_debug(`Attempting to query for single document with ID '${id}'`);
+    return queries.find_single_record({ _id: id }, this.document_model);
+  }
+
+  query_for_documents(query) {
+    logger.log_debug(`Attempting to query for documents using query: ${query}`)
+    return queries.find_many_records(query, this.document_model);
   }
 
   // Visitor related queries ---------------------------------------------------

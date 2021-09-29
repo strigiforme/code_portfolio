@@ -16,8 +16,28 @@ module.exports = class Module {
   constructor(args) {
     this.id = args.id || args._id;
     this.html = args.html;
-    this.numInputs = (this.html.match(/\?/g) || []).length;
     this.inputFields = args.inputFields || [];
+    this.sanitized = args.sanitized || false;
+
+    if (this.sanitized) {
+      this.html = Sanitizer.prepare(this.html);
+      this.inputFields.forEach( (input, index) => {
+        this.inputFields[index] = Sanitizer.prepare(input);
+      })
+    }
+
+    this.numInputs = (this.html.match(/\?/g) || []).length;
+
+  }
+
+  prepare() {
+    console.log(this.inputFields)
+    // Prepare fields to prevent database injection
+    this.inputFields.forEach(function (input, index) {
+      console.log(input)
+      this.inputFields[index] = Sanitizer.prepare(input);
+    });
+    this.html = Sanitizer.prepare(this.html)
   }
 
   /**
@@ -32,7 +52,7 @@ module.exports = class Module {
     });
 
     // return as JSON
-    return { id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
+    return { sanitized: true, id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
   }
 
   /**
