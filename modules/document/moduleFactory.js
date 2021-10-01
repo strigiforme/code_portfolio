@@ -17,9 +17,16 @@ module.exports = class ModuleFactory {
   static create_module(name) {
     switch (name) {
       case "paragraph":
-        logger.log_info("loading paragraph module")
+        logger.log_info("Creating paragraph module")
         var newModule = new Module(
-          { html : "<p class='moduleParagraph'> ? </p>"}
+          { html : "<p class='module-paragraph'> ? </p>"}
+        )
+        return newModule
+        break
+      case "image":
+        logger.log_info("Creating image module")
+        var newModule = new Module(
+          { html : "<img src=\"?\" class='module-image'/>"}
         )
         return newModule
         break
