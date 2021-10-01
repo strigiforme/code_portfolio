@@ -77,6 +77,15 @@ class Database {
     return queries.find_many_records(query, this.document_model);
   }
 
+  get_all_documents() {
+    return this.query_for_documents({});
+  }
+
+  edit_document( id, data ) {
+    logger.log_debug("Attempting to edit document");
+    return queries.edit_record(id, data, this.document_model);
+  }
+
   // Visitor related queries ---------------------------------------------------
 
   /**
