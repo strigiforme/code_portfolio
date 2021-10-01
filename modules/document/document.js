@@ -13,6 +13,8 @@ var Module       = require("./module")
 module.exports = class Document {
 
   constructor(args) {
+    if ( !args ) { throw new Error("No arguments passed in to Document constructor.") }
+
     this.sanitized = args.sanitized || false;
     // load in arguments
     this.title = args.title;
@@ -25,15 +27,12 @@ module.exports = class Document {
 
     // unescape characters if sanitized
     if ( this.sanitized ) {
-      console.log("Document was sanitized. Load in info.")
       Sanitizer.prepare(this.title);
       this.modules.forEach( (module, index) => {
-        console.log("Module " + index + " : " + module)
         this.modules[index] = new Module(module);
-        //this.modules[index].prepare();
-      })
+      });
     }
-    
+
   }
 
   /**

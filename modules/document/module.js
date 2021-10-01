@@ -14,7 +14,7 @@ var Sanitizer    = middleware.sanitizer;
 module.exports = class Module {
 
   constructor(args) {
-    this.id = args.id || args._id;
+    this.id = args.id;
     this.html = args.html;
     this.inputFields = args.inputFields || [];
     this.sanitized = args.sanitized || false;
