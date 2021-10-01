@@ -1,5 +1,7 @@
 ## 2.0.0 (2021-10-01)
 
+NOTE: I'm still getting use to managing a changelog. This could be MUCH better.
+
 ##### New Features
 
 * **Authenticator:**  Add JavaDoc for Authenticator ([f007b697](https://git.cs.dal.ca/hpearce/code_portfolio.git/commit/f007b697029c5c801d1795fd13126cd295ef6a73))
