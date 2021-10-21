@@ -37,7 +37,7 @@ class Database {
         ctx.mongodb = mongoose.connection;
         logger.log_info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
-        ctx.document_schema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
+        ctx.document_schema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, module_type : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
         ctx.post_schema = mongoose.Schema ({ title : String, type: String, snippet : String, content : String });
         ctx.admin_schema = mongoose.Schema ({ email : String });
         ctx.visitor_schema = mongoose.Schema ({ last_visit : Date, first_visit : Date, location_string : String, ip : String, visits : Number });

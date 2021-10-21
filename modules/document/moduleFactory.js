@@ -19,14 +19,20 @@ module.exports = class ModuleFactory {
       case "paragraph":
         logger.log_info("Creating paragraph module")
         var newModule = new Module(
-          { html : "<p class='module-paragraph'> ? </p>"}
+          {
+            html : "<p class='module-paragraph'> ? </p>",
+            module_type : "paragraph"
+          }
         )
         return newModule
         break
       case "image":
         logger.log_info("Creating image module")
         var newModule = new Module(
-          { html : "<img src=\"?\" class='module-image'/>"}
+          {
+            html : "<img src=\"?\" class='module-image'/>",
+            module_type : "image"
+          }
         )
         return newModule
         break

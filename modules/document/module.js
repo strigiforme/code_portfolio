@@ -14,6 +14,7 @@ var Sanitizer    = middleware.sanitizer;
 module.exports = class Module {
 
   constructor(args) {
+    this.module_type = args.module_type;
     this.id = args.id;
     this.html = args.html;
     this.inputFields = args.inputFields || [];
@@ -52,7 +53,7 @@ module.exports = class Module {
     });
 
     // return as JSON
-    return { sanitized: true, id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
+    return { sanitized: true, type: this.type, id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
   }
 
   /**

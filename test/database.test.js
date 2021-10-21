@@ -78,6 +78,7 @@ function compare_documents(a, b) {
   a.modules.forEach( (module, i) => {
     var m_a = module;
     var m_b = b.modules[i];
+    expect(m_a.module_type).toBe(m_b.module_type);
     expect(m_a.id).toBe(m_b.id);
     expect(m_a.html).toBe(m_b.html);
     expect(m_a.sanitized).toBe(m_b.sanitized);
