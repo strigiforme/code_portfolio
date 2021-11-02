@@ -2,7 +2,7 @@
 
 File: module_factory.js
 Author: Howard Pearce
-Last Edit: September 21, 2021
+Last Edit: November 1, 2021
 Description: Given the name of a module, return a new module
 
 **/
@@ -11,9 +11,10 @@ var logger       = require("logger")
 var Module       = require("./module")
 
 module.exports = class ModuleFactory {
-
-  constructor(args){}
-
+  /**
+   * Returns an empty module object ready for use
+   * @param name name of the module
+   */
   static create_module(name) {
     switch (name) {
       case "paragraph":
@@ -40,5 +41,4 @@ module.exports = class ModuleFactory {
         logger.log_error("Module does not exist.")
     }
   }
-
 }
