@@ -132,7 +132,7 @@ test("Edit Document", async () => {
     var newDoc = new Document(test_edit_document_args);
     newDoc.addModule(newModule);
     // using the ID, update the document
-    database.edit_document(doc.id, newDoc);
+    await database.edit_document(doc.id, newDoc);
     // check that the document has actually been updated
     var result = await database.find_document_by_id(doc.id);
     compare_documents(result, newDoc);
