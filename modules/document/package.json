@@ -1,6 +1,6 @@
 {
   "name": "document",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "module for managing portfolio documents",
   "main": "index.js",
   "scripts": {
