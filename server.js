@@ -40,10 +40,10 @@ logger.initialize( { level:"DEBUG" } );
 access_code_mgr.create_access_code({});
 
 // initialize app
-// var options = {
-//   key: fs.readFileSync('C:/Certbot/live/howardpearce.ca/privkey.pem'),
-//   cert: fs.readFileSync('C:/Certbot/live/howardpearce.ca/fullchain.pem')
-// };
+var options = {
+  key: fs.readFileSync('C:/Certbot/live/howardpearce.ca/privkey.pem'),
+  cert: fs.readFileSync('C:/Certbot/live/howardpearce.ca/fullchain.pem')
+};
 
 // set up sessions
 app.use(session({
@@ -60,7 +60,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
-// Routing logic
+logger.log_info("Loading Routes");
 app.use(auth);
 app.use(user);
 app.use(admin);
@@ -70,11 +70,10 @@ app.use(express.urlencoded({
   extended: true
 }))
 
-// Create an HTTP service.
-//http.createServer(app).listen(80);
-// Create an HTTPS service identical to the HTTP service.
-//https.createServer(options, app).listen(443);
-app.listen( 3000, ()  => {} );
+logger.log_info("Creating HTTP server on port 80");
+http.createServer(app).listen(80);
+logger.log_info("Creating HTTPS server on port 443")
+https.createServer(options, app).listen(443);
 
-// set view engine to be pug
 app.set('view engine', 'pug');
+logger.log_info("Started server successfully.");
