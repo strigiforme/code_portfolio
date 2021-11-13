@@ -11,11 +11,13 @@ var logger       = require("logger")
 var Module       = require("./module")
 
 module.exports = class ModuleFactory {
+
   /**
    * Returns an empty module object ready for use
-   * @param name name of the module
+   * @param {string} name - Name of the module. Serves as unique identifier
+   * @returns {Module} Instantiated module object with required fields filled
    */
-  static create_module(name) {
+  static createModule(name) {
     switch (name) {
       case "paragraph":
         logger.log_info("Creating paragraph module")
@@ -41,4 +43,19 @@ module.exports = class ModuleFactory {
         logger.log_error("Module does not exist.")
     }
   }
+
+  /**
+   * Returns the HTML inputs required for a user to fill in to instantiate a module
+   * @param {string} name - Name of the module. Serves as a unique identifier
+   * @returns {string} HTML with required inputs to fill in details on the module named
+   */
+   static getModuleHTML(name) {
+     switch (name) {
+       case "paragraph":
+        return "<input class='floating-input' type='text' name='paragraph'>"
+        break
+      default:
+        logger.log_error("Module does not exist.")
+     }
+   }
 }
