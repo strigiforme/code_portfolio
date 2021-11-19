@@ -31,6 +31,47 @@ function lookup(form) {
   });
 }
 
+/**
+ * Loads in the HTML for a new module into the create document page.
+ * @param {string} insertionId - the HTML id for the element to insert the module HTML into.
+ * @param {string} seletorId - the ID of the selector containing the type of module to load.
+ */
+function load_new_module(insertionId, selectorId) {
+  var container = document.getElementById(insertionId);
+  var selector = document.getElementById(selectorId);
+  var status_container = document.getElementById("result");
+  var moduleHTML = get_module_html(selector.value).then( result => {
+    if ( result ) {
+      container.insertAdjacentHTML('beforeend', result);
+    } else {
+      status_container.innerHTML = "can't";
+    }
+  }).catch( error => {
+    console.warn("Unable to load new module: " + error);
+  });
+}
+
+/**
+ * Retrieve HTML for module by name from backed.
+ * @param {string} name - the name of the module.
+ * @returns {string} HTML string of required inputs for module.
+ * @throws Will throw if the module queried for does not exist.
+ */
+function get_module_html(name) {
+  return new Promise( (resolve, reject) => {
+    fetch("https://howardpearce.ca/get_module_html?module=" + name).then(result => {
+      result.json().then( response => {
+        resolve(response.html);
+      }).catch( error => {
+        reject("Module does not exist! " + error);
+      });
+    }).catch( error => {
+      reject("Fetch request failed! " + error);
+    });
+  });
+
+}
+
 /* Builds an html entry for a post as a string
  * id {string}:    the post's ID, for creating links
  * title {string}: the post's title

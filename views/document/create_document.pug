@@ -5,6 +5,12 @@ head
     br
     div.flexbox.flex-col
       form.flexbox.flex-col(action="/posts/upload-post", method='POST', enctype="multipart/form-data")
-        div.input-container
+        div.input-container#main
           label(for="title").floating-label Document Title
           input(type="text", name="title").floating-input
+        div#result
+        input(type="submit", value="Create")
+      select#module-selector(name="modules")
+        option(value="paragraph") paragraph
+        option(value="image") image
+      button.add-module(onclick="load_new_module('main','module-selector')") Add module

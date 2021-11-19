@@ -18,6 +18,8 @@ var snippets      = require("file_upload");
 var record        = require("ip_logger");
 var authenticator = require("authenticator");
 var middleware    = require("middleware");
+var doc_package   = require("document");
+
 var Sanitizer     = middleware.sanitizer;
 var authenticate  = middleware.verify;
 
@@ -26,9 +28,14 @@ var Post          = objects.Post;
 var Visitor       = objects.Visitor;
 var Location      = objects.Location;
 
+var Document              = doc_package.Document;
+var Module                = doc_package.Module;
+var ModuleFactory         = doc_package.ModuleFactory;
+
+
 var app = module.exports = express();
 
-app.get("/search_posts", authenticate, function(req, res, next) {
+app.get("/search_posts", authenticate, function (req, res, next) {
   var params = Sanitizer.clean(req.query.search);
   if (params != undefined) {
     // search for any title that contains the substring provided by the user
@@ -46,6 +53,25 @@ app.get("/search_posts", authenticate, function(req, res, next) {
   }
 });
 
+app.get("/get_module_html", authenticate, function (req, res, next) {
+  var params = Sanitizer.clean(req.query.module);
+  if (params != undefined) {
+    try {
+      var moduleHTML = ModuleFactory.getModuleHTML(params);
+      logger.log_debug("Returning HTML '" + moduleHTML + "' to module HTML request");
+      res.send(moduleHTML);
+      res.end();
+    } catch (error) {
+      res.status(400).send({
+        message: error
+      });
+    }
+  } else {
+    logger.log_error("Unable to retrieve input HTML for module '" + req.query.module + "'");
+    res.end();
+  }
+});
+
 app.get("/posts/uploaderror", function (req, res, next) {
   res.render("posts/uploaderror", {loggedin: req.session.login});
   res.end();
@@ -53,9 +79,13 @@ app.get("/posts/uploaderror", function (req, res, next) {
 
 app.get("/posts/add", authenticate, function (req, res, next) {
   res.render("posts/addpost", {loggedin: req.session.login});
-  res.end()
+  res.end();
 });
 
+app.get("/document/create", authenticate, function (req, res, next) {
+  res.render("document/create_document", {loggedin: req.session.login});
+  res.end();
+})
 
 
 // upload a new post to database

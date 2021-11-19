@@ -52,10 +52,10 @@ module.exports = class ModuleFactory {
    static getModuleHTML(name) {
      switch (name) {
        case "paragraph":
-        return "<input class='floating-input' type='text' name='paragraph'>"
-        break
+        return {html: "<input class='floating-input' type='text' name='paragraph'>"};
+        break;
       default:
-        logger.log_error("Module does not exist.")
+        throw "Module does not exist."
      }
    }
 }
