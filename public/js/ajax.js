@@ -44,9 +44,10 @@ function load_new_module(insertionId, selectorId) {
     if ( result ) {
       container.insertAdjacentHTML('beforeend', result);
     } else {
-      status_container.innerHTML = "can't";
+      status_container.innerHTML = "unable to load module";
     }
   }).catch( error => {
+    status_container.innerHTML = "unable to load module";
     console.warn("Unable to load new module: " + error);
   });
 }
@@ -60,11 +61,15 @@ function load_new_module(insertionId, selectorId) {
 function get_module_html(name) {
   return new Promise( (resolve, reject) => {
     fetch("https://howardpearce.ca/get_module_html?module=" + name).then(result => {
-      result.json().then( response => {
-        resolve(response.html);
-      }).catch( error => {
-        reject("Module does not exist! " + error);
-      });
+      if (result.ok) {
+        result.json().then( response => {
+           resolve(response.html);
+        }).catch( error => {
+          reject("Unable to parse JSON: " + error);
+        });
+      } else {
+        reject("Module '" + name + "' could not be found.");
+      }
     }).catch( error => {
       reject("Fetch request failed! " + error);
     });
