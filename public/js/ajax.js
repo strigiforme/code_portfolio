@@ -41,46 +41,40 @@ function load_new_module(insertionId, selectorId) {
   var selector = document.getElementById(selectorId);
   var result_container = document.getElementById("result");
   var status_container = document.getElementById("status");
+  var count = get_module_count(status_container, selector.value);
 
-  var moduleHTML = get_module_html(selector.value).then( result => {
+  var moduleHTML = get_module_html(selector.value, count).then( result => {
     if ( result ) {
       // render the string and turn it into HMTL
       var newModule = htmlToElement(result);
       // add module HTML to end of form
-      // container.insertAdjacentHTML('beforeend', result);
-      // grab the module we just inserted
-      container.appendChild(label_module(status_container, newModule, selector.value))
+      container.appendChild(newModule);
+      // increment count of # of modules
+      status_container.setAttribute(`data-${selector.value}`, count);
     } else {
-      result_container.innerHTML = "unable to load module";
+      result_container.innerHTML = "Unable to load module";
     }
   }).catch( error => {
-    result_container.innerHTML = "unable to load module";
+    result_container.innerHTML = "Unable to load module";
     console.warn("Unable to load new module: " + error);
   });
 }
 
-function label_module(counter, container, name) {
+/**
+ * Get the number of times this module has been instantiated
+ * @param {element} counter - The HTML element that holds the # of modules instantiated
+ * @param {string} name - the name of the module
+ * @returns {number} the number of times this module is already displayed on screen
+ */
+function get_module_count(counter, name) {
+  // check how many times this module has been loaded
   var module_count = counter.getAttribute("data-" + name);
-  var new_name;
-  var count = "1";
-
-  // increment the module count
-  if (module_count) { count = Number(module_count) + 1; }
-  var new_name = name + count;
-
-  container.id = new_name
-  container.childNodes.forEach( element => {
-    if (element.hasAttribute("for")) {
-      element.setAttribute("for", new_name);
-    }
-    if (element.hasAttribute("name")) {
-      element.setAttribute("name", new_name);
-    }
-    element.id = new_name;
-  });
-
-  counter.setAttribute("data-" + name, count);
-  return container;
+  if (module_count) {
+    module_count = Number(module_count) + 1;
+  } else {
+    module_count = 1;
+  }
+  return Number(module_count);
 }
 
 /**
@@ -96,12 +90,13 @@ function htmlToElement(html) {
 /**
  * Retrieve HTML for module by name from backed.
  * @param {string} name - the name of the module.
+ * @param {number} count - How many of these modules currently exist on-page
  * @returns {string} HTML string of required inputs for module.
  * @throws Will throw if the module queried for does not exist.
  */
-function get_module_html(name) {
+function get_module_html(name, count) {
   return new Promise( (resolve, reject) => {
-    fetch("https://howardpearce.ca/get_module_html?module=" + name).then(result => {
+    fetch("https://howardpearce.ca/get_module_html?module=" + name + "&count=" + count).then(result => {
       if (result.ok) {
         result.json().then( response => {
            resolve(response.html);

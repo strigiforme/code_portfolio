@@ -47,17 +47,18 @@ module.exports = class ModuleFactory {
   /**
    * Returns the HTML inputs required for a user to fill in to instantiate a module
    * @param {string} name - Name of the module. Serves as a unique identifier
+   * @param {number} count - The index of the module. Serves to keep name and ID unique
    * @returns {string} HTML with required inputs to fill in details on the module named
    */
-   static getModuleHTML(name) {
+   static getModuleHTML(name, count) {
      var html;
      switch (name) {
        case "paragraph":
-        html = "<label class='floating-label' for='paragraph'>Paragraph</label><input class='floating-input' type='text' name='paragraph' id='paragraph'>";
+        html = `<label class='floating-label' for='paragraph${count}'>Paragraph</label><input class='floating-input' type='text' name='paragraph${count}' id='paragraph${count}'>`;
         break;
       default:
         throw "Module does not exist."
      }
-     return { html : "<div id='module'>" + html + "</div>" }
+     return { html : `<div id='${name}${count}'> ${html} </div>` }
    }
 }

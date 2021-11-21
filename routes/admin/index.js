@@ -54,10 +54,11 @@ app.get("/search_posts", authenticate, function (req, res, next) {
 });
 
 app.get("/get_module_html", authenticate, function (req, res, next) {
-  var params = Sanitizer.clean(req.query.module);
-  if (params != undefined) {
+  var moduleName = Sanitizer.clean(req.query.module);
+  var moduleCount = Sanitizer.clean(req.query.count);
+  if (moduleName != undefined && moduleCount != undefined ) {
     try {
-      var moduleHTML = ModuleFactory.getModuleHTML(params);
+      var moduleHTML = ModuleFactory.getModuleHTML(moduleName, moduleCount);
       logger.log_debug("Returning HTML '" + moduleHTML + "' to module HTML request");
       res.send(moduleHTML);
       res.end();
