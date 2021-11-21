@@ -4,10 +4,11 @@ head
   div.container.flexbox.flex-col
     br
     div.flexbox.flex-col
-      form.flexbox.flex-col(action="/posts/upload-post", method='POST', enctype="multipart/form-data")
-        div.input-container#main
+      form.flexbox.flex-col.floating-input-form(action="/posts/upload-post", method='POST', enctype="multipart/form-data")
+        div#main
           label(for="title").floating-label Document Title
           input(type="text", name="title").floating-input
+        div#status
         div#result
         input(type="submit", value="Create")
       select#module-selector(name="modules")

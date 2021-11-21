@@ -50,12 +50,14 @@ module.exports = class ModuleFactory {
    * @returns {string} HTML with required inputs to fill in details on the module named
    */
    static getModuleHTML(name) {
+     var html;
      switch (name) {
        case "paragraph":
-        return {html: "<input class='floating-input' type='text' name='paragraph'>"};
+        html = "<label class='floating-label' for='paragraph'>Paragraph</label><input class='floating-input' type='text' name='paragraph' id='paragraph'>";
         break;
       default:
         throw "Module does not exist."
      }
+     return { html : "<div id='module'>" + html + "</div>" }
    }
 }

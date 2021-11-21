@@ -39,17 +39,58 @@ function lookup(form) {
 function load_new_module(insertionId, selectorId) {
   var container = document.getElementById(insertionId);
   var selector = document.getElementById(selectorId);
-  var status_container = document.getElementById("result");
+  var result_container = document.getElementById("result");
+  var status_container = document.getElementById("status");
+
   var moduleHTML = get_module_html(selector.value).then( result => {
     if ( result ) {
-      container.insertAdjacentHTML('beforeend', result);
+      // render the string and turn it into HMTL
+      var newModule = htmlToElement(result);
+      // add module HTML to end of form
+      // container.insertAdjacentHTML('beforeend', result);
+      // grab the module we just inserted
+      container.appendChild(label_module(status_container, newModule, selector.value))
     } else {
-      status_container.innerHTML = "unable to load module";
+      result_container.innerHTML = "unable to load module";
     }
   }).catch( error => {
-    status_container.innerHTML = "unable to load module";
+    result_container.innerHTML = "unable to load module";
     console.warn("Unable to load new module: " + error);
   });
+}
+
+function label_module(counter, container, name) {
+  var module_count = counter.getAttribute("data-" + name);
+  var new_name;
+  var count = "1";
+
+  // increment the module count
+  if (module_count) { count = Number(module_count) + 1; }
+  var new_name = name + count;
+
+  container.id = new_name
+  container.childNodes.forEach( element => {
+    if (element.hasAttribute("for")) {
+      element.setAttribute("for", new_name);
+    }
+    if (element.hasAttribute("name")) {
+      element.setAttribute("name", new_name);
+    }
+    element.id = new_name;
+  });
+
+  counter.setAttribute("data-" + name, count);
+  return container;
+}
+
+/**
+ * @param {String} HTML representing a single element
+ * @return {Element}
+ */
+function htmlToElement(html) {
+  var parser = new DOMParser();
+	var doc = parser.parseFromString(html, 'text/html');
+	return doc.body.childNodes[0];
 }
 
 /**
