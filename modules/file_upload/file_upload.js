@@ -47,8 +47,18 @@ class fileManager {
     // Max filesize is 1mb (1042 * 1024)
     return multer({ storage: this.storage,
                     fileFilter: this.codeFilter,
-                    limits: { fileSize: 1024 * 1024 }}).single('code')
+                    limits: { fileSize: 1024 * 1024 }}).single('code');
   }
+
+  /**
+   * Return multer upload that accepts any number of upoads
+   * @return {multer} The upload object
+   */
+   any() {
+     return multer({ storage: this.storage,
+                     fileFilter: this.codeFilter,
+                     limits: {fileSize: 1024 * 1024}}).any();
+   }
 }
 
 var manager = new fileManager();
