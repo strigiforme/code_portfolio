@@ -54,11 +54,16 @@ module.exports = class ModuleFactory {
      var html;
      switch (name) {
        case "paragraph":
-        html = `<label class='floating-label' for='paragraph${count}'>Paragraph</label><input class='floating-input' type='text' name='paragraph${count}' id='paragraph${count}'>`;
+        html = `<label class='floating-label' for='paragraph:${count}'>Paragraph</label><input class='floating-input' type='text' name='paragraph:${count}' id='paragraph:${count}'>`;
         break;
       default:
         throw "Module does not exist."
      }
-     return { html : `<div id='${name}${count}'> ${html} </div>` }
+     return { html : `<div id='${name}:${count}'> ${html} </div>` }
+   }
+
+   static isModule(name) {
+     var modules = ["paragraph", "image"];
+     return modules.includes(name);
    }
 }

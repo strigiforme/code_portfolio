@@ -87,12 +87,20 @@ module.exports = class Document {
      this.modules.push(newModule);
    }
 
+   /**
+    * Returns the number of modules this document has
+    * @return {number} the number modules contained inside this document
+    */
+   numberOfModules() {
+     return this.modules.length; 
+   }
+
   /**
    * Removes a module from the current list of modules
    * @param id the unique ID of the module
    */
    removeModule(id) {
-
+     //TODO: implement
    }
 
 }

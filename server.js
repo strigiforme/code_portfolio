@@ -66,9 +66,7 @@ app.use(user);
 app.use(admin);
 
 // for receiving post requests
-app.use(express.urlencoded({
-  extended: true
-}))
+// app.use(express.json())
 
 logger.log_info("Creating HTTP server on port 80");
 http.createServer(app).listen(80);

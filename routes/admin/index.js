@@ -2,35 +2,34 @@
 
 File: index.js
 Author: Howard Pearce
-Last Edit: May 17, 2021
+Last Edit: December 06, 2021
 Description: Handles all logic for the administration of the portfolio
 
 **/
 
-var express       = require("express");
-const fs          = require("fs");
-var { exec }      = require("child_process");
-const path        = require('path');
-var database      = require("database");
-var objects       = require("objects");
-var logger        = require("logger");
-var snippets      = require("file_upload");
-var record        = require("ip_logger");
-var authenticator = require("authenticator");
-var middleware    = require("middleware");
-var doc_package   = require("document");
+var express         = require("express");
+const fs            = require("fs");
+var { exec }        = require("child_process");
+const path          = require('path');
+var database        = require("database");
+var objects         = require("objects");
+var logger          = require("logger");
+var snippets        = require("file_upload");
+var record          = require("ip_logger");
+var authenticator   = require("authenticator");
+var middleware      = require("middleware");
+var doc_package     = require("document");
+var Sanitizer       = middleware.sanitizer;
+var authenticate    = middleware.verify;
 
-var Sanitizer     = middleware.sanitizer;
-var authenticate  = middleware.verify;
+const upload        = snippets.multer;
+var Post            = objects.Post;
+var Visitor         = objects.Visitor;
+var Location        = objects.Location;
 
-const upload = snippets.multer;
-var Post          = objects.Post;
-var Visitor       = objects.Visitor;
-var Location      = objects.Location;
-
-var Document              = doc_package.Document;
-var Module                = doc_package.Module;
-var ModuleFactory         = doc_package.ModuleFactory;
+var Document        = doc_package.Document;
+var Module          = doc_package.Module;
+var ModuleFactory   = doc_package.ModuleFactory;
 
 
 var app = module.exports = express();
@@ -86,13 +85,51 @@ app.get("/posts/add", authenticate, function (req, res, next) {
 app.get("/document/create", authenticate, function (req, res, next) {
   res.render("document/create_document", {loggedin: req.session.login});
   res.end();
-})
+});
+
+app.post("/document/upload", upload.any(), authenticate, function (req, res, next) {
+  // grab the default document items
+  var docTitle = req.body.title;
+  // get a document ready to insert modules into
+  var newDocument = new Document( { title: docTitle } );
+
+  // iterate over the modules the user has sent
+  for ( const [item, value] of Object.entries(req.body) ) {
+    // regex match to see if it's a valid module
+    var moduleRegex = item.match(/(\w*)\:(\d+)/);
+    if ( moduleRegex ) {
+      var moduleName = moduleRegex[1];
+      var moduleIndex = moduleRegex[2];
+      if ( ModuleFactory.isModule(moduleName) ) {
+        // construct a module from the user's input
+        var newModule = ModuleFactory.createModule(moduleName);
+        newModule.add_input(value);
+        newDocument.addModule(newModule);
+      } else {
+        logger.log_error(`Module type '${moduleName}' does not exist.`);
+        // TODO: implement proper rejection. Should probably throw if this happens
+      }
+    }
+  }
+
+  if (newDocument.numberOfModules() > 0 ) {
+    // submit to database
+    database.create_document(newDocument.export()).then( result => {
+      console.log("successfully created document!");
+      res.render("document/create_document", {loggedin: req.session.login});
+      res.end();
+    });
+
+  } else {
+    // TODO: implement proper rejection
+  }
+
+  res.end();
+});
 
 
 // upload a new post to database
 app.post("/posts/upload-post", upload.single("code"), function (req, res, next) {
-  console.log(req.body);
-  console.log(req.file);
     if ( req.fileValidationError ) {
       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
       return res.redirect("uploaderror");
