@@ -71,6 +71,26 @@ module.exports = class Document {
   }
 
   /**
+   * Returns a string representation of the document for debugging
+   * @Returns a string representation of the document
+   */
+   toString() {
+    var outputString = `Document: {\n`;
+    outputString += `\ttitle: ${this.title}\n`;
+    outputString += `\tid: ${this.id}\n`;
+    outputString += `\tsanitized: ${this.sanitized}\n`;
+    outputString += `\tmetadata: ${this.metadata}\n`;
+    outputString += `\tmodules: [ `;
+    this.modules.forEach(function (input, index) {
+      outputString += `${input.toString()}, `;
+    });
+    // remove last ', ' from string representation of list
+    outputString = outputString.substring(0, outputString.length -2);
+    outputString += `]\n`;
+    return outputString;
+   }
+
+  /**
    * Sanitizes all of the document's fields to prevent injection
    */
   clean() {
@@ -92,7 +112,7 @@ module.exports = class Document {
     * @return {number} the number modules contained inside this document
     */
    numberOfModules() {
-     return this.modules.length; 
+     return this.modules.length;
    }
 
   /**

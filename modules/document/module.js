@@ -14,10 +14,16 @@ var Sanitizer    = middleware.sanitizer;
 module.exports = class Module {
 
   constructor(args) {
+    logger.log_debug("Creating module from args:");
+    logger.log_debug(`module_type: ${args.module_type}`);
     this.module_type = args.module_type;
+    logger.log_debug(`id: ${args.id}`);
     this.id = args.id;
+    logger.log_debug(`html: ${args.html}`);
     this.html = args.html;
+    logger.log_debug(`inputFields: ${args.inputFields}`);
     this.inputFields = args.inputFields || [];
+    logger.log_debug(`sanitized: ${args.sanitized}`);
     this.sanitized = args.sanitized || false;
 
     if (this.sanitized) {
@@ -53,7 +59,7 @@ module.exports = class Module {
     });
 
     // return as JSON
-    return { sanitized: true, type: this.type, id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
+    return { sanitized: true, module_type: this.module_type, id: this.id, html: Sanitizer.clean(this.html), inputFields: exportedInputFields }
   }
 
   /**
@@ -63,6 +69,26 @@ module.exports = class Module {
   add_input(input) {
     this.inputFields.push(input);
   }
+
+  /**
+   * Returns a string representation of the module for debugging
+   * @Returns a string representation of the module
+   */
+   toString() {
+    var outputString = `Module: {\n`;
+    outputString += `\tmodule_type: ${this.module_type}\n`;
+    outputString += `\tid: ${this.id}\n`;
+    outputString += `\tsanitized: ${this.sanitized}\n`;
+    outputString += `\tinputFields: [`;
+    this.inputFields.forEach(function (input, index) {
+      outputString += `${input}, `;
+    });
+    // remove last ', ' from string representation of list
+    outputString = outputString.substring(0, outputString.length -2);
+    outputString += "]\n";
+    outputString += `\thtml: ${this.html}\n}`;
+    return outputString;
+   }
 
   /**
   * Returns a copy of the module as HTML
