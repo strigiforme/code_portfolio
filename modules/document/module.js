@@ -34,7 +34,6 @@ module.exports = class Module {
     }
 
     this.numInputs = (this.html.match(/\?/g) || []).length;
-
   }
 
   prepare() {

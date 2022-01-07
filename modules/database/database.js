@@ -65,7 +65,7 @@ class Database {
   // Document related queries --------------------------------------------------
 
   create_document(data) {
-    logger.log_debug("Attempting to create document");
+    logger.log_debug(`Attempting to create document in database`);
     return queries.create_record(data, this.documentModel);
   }
 
