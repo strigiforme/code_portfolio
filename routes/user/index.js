@@ -33,6 +33,7 @@ app.get('/document_test', function (req, res, next) {
   var document_id = req.query.doc;
   var document_view = database.find_document_by_id(document_id).then( doc => {
     var clean_doc = new Document(doc);
+    logger.log_debug("Document: " + clean_doc.toString());
     logger.log_debug("Rendered HTML: " + clean_doc.render());
     res.render("document", { doc : clean_doc });
     res.end();
