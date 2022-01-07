@@ -36,8 +36,10 @@ database.connect('mongodb://127.0.0.1/my_database').then( () => {
 // initialize logger
 logger.initialize( { level:"DEBUG" } );
 
-// generate the users access code if it doesn't exist
-access_code_mgr.create_access_code({});
+if (!access_code_mgr.access_file_exists()) {
+  // generate the users access code if it doesn't exist
+  access_code_mgr.create_access_code({});
+}
 
 // initialize app
 var options = {
