@@ -19,12 +19,14 @@ class Authenticator {
    * @param {Boolean} addAdminFlag boolean flag that identifies if we are in 'new' mode. (No admin exists, and we need to add one)
    * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the access_code module.
    * @param {Database} database reference to the database module.
+   * @param {Boolean} adminEnabled whether or not to check for admin account
    */
-  constructor(database) {
+  constructor(database, adminEnabled) {
     this.adminAccount = undefined;
     this.addAdminFlag = false;
     this.accessCodeValid = false;
     this.database = database;
+    this.adminEnabled = adminEnabled
   }
 
   /**
