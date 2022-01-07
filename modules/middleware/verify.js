@@ -11,17 +11,20 @@ var authenticator = require("authenticator");
 
 var auth_callback = function (req, res, next) {
   // check if we're allowed to be here
-  if(!req.session.login){
-    res.redirect("/forbidden");
-    next();
-  } else {
-    if (req.session.email != authenticator.admin) {
+  if (authenticator.authEnabled) {
+    if(!req.session.login){
       res.redirect("/forbidden");
       next();
     } else {
-      next();
+      if (req.session.email != authenticator.admin) {
+        res.redirect("/forbidden");
+        next();
+      } else {
+        next();
+      }
     }
   }
+  next();
 }
 
 module.exports = auth_callback;
