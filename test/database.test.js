@@ -91,7 +91,7 @@ function compare_documents(a, b) {
 // Test that the database can create a document successfully
 test("Create Document", async () => {
   try {
-    var newModule = ModuleFactory.create_module(test_module_args.id);
+    var newModule = ModuleFactory.createModule(test_module_args.id);
     newModule.add_input(test_module_args.input);
     // create and test the document
     var newDoc = new Document(test_document_args);
@@ -127,7 +127,7 @@ test("Edit Document", async () => {
     // should be only one
     var doc = results[0];
     // create a replacement document
-    var newModule = ModuleFactory.create_module(test_edit_module_args.id);
+    var newModule = ModuleFactory.createModule(test_edit_module_args.id);
     newModule.add_input(test_edit_module_args.input);
     var newDoc = new Document(test_edit_document_args);
     newDoc.addModule(newModule);
