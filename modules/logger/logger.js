@@ -40,9 +40,8 @@ class Logger {
   initialize(args) {
     this.log_info("Starting logger module")
 
-    // check if argument was provided
-    if ( !args.level ) {
-      throw new Error("Log level was not provided. Unable to proceed.")
+    if (!args) {
+      args = {}
     }
 
     // allows us to change behaviour in the logging function if need be.
@@ -52,7 +51,9 @@ class Logger {
       this.log_function = args.log_function;
     }
 
-    this.set_level(args.level);
+    if ( args.level ) {
+      this.set_level(args.level);
+    }
   }
 
   /**

@@ -31,6 +31,88 @@ function lookup(form) {
   });
 }
 
+/**
+ * Loads in the HTML for a new module into the create document page.
+ * @param {string} insertionId - the HTML id for the element to insert the module HTML into.
+ * @param {string} seletorId - the ID of the selector containing the type of module to load.
+ */
+function load_new_module(insertionId, selectorId) {
+  var container = document.getElementById(insertionId);
+  var selector = document.getElementById(selectorId);
+  var result_container = document.getElementById("result");
+  var status_container = document.getElementById("status");
+  var count = get_module_count(status_container, selector.value);
+
+  var moduleHTML = get_module_html(selector.value, count).then( result => {
+    if ( result ) {
+      // render the string and turn it into HMTL
+      var newModule = htmlToElement(result);
+      // add module HTML to end of form
+      container.appendChild(newModule);
+      // increment count of # of modules
+      status_container.setAttribute(`data-${selector.value}`, count);
+    } else {
+      result_container.innerHTML = "Unable to load module";
+    }
+  }).catch( error => {
+    result_container.innerHTML = "Unable to load module";
+    console.warn("Unable to load new module: " + error);
+  });
+}
+
+/**
+ * Get the number of times this module has been instantiated
+ * @param {element} counter - The HTML element that holds the # of modules instantiated
+ * @param {string} name - the name of the module
+ * @returns {number} the number of times this module is already displayed on screen
+ */
+function get_module_count(counter, name) {
+  // check how many times this module has been loaded
+  var module_count = counter.getAttribute("data-" + name);
+  if (module_count) {
+    module_count = Number(module_count) + 1;
+  } else {
+    module_count = 1;
+  }
+  return Number(module_count);
+}
+
+/**
+ * @param {String} HTML representing a single element
+ * @return {Element}
+ */
+function htmlToElement(html) {
+  var parser = new DOMParser();
+	var doc = parser.parseFromString(html, 'text/html');
+	return doc.body.childNodes[0];
+}
+
+/**
+ * Retrieve HTML for module by name from backed.
+ * @param {string} name - the name of the module.
+ * @param {number} count - How many of these modules currently exist on-page
+ * @returns {string} HTML string of required inputs for module.
+ * @throws Will throw if the module queried for does not exist.
+ */
+function get_module_html(name, count) {
+  return new Promise( (resolve, reject) => {
+    fetch("https://howardpearce.ca/get_module_html?module=" + name + "&count=" + count).then(result => {
+      if (result.ok) {
+        result.json().then( response => {
+           resolve(response.html);
+        }).catch( error => {
+          reject("Unable to parse JSON: " + error);
+        });
+      } else {
+        reject("Module '" + name + "' could not be found.");
+      }
+    }).catch( error => {
+      reject("Fetch request failed! " + error);
+    });
+  });
+
+}
+
 /* Builds an html entry for a post as a string
  * id {string}:    the post's ID, for creating links
  * title {string}: the post's title

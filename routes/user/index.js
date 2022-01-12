@@ -7,16 +7,18 @@ Description: Handles all logic for users
 
 **/
 
-var express    = require("express");
-var database   = require("database");
-var objects    = require("objects");
-var middleware = require("middleware");
-var logger     = require("logger");
-const fs       = require("fs");
-var { exec }   = require("child_process");
-var record     = require("ip_logger");
-var Sanitizer  = middleware.sanitizer;
-var Post       = objects.Post;
+var express          = require("express");
+var database         = require("database");
+var objects          = require("objects");
+var middleware       = require("middleware");
+var logger           = require("logger");
+const fs             = require("fs");
+var { exec }         = require("child_process");
+var record           = require("ip_logger");
+var document_package = require("document");
+var Document         = document_package.Document;
+var Sanitizer        = middleware.sanitizer;
+var Post             = objects.Post;
 
 var app = module.exports = express();
 
@@ -25,6 +27,17 @@ app.get('/', record ,function (req, res, next) {
   var login_status = req.query.login;
   res.render('index', {loggedin: req.session.login, login: login_status});
   res.end()
+});
+
+app.get('/document_test', function (req, res, next) {
+  var document_id = req.query.doc;
+  var document_view = database.find_document_by_id(document_id).then( doc => {
+    var clean_doc = new Document(doc);
+    logger.log_debug("Document: " + clean_doc.toString());
+    logger.log_debug("Rendered HTML: " + clean_doc.render());
+    res.render("document", { doc : clean_doc });
+    res.end();
+  });
 });
 
 app.get('/resume', record, function (req, res, next) {

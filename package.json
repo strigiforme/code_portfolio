@@ -18,6 +18,7 @@
     "angular": "^1.8.2",
     "authenticator": "file:modules/authenticator",
     "database": "file:modules/database",
+    "document": "file:modules/document",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.8.0",

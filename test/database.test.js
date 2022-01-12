@@ -12,8 +12,13 @@ const database              = require("database");
 const objects               = require("objects");
 const middleware            = require("middleware");
 const fs                    = require('fs');
+const doc_package           = require("document");
+
 const Post                  = objects.Post;
 const Visitor               = objects.Visitor;
+const Document              = doc_package.Document;
+const Module                = doc_package.Module;
+const ModuleFactory         = doc_package.ModuleFactory;
 
 var { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -23,12 +28,17 @@ jest.setTimeout(20000);
 mongod = new MongoMemoryServer({binary: {version: '5.0.1'}});
 
 // data to be used in tests.
-const test_post_args         = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
-const test_snippet_post_args = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
-const test_edit_post_args    = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
-const test_visitor_args      = { ip: "123", first_visit: "2021-04-30T20:08:52.002Z", last_visit: "2021-04-30T20:08:52.002Z", visits: 5, location_string: "somewhere" };
-const test_edit_visitor_args = { id: "123", ip: "123", first_visit: "2021-05-30T20:08:52.002Z", last_visit: "2021-05-30T20:08:52.002Z", visits: 9, location_string: "over there" };
-const test_admin_args        = { email: "testemail@test.com" };
+var test_post_args          = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
+var test_snippet_post_args  = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
+var test_edit_post_args     = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
+var test_visitor_args       = { ip: "123", first_visit: "2021-04-30T20:08:52.002Z", last_visit: "2021-04-30T20:08:52.002Z", visits: 5, location_string: "somewhere" };
+var test_edit_visitor_args  = { id: "123", ip: "123", first_visit: "2021-05-30T20:08:52.002Z", last_visit: "2021-05-30T20:08:52.002Z", visits: 9, location_string: "over there" };
+var test_admin_args         = { email: "testemail@test.com" };
+var test_document_args      = { id: "123", title: "title", metadata: { tags: "test"} }
+var test_edit_document_args = { id: "123", title: "new_title", metadata: { tags: "new"} }
+var test_module_args        = { id: "paragraph", input: "test" }
+var test_edit_module_args   = { id: "image", input: "new" }
+
 // do all our querying based on this post.
 var test_post                = new Post(test_post_args);
 
@@ -56,8 +66,80 @@ function compare_visitors(a, b){
   expect(a.ip).toBe(b.ip);
   expect(a.location_string).toBe(b.location_string);
   expect(a.visits).toBe(b.visits);
-  // not testing date strings since they're so damn buggy. Not worth the effort
+  // not testing date strings since they're so damn tricky. Not worth the effort
 }
+
+function compare_documents(a, b) {
+  expect(a.title).toBe(b.title);
+  expect(a.metadata.tags).toBe(b.metadata.tags);
+  expect(a.metadata.date.getTime()).toBe(b.metadata.date.getTime());
+  expect(a.modules.length).toBe(a.modules.length);
+  // compare each module
+  a.modules.forEach( (module, i) => {
+    var m_a = module;
+    var m_b = b.modules[i];
+    expect(m_a.module_type).toBe(m_b.module_type);
+    expect(m_a.id).toBe(m_b.id);
+    expect(m_a.html).toBe(m_b.html);
+    expect(m_a.sanitized).toBe(m_b.sanitized);
+    m_a.inputFields.forEach( (input, j) => {
+      expect(input).toBe(m_b.inputFields[j]);
+    })
+  });
+}
+
+// Test that the database can create a document successfully
+test("Create Document", async () => {
+  try {
+    var newModule = ModuleFactory.createModule(test_module_args.id);
+    newModule.add_input(test_module_args.input);
+    // create and test the document
+    var newDoc = new Document(test_document_args);
+    newDoc.addModule(newModule);
+    await database.create_document(newDoc.export());
+  } catch (error) {
+    throw new Error(`Error occurred while creating document in database: ${error}`);
+  }
+});
+
+// Test that the database can retrieve a document successfully
+test("Find Documents", async () => {
+  try {
+    var results = await database.query_for_documents({});
+    // should be only one
+    var doc = results[0];
+    doc = new Document(doc);
+    // query for the same document by ID
+    var single = await database.find_document_by_id(doc.id);
+    single = new Document(single);
+    // compare the two
+    compare_documents(doc, single);
+  } catch (error) {
+    throw new Error(`Error occurred while retrieving document in database: ${error}`);
+  }
+});
+
+// Test that we can edit documents
+test("Edit Document", async () => {
+  try {
+    // retrieve a document to edit
+    var results = await database.query_for_documents({});
+    // should be only one
+    var doc = results[0];
+    // create a replacement document
+    var newModule = ModuleFactory.createModule(test_edit_module_args.id);
+    newModule.add_input(test_edit_module_args.input);
+    var newDoc = new Document(test_edit_document_args);
+    newDoc.addModule(newModule);
+    // using the ID, update the document
+    await database.edit_document(doc.id, newDoc);
+    // check that the document has actually been updated
+    var result = await database.find_document_by_id(doc.id);
+    compare_documents(result, newDoc);
+  } catch (error) {
+    throw new Error(`Error occurred while editing document in database: ${error}`);
+  }
+});
 
 // Test that the database can create a record successfully
 test("Create Posts", async () => {

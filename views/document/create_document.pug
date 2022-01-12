@@ -1,0 +1,17 @@
+doctype html
+head
+  include ../includes/nav.pug
+  div.container.flexbox.flex-col
+    br
+    div.flexbox.flex-col
+      form.flexbox.flex-col.floating-input-form(action="/document/upload", method='POST', enctype="multipart/form-data")
+        div#main
+          label(for="title").floating-label Document Title
+          input(type="text", name="title").floating-input
+        div#status
+        div#result
+        input(type="submit", value="Create")
+      select#module-selector(name="modules")
+        option(value="paragraph") paragraph
+        option(value="image") image
+      button.add-module(onclick="load_new_module('main','module-selector')") Add module

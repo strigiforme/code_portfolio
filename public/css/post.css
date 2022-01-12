@@ -11,6 +11,10 @@ label {
   font-size: 16px;
 }
 
+.floating-input-form div{
+  position: relative;
+}
+
 .floating-label {
   font-size: 16px;
   position: absolute;
@@ -28,9 +32,6 @@ label {
   width: 100%;
 }
 
-.input-container{
-  position: relative;
-}
 
 textarea {
   margin-bottom: 1rem;

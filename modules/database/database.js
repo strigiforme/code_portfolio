@@ -16,10 +16,13 @@ class Database {
 
   constructor() {
     this.mongodb     = undefined;
-    this.post_schema  = undefined;
-    this.admin_schema = undefined;
-    this.post_model   = undefined;
-    this.admin_model  = undefined;
+    this.postSchema  = undefined;
+    this.adminSchema = undefined;
+    this.postModel   = undefined;
+    this.adminModel  = undefined;
+    this.documentModel = undefined;
+    this.visitorSchema = undefined;
+    this.visitorModel = undefined;
   }
 
   /**
@@ -36,13 +39,15 @@ class Database {
         ctx.mongodb = mongoose.connection;
         logger.log_info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
-        ctx.post_schema = mongoose.Schema ({ title: String, type: String, snippet: String, content: String });
-        ctx.admin_schema = mongoose.Schema ({ email: String });
-        ctx.visitor_schema = mongoose.Schema ({ last_visit: Date, first_visit: Date, location_string: String, ip: String, visits: Number });
+        ctx.documentSchema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, module_type : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
+        ctx.postSchema = mongoose.Schema ({ title : String, type: String, snippet : String, content : String });
+        ctx.adminSchema = mongoose.Schema ({ email : String });
+        ctx.visitorSchema = mongoose.Schema ({ last_visit : Date, first_visit : Date, location_string : String, ip : String, visits : Number });
         // set up models - these represent the mongodb data stores for each type of object we want to store
-        ctx.post_model = mongoose.model('Post', ctx.post_schema);
-        ctx.admin_model = mongoose.model('Admin', ctx.admin_schema);
-        ctx.visitor_model = mongoose.model("Visitor", ctx.visitor_schema);
+        ctx.documentModel = mongoose.model('Document', ctx.documentSchema);
+        ctx.postModel = mongoose.model('Post', ctx.postSchema);
+        ctx.adminModel = mongoose.model('Admin', ctx.adminSchema);
+        ctx.visitorModel = mongoose.model("Visitor", ctx.visitorSchema);
         resolve();
       }).catch( err => {
         reject(`Unable to connect database module. ${err}`);
@@ -57,6 +62,32 @@ class Database {
      return mongoose.disconnect();
    }
 
+  // Document related queries --------------------------------------------------
+
+  create_document(data) {
+    logger.log_debug(`Attempting to create document in database`);
+    return queries.create_record(data, this.documentModel);
+  }
+
+  find_document_by_id(id) {
+    logger.log_debug(`Attempting to query for single document with ID '${id}'`);
+    return queries.find_single_record({ _id: id }, this.documentModel);
+  }
+
+  query_for_documents(query) {
+    logger.log_debug(`Attempting to query for documents using query: ${query}`)
+    return queries.find_many_records(query, this.documentModel);
+  }
+
+  get_all_documents() {
+    return this.query_for_documents({});
+  }
+
+  edit_document( id, data ) {
+    logger.log_debug("Attempting to edit document");
+    return queries.edit_record(id, data, this.documentModel);
+  }
+
   // Visitor related queries ---------------------------------------------------
 
   /**
@@ -66,7 +97,7 @@ class Database {
    */
   create_visitor(data) {
     logger.log_debug("Attempting to create visitor record.");
-    return queries.create_record(data, this.visitor_model);
+    return queries.create_record(data, this.visitorModel);
   }
 
   /**
@@ -83,7 +114,7 @@ class Database {
    */
   query_for_visitors(query) {
     logger.log_debug(`Attempting to query for visitors using query: ${query}`)
-    return queries.find_many_records(query, this.visitor_model);
+    return queries.find_many_records(query, this.visitorModel);
   }
 
   /**
@@ -93,7 +124,7 @@ class Database {
    */
   find_visitor_by_ip(ip) {
     logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
-    return queries.find_single_record({ ip: ip }, this.visitor_model);
+    return queries.find_single_record({ ip: ip }, this.visitorModel);
   }
 
   /**
@@ -103,7 +134,7 @@ class Database {
    */
   delete_visitor(id) {
     logger.log_debug(`Attempting to delete visitor with ID '${id}'`);
-    return queries.delete_record({ _id : id }, this.visitor_model);
+    return queries.delete_record({ _id : id }, this.visitorModel);
   }
 
   /**
@@ -113,9 +144,9 @@ class Database {
    * @return {Promise} Promise object with result
    */
   edit_visitor(id, new_visitor) {
-    return new Promise(  ( resolve, reject, visitor_model=this.visitor_model ) => {
+    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
       // create a query to edit the post
-      var edit_query = visitor_model.findOneAndUpdate( { _id: id }, new_visitor );
+      var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
       // send the query
       edit_query.exec().then( visitor => {
         logger.log_trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
@@ -136,7 +167,7 @@ class Database {
    */
   create_post(data) {
     logger.log_debug(`Attempting to create post record: ${data}`);
-    return queries.create_record(data, this.post_model);
+    return queries.create_record(data, this.postModel);
   }
 
   /**
@@ -154,7 +185,7 @@ class Database {
    */
   query_for_posts(query) {
     logger.log_debug(`Attempting to query for posts using query: ${query}`)
-    return queries.find_many_records(query, this.post_model);
+    return queries.find_many_records(query, this.postModel);
   }
 
   /**
@@ -164,7 +195,7 @@ class Database {
    */
   find_post_by_id(id) {
     logger.log_debug(`Attempting to query for single post with ID '${id}'`);
-    return queries.find_single_record({ _id: id }, this.post_model);
+    return queries.find_single_record({ _id: id }, this.postModel);
   }
 
   /**
@@ -175,7 +206,7 @@ class Database {
    */
   edit_post(id, new_post) {
     logger.log_debug(`Attempting edit query for post with ID '${id}'`);
-    return queries.edit_record({ _id : id }, new_post, this.post_model);
+    return queries.edit_record({ _id : id }, new_post, this.postModel);
   }
 
   /**
@@ -184,9 +215,9 @@ class Database {
    * @return {Promise} Promise object with result
    */
   delete_post(id) {
-    return new Promise(  ( resolve, reject, post_model=this.post_model ) => {
+    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
       // create a query to delete the post
-      var delete_query = post_model.findOneAndDelete( { _id: id } );
+      var delete_query = postModel.findOneAndDelete( { _id: id } );
       // send the query
       delete_query.exec().then( post => {
         // check if the post was found in the database
@@ -221,7 +252,7 @@ class Database {
    */
    create_admin(email) {
      logger.log_debug(`Attempting to create admin with email: ${email}`);
-     return queries.create_record({email: email}, this.admin_model);
+     return queries.create_record({email: email}, this.adminModel);
    }
 
    /**
@@ -231,7 +262,7 @@ class Database {
     */
    query_for_admins(query) {
      logger.log_debug(`Attempting to query for posts using query: ${query}`);
-     return queries.find_many_records(query, this.admin_model);
+     return queries.find_many_records(query, this.adminModel);
    }
 
   /**
@@ -241,11 +272,11 @@ class Database {
   get_admin_account() {
     var newEmail = false;
     // return a promise for the caller to handle
-    return new Promise(  ( resolve, reject, admin_model=this.admin_model ) => {
+    return new Promise(  ( resolve, reject, adminModel=this.adminModel ) => {
       // the email of the administator's account
       var adminAccount;
       // create a query to get all admin accounts
-      var admin_query = admin_model.find({});
+      var admin_query = adminModel.find({});
       // send the query
       admin_query.exec().then( admins => {
         if (admins.length > 1) {
