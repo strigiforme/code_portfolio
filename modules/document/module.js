@@ -7,7 +7,7 @@ Description: Data structure that is a subcomponent of the document.
 
 **/
 
-var RenderError = require("./RenderError")
+var RenderError = require("./renderError")
 var middleware   = require("middleware")
 var Sanitizer    = middleware.sanitizer;
 
