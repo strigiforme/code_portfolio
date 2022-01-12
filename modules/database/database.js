@@ -64,26 +64,26 @@ class Database {
 
   // Document related queries --------------------------------------------------
 
-  create_document(data) {
+  createDocument(data) {
     logger.log_debug(`Attempting to create document in database`);
     return queries.create_record(data, this.documentModel);
   }
 
-  find_document_by_id(id) {
+  findDocumentById(id) {
     logger.log_debug(`Attempting to query for single document with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.documentModel);
   }
 
-  query_for_documents(query) {
+  queryForDocuments(query) {
     logger.log_debug(`Attempting to query for documents using query: ${query}`)
     return queries.find_many_records(query, this.documentModel);
   }
 
-  get_all_documents() {
-    return this.query_for_documents({});
+  getAllDocuments() {
+    return this.queryForDocuments({});
   }
 
-  edit_document( id, data ) {
+  editDocument( id, data ) {
     logger.log_debug("Attempting to edit document");
     return queries.edit_record(id, data, this.documentModel);
   }
@@ -95,16 +95,16 @@ class Database {
    * @param {Visitor} data The required data for a visitor object
    * @return {Promise} Promise object with upload result
    */
-  create_visitor(data) {
+  createVisitor(data) {
     logger.log_debug("Attempting to create visitor record.");
     return queries.create_record(data, this.visitorModel);
   }
 
   /**
-   * Returns all available visitors - a wrapper for query_for_visitors
+   * Returns all available visitors - a wrapper for queryForVisitors
    */
-  get_all_visitors(){
-    return this.query_for_visitors({});
+  getAllVisitors(){
+    return this.queryForVisitors({});
   }
 
   /**
@@ -112,7 +112,7 @@ class Database {
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  query_for_visitors(query) {
+  queryForVisitors(query) {
     logger.log_debug(`Attempting to query for visitors using query: ${query}`)
     return queries.find_many_records(query, this.visitorModel);
   }
@@ -122,7 +122,7 @@ class Database {
    * @param {String} ip An IP to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_visitor_by_ip(ip) {
+  findVisitorByIp(ip) {
     logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
     return queries.find_single_record({ ip: ip }, this.visitorModel);
   }
@@ -132,7 +132,7 @@ class Database {
    * @param {String} id Unique ID of the visitor in MONGODB
    * @return {Promise} Promise object with result
    */
-  delete_visitor(id) {
+  deleteVisitor(id) {
     logger.log_debug(`Attempting to delete visitor with ID '${id}'`);
     return queries.delete_record({ _id : id }, this.visitorModel);
   }
@@ -143,7 +143,7 @@ class Database {
    * @param {Visitor} new_visitor visitor object with update data
    * @return {Promise} Promise object with result
    */
-  edit_visitor(id, new_visitor) {
+  editVisitor(id, new_visitor) {
     return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
       // create a query to edit the post
       var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
@@ -165,17 +165,17 @@ class Database {
    * @param {post} data The required data for a post object
    * @return {Promise} Promise object with upload result
    */
-  create_post(data) {
+  createPost(data) {
     logger.log_debug(`Attempting to create post record: ${data}`);
     return queries.create_record(data, this.postModel);
   }
 
   /**
-   * Returns all available posts - a wrapper for query_for_posts
+   * Returns all available posts - a wrapper for queryForPosts
    * @return {Promise} Promise object with all available posts in database
    */
-  get_all_posts() {
-    return this.query_for_posts({});
+  getAllPosts() {
+    return this.queryForPosts({});
   }
 
   /**
@@ -183,7 +183,7 @@ class Database {
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  query_for_posts(query) {
+  queryForPosts(query) {
     logger.log_debug(`Attempting to query for posts using query: ${query}`)
     return queries.find_many_records(query, this.postModel);
   }
@@ -193,7 +193,7 @@ class Database {
    * @param {String} id An ID to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_post_by_id(id) {
+  findPostById(id) {
     logger.log_debug(`Attempting to query for single post with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.postModel);
   }
@@ -204,7 +204,7 @@ class Database {
    * @param {Post} new_post post object with update data
    * @return {Promise} Promise object with result
    */
-  edit_post(id, new_post) {
+  editPost(id, new_post) {
     logger.log_debug(`Attempting edit query for post with ID '${id}'`);
     return queries.edit_record({ _id : id }, new_post, this.postModel);
   }
@@ -214,7 +214,7 @@ class Database {
    * @param {String} id An ID to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  delete_post(id) {
+  deletePost(id) {
     return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
       // create a query to delete the post
       var delete_query = postModel.findOneAndDelete( { _id: id } );
@@ -250,7 +250,7 @@ class Database {
    * @param {String} email The email address of the admin account
    * @return {Promise} Promise object with upload result
    */
-   create_admin(email) {
+   createAdmin(email) {
      logger.log_debug(`Attempting to create admin with email: ${email}`);
      return queries.create_record({email: email}, this.adminModel);
    }
@@ -260,7 +260,7 @@ class Database {
     * @param {map} query Information to query by. { _id: 102301234 } for example.
     * @return {Promise} Promise object with query result
     */
-   query_for_admins(query) {
+   queryForAdmins(query) {
      logger.log_debug(`Attempting to query for posts using query: ${query}`);
      return queries.find_many_records(query, this.adminModel);
    }
@@ -269,7 +269,7 @@ class Database {
    * Retrieve the administrator account from MONGODB
    * @return {Promise} Promise object with admin account, and whether a new email is needed.
    */
-  get_admin_account() {
+  getAdminAccount() {
     var newEmail = false;
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, adminModel=this.adminModel ) => {

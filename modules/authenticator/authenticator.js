@@ -35,7 +35,7 @@ class Authenticator {
   async fetchAdminAccount() {
     try {
       // retrieve the administrator account's email
-      var result = await database.get_admin_account();
+      var result = await database.getAdminAccount();
       this.adminAccount = result.account;
       this.addAdminFlag = result.new;
     } catch (error) {

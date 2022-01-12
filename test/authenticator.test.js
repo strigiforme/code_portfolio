@@ -49,7 +49,7 @@ test("Authenticator enters new email mode if no admin account is found.", async 
 
 test("Authenticator checks for administrator account.", async () => {
   // Insert a fake admin record for the authenticator to use
-  await database.create_admin(test_email);
+  await database.createAdmin(test_email);
   // get the authenticator to fetch the admin account
   await authenticator.fetchAdminAccount();
   expect(authenticator.admin).toBe(test_email);

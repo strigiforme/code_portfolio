@@ -58,7 +58,7 @@ app.get("/get_module_html", authenticate, function (req, res, next) {
 });
 
 app.get("/document/create", authenticate, function (req, res, next) {
-  res.render("document/create_document", {loggedin: req.session.login});
+  res.render("document/createDocument", {loggedin: req.session.login});
   res.end();
 });
 
@@ -90,8 +90,8 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 
   if (newDocument.numberOfModules() > 0 ) {
     // submit to database
-    database.create_document(newDocument.export()).then( result => {
-      res.render("document/create_document", {loggedin: req.session.login});
+    database.createDocument(newDocument.export()).then( result => {
+      res.render("document/createDocument", {loggedin: req.session.login});
     });
   } else {
     logger.warning("Warning: submitting an empty document (no modules) to the database.");
@@ -115,7 +115,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //     // search for any title that contains the substring provided by the user
 //     var regex = new RegExp(params, 'i');
 //     var search_args = { title: {$regex: regex} };
-//     database.query_for_posts(search_args).then(posts => {
+//     database.queryForPosts(search_args).then(posts => {
 //       // logic for presenting search results is in ajax.js
 //       res.send( { posts: posts } );
 //       res.end();
@@ -167,7 +167,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //   // extract the ID of the post from the post request
 //   var id = Sanitizer.clean(req.body.id);
 //   // get the post using its ID
-//   database.find_post_by_id(id).then( post => {
+//   database.findPostById(id).then( post => {
 //       // load the found post
 //       var to_edit = new Post(post);
 //       // give user a page to edit the content
@@ -198,7 +198,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //       // we have the new file, delete the old one
 //       if(req.body.editSnippet != undefined) {
 //         // get the post using its ID
-//         database.find_post_by_id(req.body.id).then( post => {
+//         database.findPostById(req.body.id).then( post => {
 //           logger.log_info("Editing snippet for post, deleting old one.");
 //           fs.unlinkSync(post.snippet);
 //         }).catch( err => {
@@ -228,7 +228,7 @@ app.get('/logout', function (req, res, next) {
 // get request for login page
 app.get("/admin", record, authenticate, function (req, res, next){
   // iterate over all the posts in the database
-  database.get_all_posts({}).then( posts => {
+  database.getAllPosts({}).then( posts => {
     var all_posts = new Array();
     // TODO: Move this to the post class?
     // decode special characters in lists of posts
@@ -238,7 +238,7 @@ app.get("/admin", record, authenticate, function (req, res, next){
       all_posts.push(temp_post.export_to_view());
     });
     // get the visitor information as well and pass it to pug page
-    database.query_for_visitors({}).then( visitors => {
+    database.queryForVisitors({}).then( visitors => {
       var all_visitors = new Array();
       visitors.forEach(function(visit, index, arr) {
         visitor_args = { id: visit._id, last_visit: visit.last_visit, first_visit: visit.first_visit, location_string: visit.location_string, ip: visit.ip, visits: visit.visits };

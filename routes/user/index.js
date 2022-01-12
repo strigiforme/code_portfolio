@@ -31,7 +31,7 @@ app.get('/', record ,function (req, res, next) {
 
 app.get('/document_test', function (req, res, next) {
   var document_id = req.query.doc;
-  var document_view = database.find_document_by_id(document_id).then( doc => {
+  var document_view = database.findDocumentById(document_id).then( doc => {
     var clean_doc = new Document(doc);
     logger.log_debug("Document: " + clean_doc.toString());
     logger.log_debug("Rendered HTML: " + clean_doc.render());
@@ -56,7 +56,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
     query = { type:postType };
   }
   // query mongodb for all posts
-  database.query_for_posts(query).then( posts => {
+  database.queryForPosts(query).then( posts => {
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
       post_args = { id: post.id, title: post.title, content: post.content, type: post.type};
@@ -76,7 +76,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
 // view individual post
 app.get("/posts/view_post", record, function (req,res,next) {
   var id = Sanitizer.clean(req.query.id);
-  database.find_post_by_id(id).then( post =>  {
+  database.findPostById(id).then( post =>  {
     var to_view = new Post(post);
     // check if this post has a code snippet -- This should be moved somewhere else
     if (to_view.has_snippet) {

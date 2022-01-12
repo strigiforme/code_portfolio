@@ -27,13 +27,13 @@ var ip_callback = function(req, res, next) {
   // hash the IP to protect the users privacy
   var hash = crypto.createHash('sha256').update(visitorAddress).digest('hex');
 
-  database.find_visitor_by_ip(hash).then(visitor => {
+  database.findVisitorByIp(hash).then(visitor => {
     // we haven't seen this IP before
     if (visitor == null) {
       // Get their physical location using their IP
       var location = locate.lookup(visitorAddress);
       var now = new Date()
-      database.create_visitor({lastvisit: now, firstvisit: now, location_string: JSON.stringify(location), ip: hash, visits: 1}).then(result => {
+      database.createVisitor({lastvisit: now, firstvisit: now, location_string: JSON.stringify(location), ip: hash, visits: 1}).then(result => {
         next();
       }).catch( err => {
         logger.log_error("Unable to save visitor IP:" + err);
@@ -43,7 +43,7 @@ var ip_callback = function(req, res, next) {
       // take the visitor and increment their visits
       visitor.visits += 1;
       visitor.lastvisit = new Date();
-      database.edit_visitor(visitor._id, visitor).then(result => {
+      databaseeditVisitor(visitor._id, visitor).then(result => {
         next();
       }).catch( err => {
         logger.log_err("Unable to increment visitor count: " + err);

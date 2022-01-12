@@ -98,7 +98,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
     authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
     authenticator.doAddAdmin = false;
-    database.create_admin(req.session.email).then( () => {
+    database.createAdmin(req.session.email).then( () => {
       logger.log_info("Admin account " + req.session.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
       authenticator.isAccessCodeValid = false;
