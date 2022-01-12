@@ -25,7 +25,7 @@ class AccessCodeManager {
    * @param {Subarg} code Optional access code. Will prompt for code if not used
    * @throw {Error} If access code is empty or file cannot be created
    */
-  create_access_code(args) {
+  createAccessCode(args) {
     if (!args.code) {
       // Does not use logger since this should be displayed no matter what
       console.log("Access code file does not exist yet.")
@@ -55,7 +55,7 @@ class AccessCodeManager {
    * @return {Boolean} Whether or not the code matches
    * @throw {Error} If file could not be opened
    */
-  check_access(code) {
+  checkAccess(code) {
     return new Promise( (resolve, reject) => {
       var hashcode = crypto.createHash('sha256').update(code).digest('hex');
       logger.log_info("Received access code '" + code + "'" );
@@ -77,7 +77,7 @@ class AccessCodeManager {
    * Set file name
    * @param {String} filename The new file name to set
    */
-   set_filename(filename) {
+   setFilename(filename) {
      var re = /.*\.txt/
      if ( !re.test(filename) ) {
        throw new Error("Filename does not end in .txt");
@@ -90,7 +90,7 @@ class AccessCodeManager {
    * Delete the access file
    * @throw {Error} filesystem error when deleting
    */
-   delete_access_file() {
+   deleteAccessFile() {
      fs.unlinkSync(this.filename);
    }
 
@@ -98,7 +98,7 @@ class AccessCodeManager {
    * Does the access file exit already?
    * @return {Boolean} If access file can be found
    */
-  access_file_exists() {
+  accessFileExists() {
     return fs.existsSync(this.filename);
   }
 
@@ -106,7 +106,7 @@ class AccessCodeManager {
    * Is there an administrator account?
    * @return {Boolean} If admin account exists according to authenticator
    */
-  admin_exists() {
+  adminExists() {
     return authenticator.adminExists;
   }
 }
