@@ -17,7 +17,7 @@ class Authenticator {
    * Construct the Authenticator
    * @param {String} adminAccount The email address of the administrators account.
    * @param {Boolean} addAdminFlag boolean flag that identifies if we are in 'new' mode. (No admin exists, and we need to add one)
-   * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the access_code module.
+   * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the accessCode module.
    * @param {Database} database reference to the database module.
    * @param {Boolean} adminEnabled whether or not to check for admin account
    */

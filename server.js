@@ -11,7 +11,7 @@ Description: Main route and logic handler for node application. Everything that
 // dependencies
 const express            = require("express");
 const fs                 = require("fs");
-const accessCodeManager    = require("access_code");
+const accessCodeManager  = require("accessCode");
 const authenticator      = require("authenticator");
 const database           = require("database");
 const logger             = require("logger");
@@ -38,7 +38,7 @@ logger.initialize( { level:"DEBUG" } );
 
 if (!accessCodeManager.accessFileExists()) {
   // generate the users access code if it doesn't exist
-  accessCodeManager.create_access_code({});
+  accessCodeManager.create_accessCode({});
 }
 
 // initialize app

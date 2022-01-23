@@ -1,8 +1,8 @@
 {
-  "name": "access_code",
+  "name": "accessCode",
   "version": "1.0.0",
   "description": "",
-  "main": "access_code.js",
+  "main": "accessCode.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

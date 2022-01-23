@@ -14,7 +14,7 @@
   "author": "Howard Pearce",
   "license": "ISC",
   "dependencies": {
-    "access_code": "file:modules/access_code",
+    "accessCode": "file:modules/accessCode",
     "angular": "^1.8.2",
     "authenticator": "file:modules/authenticator",
     "database": "file:modules/database",

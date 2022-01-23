@@ -1,6 +1,6 @@
 /**
 
-File: access_code.js
+File: accessCode.js
 Author: Howard Pearce
 Last Edit: May 2, 2021
 Description: Handles generation and management of the application's access code.
