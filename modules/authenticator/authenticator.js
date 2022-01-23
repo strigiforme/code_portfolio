@@ -39,7 +39,7 @@ class Authenticator {
       this.adminAccount = result.account;
       this.addAdminFlag = result.new;
     } catch (error) {
-      logger.log_error("ERROR: promise rejection while getting administrator account email: " + error);
+      logger.error("ERROR: promise rejection while getting administrator account email: " + error);
     }
   }
 

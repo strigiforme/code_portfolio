@@ -62,7 +62,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
-logger.log_info("Loading Routes");
+logger.info("Loading Routes");
 app.use(auth);
 app.use(user);
 app.use(admin);
@@ -70,10 +70,10 @@ app.use(admin);
 // for receiving post requests
 // app.use(express.json())
 
-logger.log_info("Creating HTTP server on port 80");
+logger.info("Creating HTTP server on port 80");
 http.createServer(app).listen(80);
-logger.log_info("Creating HTTPS server on port 443")
+logger.info("Creating HTTPS server on port 443")
 https.createServer(options, app).listen(443);
 
 app.set('view engine', 'pug');
-logger.log_info("Started server successfully.");
+logger.info("Started server successfully.");

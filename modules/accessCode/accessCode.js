@@ -58,14 +58,14 @@ class AccessCodeManager {
   checkAccess(code) {
     return new Promise( (resolve, reject) => {
       var hashcode = crypto.createHash('sha256').update(code).digest('hex');
-      logger.log_info("Received access code '" + code + "'" );
-      logger.log_debug("Converted to hash '" + hashcode + "'");
+      logger.info("Received access code '" + code + "'" );
+      logger.debug("Converted to hash '" + hashcode + "'");
       // get the code stored locally
       fs.readFile(this.filename, 'utf8', function (err, data) {
         if (err) {
           reject(err);
         } else {
-          logger.log_debug("Loaded access code hash '" + data + "' from file.");
+          logger.debug("Loaded access code hash '" + data + "' from file.");
           // compare the submitted code to the stored one
           resolve(hashcode == data);
         }

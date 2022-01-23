@@ -33,8 +33,8 @@ app.get('/document_test', function (req, res, next) {
   var document_id = req.query.doc;
   var document_view = database.findDocumentById(document_id).then( doc => {
     var clean_doc = new Document(doc);
-    logger.log_debug("Document: " + clean_doc.toString());
-    logger.log_debug("Rendered HTML: " + clean_doc.render());
+    logger.debug("Document: " + clean_doc.toString());
+    logger.debug("Rendered HTML: " + clean_doc.render());
     res.render("document", { doc : clean_doc });
     res.end();
   });
@@ -68,7 +68,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
     // end request
     res.end();
   }).catch( err => {
-      logger.log_error(err);
+      logger.error(err);
       next(err);
   });
 });
@@ -80,7 +80,7 @@ app.get("/posts/view_post", record, function (req,res,next) {
     var to_view = new Post(post);
     // check if this post has a code snippet -- This should be moved somewhere else
     if (to_view.has_snippet) {
-      logger.log_debug("Loaded post has a code snippet");
+      logger.debug("Loaded post has a code snippet");
       // extract the snippet path of the post
       snippetPath = to_view.post_snippet_path;
       // check if the file exists
@@ -92,13 +92,13 @@ app.get("/posts/view_post", record, function (req,res,next) {
         } else {
           var args = "";
         }
-        logger.log_info(`Executing cmd: 'python ${post.snippet} ${args}`);
+        logger.info(`Executing cmd: 'python ${post.snippet} ${args}`);
         // execute the snippet
         exec("python " + to_view.snippet + " " + args, (error, stdout, stderr) => {
           // check for errors
-          if (error) { logger.log_error(`Code failed to execute: ${error.message}`); }
+          if (error) { logger.error(`Code failed to execute: ${error.message}`); }
           // debug the output
-          logger.log_debug(`Code executed with output: '${stdout}'`);
+          logger.debug(`Code executed with output: '${stdout}'`);
           // preprocess the output
           var output = unescape(stdout).split("\n")
           // send user to view post page with data about the post
@@ -107,17 +107,17 @@ app.get("/posts/view_post", record, function (req,res,next) {
           res.end();
         });
       } else {
-        logger.log_error("Couldn't find uploaded code snippet at: '" + snippetPath + "'");
+        logger.error("Couldn't find uploaded code snippet at: '" + snippetPath + "'");
       }
     } else {
-      logger.log_info("Viewing normal post:");
+      logger.info("Viewing normal post:");
       // send user to view post page with data about the post
       res.render("posts/viewpost", {loggedin: req.session.login, postdata: to_view.export_to_view()});
       // end request
       res.end();
     }
   }).catch( err => {
-    logger.log_error(err);
+    logger.error(err);
     next(err);
   });
 });

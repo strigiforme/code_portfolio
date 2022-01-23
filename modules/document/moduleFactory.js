@@ -20,7 +20,7 @@ module.exports = class ModuleFactory {
   static createModule(name) {
     switch (name) {
       case "paragraph":
-        logger.log_info("Creating paragraph module")
+        logger.info("Creating paragraph module")
         var newModule = new Module(
           {
             html : "<p class='module-paragraph'> ? </p>",
@@ -30,7 +30,7 @@ module.exports = class ModuleFactory {
         return newModule
         break
       case "image":
-        logger.log_info("Creating image module")
+        logger.info("Creating image module")
         var newModule = new Module(
           {
             html : "<img src=\"?\" class='module-image'/>",
@@ -40,7 +40,7 @@ module.exports = class ModuleFactory {
         return newModule
         break
       default:
-        logger.log_error("Module does not exist.")
+        logger.error("Module does not exist.")
     }
   }
 

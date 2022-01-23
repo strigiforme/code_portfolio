@@ -20,7 +20,7 @@ module.exports = class Location {
     try {
       var parse = JSON.parse(location_string);
     } catch (error) {
-      logger.log_trace(`Unable to parse location string '${location_string}'`);
+      logger.trace(`Unable to parse location string '${location_string}'`);
     }
 
     // ignore empty strings
@@ -59,7 +59,7 @@ module.exports = class Location {
     output += "metro: '"     + this.metro    + "'\n";
     output += "area: '"      + this.area     + "'\n";
     output += "eu: '"        + this.eu       + "'\n";
-    logger.log_info(output);
+    logger.info(output);
   }
 
   clean() {

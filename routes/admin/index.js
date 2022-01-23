@@ -43,7 +43,7 @@ app.get("/get_module_html", authenticate, function (req, res, next) {
   if (moduleName != undefined && moduleCount != undefined ) {
     try {
       var moduleHTML = ModuleFactory.getModuleHTML(moduleName, moduleCount);
-      logger.log_debug("Returning HTML '" + moduleHTML + "' to module HTML request");
+      logger.debug("Returning HTML '" + moduleHTML + "' to module HTML request");
       res.send(moduleHTML);
       res.end();
     } catch (error) {
@@ -52,7 +52,7 @@ app.get("/get_module_html", authenticate, function (req, res, next) {
       });
     }
   } else {
-    logger.log_error("Unable to retrieve input HTML for module '" + req.query.module + "'");
+    logger.error("Unable to retrieve input HTML for module '" + req.query.module + "'");
     res.end();
   }
 });
@@ -78,11 +78,11 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
       if ( ModuleFactory.isModule(moduleName) ) {
         // construct a module from the user's input
         var newModule = ModuleFactory.createModule(moduleName);
-        logger.log_info(`first module after creating it: ${newModule.toString()}`);
+        logger.info(`first module after creating it: ${newModule.toString()}`);
         newModule.add_input(value);
         newDocument.addModule(newModule);
       } else {
-        logger.log_error(`Module type '${moduleName}' does not exist.`);
+        logger.error(`Module type '${moduleName}' does not exist.`);
         // TODO: implement proper rejection. Should probably throw if this happens
       }
     }
@@ -120,7 +120,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //       res.send( { posts: posts } );
 //       res.end();
 //     }).catch( error => {
-//       logger.log_error(`Error occurred while searching for posts.
+//       logger.error(`Error occurred while searching for posts.
 //                         Unable to return search request: ${error}`);
 //       res.end();
 //     });
@@ -130,7 +130,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 // upload a new post to database
 // app.post("/posts/upload-post", upload.single("code"), function (req, res, next) {
 //     if ( req.fileValidationError ) {
-//       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
+//       logger.warning("Rejecting file upload: " + req.fileValidationError);
 //       return res.redirect("uploaderror");
 //     }
 //     // construct args for post object
@@ -157,7 +157,7 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //     res.redirect("/admin?delete=true");
 //     res.end();
 //   }).catch( err => {
-//     logger.log_error(err)
+//     logger.error(err)
 //     next(err);
 //   });
 // });
@@ -183,26 +183,26 @@ app.post("/document/upload", upload.any(), authenticate, function (req, res, nex
 //   var post_args = {id:req.body.id, title:req.body.title, content:req.body.content, type:req.body.type, snippet: undefined}
 //   //upload(req, res, function(err) {
 //     if ( req.fileValidationError ) {
-//       logger.log_warning("Rejecting file upload: " + req.fileValidationError);
+//       logger.warning("Rejecting file upload: " + req.fileValidationError);
 //       return res.redirect("uploaderror");
 //     }
 //     // else if (err) {
-//     //   logger.log_warning("Rejecting file upload: " + err);
+//     //   logger.warning("Rejecting file upload: " + err);
 //     //   return res.redirect("uploaderror");
 //     // }
 //     // check if new post edit has a file
 //     if (req.file) {
-//       logger.log_info("New code snippet submitted.")
+//       logger.info("New code snippet submitted.")
 //       // does not need to be escaped since we generate the name within the portfolio
 //       post_args.snippet = req.file.path;
 //       // we have the new file, delete the old one
 //       if(req.body.editSnippet != undefined) {
 //         // get the post using its ID
 //         database.findPostById(req.body.id).then( post => {
-//           logger.log_info("Editing snippet for post, deleting old one.");
+//           logger.info("Editing snippet for post, deleting old one.");
 //           fs.unlinkSync(post.snippet);
 //         }).catch( err => {
-//           logger.log_error(err);
+//           logger.error(err);
 //           next(err);
 //         });
 //       }

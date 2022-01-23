@@ -14,16 +14,16 @@ var Sanitizer    = middleware.sanitizer;
 module.exports = class Module {
 
   constructor(args) {
-    logger.log_debug("Creating module from args:");
-    logger.log_debug(`module_type: ${args.module_type}`);
+    logger.debug("Creating module from args:");
+    logger.debug(`module_type: ${args.module_type}`);
     this.module_type = args.module_type;
-    logger.log_debug(`id: ${args.id}`);
+    logger.debug(`id: ${args.id}`);
     this.id = args.id;
-    logger.log_debug(`html: ${args.html}`);
+    logger.debug(`html: ${args.html}`);
     this.html = args.html;
-    logger.log_debug(`inputFields: ${args.inputFields}`);
+    logger.debug(`inputFields: ${args.inputFields}`);
     this.inputFields = args.inputFields || [];
-    logger.log_debug(`sanitized: ${args.sanitized}`);
+    logger.debug(`sanitized: ${args.sanitized}`);
     this.sanitized = args.sanitized || false;
 
     if (this.sanitized) {

@@ -38,7 +38,7 @@ class Logger {
    * @param {json} args list of arguments to provide the logger
    */
   initialize(args) {
-    this.log_info("Starting logger module")
+    this.info("Starting logger module")
 
     if (!args) {
       args = {}
@@ -52,7 +52,7 @@ class Logger {
     }
 
     if ( args.level ) {
-      this.set_level(args.level);
+      this.setLevel(args.level);
     }
   }
 
@@ -60,15 +60,15 @@ class Logger {
    * Set the logging level after checking it's valid
    * @param {String} level The new logging level
    */
-  set_level(level) {
-    this.log_limit = this.get_level(level);
+  setLevel(level) {
+    this.log_limit = this.getLevel(level);
   }
 
   /**
    * Set the logging function to be the one provided
    * @param {Function} func The new logging function to be used
    */
-   set_function(func) {
+   setFunction(func) {
      this.log_function = func;
    }
 
@@ -77,7 +77,7 @@ class Logger {
    * @param {String} level The level to be verified
    * @return {Boolean} false if the level does not exist, true if it does
    */
-  is_level(level) {
+  isLevel(level) {
     if ( levels.has(level) ) {
       return true
     }
@@ -89,8 +89,8 @@ class Logger {
    * @param {String} level The level to search for
    * @throws error if the level does not exist
    */
-   get_level(level) {
-     if ( this.is_level(level) ) {
+   getLevel(level) {
+     if ( this.isLevel(level) ) {
        return levels.get(level);
      } else {
        throw new Error(`Logging level \'${level}\' provided does not exist.
@@ -103,7 +103,7 @@ class Logger {
    * @param {String} level The log level to be verified
    * @return {Boolean} Whether the log level is within limit
    */
-  within_limit(level) {
+  withinLimit(level) {
     if ( levels.has(level) ) {
       if ( levels.get(level) <= this.log_limit) {
         return true;
@@ -120,7 +120,7 @@ class Logger {
    * Log information using the logger
    * @param {String} msg The message to be logged
    */
-  log_info(msg) {
+  info(msg) {
     return this.log("INFO", msg);
   }
 
@@ -128,7 +128,7 @@ class Logger {
    * Log information using the logger
    * @param {String} msg The message to be logged
    */
-  log_warning(msg) {
+  warning(msg) {
     return this.log("WARNING", msg);
   }
 
@@ -136,7 +136,7 @@ class Logger {
    * Log errors using the logger
    * @param {String} msg The message to be logged
    */
-  log_error(msg) {
+  error(msg) {
     return this.log("ERROR", msg);
   }
 
@@ -144,7 +144,7 @@ class Logger {
    * Log debug using the logger
    * @param {String} msg The message to be logged
    */
-  log_debug(msg) {
+  debug(msg) {
     return this.log("DEBUG", msg);
   }
 
@@ -152,7 +152,7 @@ class Logger {
    * Log trace using the logger
    * @param {String} msg The message to be logged
    */
-  log_trace(msg) {
+  trace(msg) {
     return this.log("TRACE", msg);
   }
 
@@ -162,7 +162,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log(level, msg) {
-    if ( this.within_limit(level)) {
+    if ( this.withinLimit(level)) {
       var now = new Date();
       var format_date = `${now.getFullYear()}-${(now.getMonth() + 1)}-${now.getDate()} ${('0' + now.getHours()).slice(-2)}:${('0' + now.getMinutes()).slice(-2)}:${('0' + now.getSeconds()).slice(-2)}`;
       return this.log_function(`${format_date} ${level}: ${msg}`);

@@ -31,13 +31,13 @@ class Database {
    */
   connect(uri) {
     return new Promise( async (resolve, reject) => {
-      logger.log_info(`Connecting to MongoDB instance at: '${uri}'...`);
+      logger.info(`Connecting to MongoDB instance at: '${uri}'...`);
       let ctx = this;
       // connect to local db instance
       mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
         // get the database obj from the connection
         ctx.mongodb = mongoose.connection;
-        logger.log_info(`Connected successfully.`);
+        logger.info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
         ctx.documentSchema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, module_type : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
         ctx.postSchema = mongoose.Schema ({ title : String, type: String, snippet : String, content : String });
@@ -65,17 +65,17 @@ class Database {
   // Document related queries --------------------------------------------------
 
   createDocument(data) {
-    logger.log_debug(`Attempting to create document in database`);
+    logger.debug(`Attempting to create document in database`);
     return queries.create_record(data, this.documentModel);
   }
 
   findDocumentById(id) {
-    logger.log_debug(`Attempting to query for single document with ID '${id}'`);
+    logger.debug(`Attempting to query for single document with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.documentModel);
   }
 
   queryForDocuments(query) {
-    logger.log_debug(`Attempting to query for documents using query: ${query}`)
+    logger.debug(`Attempting to query for documents using query: ${query}`)
     return queries.find_many_records(query, this.documentModel);
   }
 
@@ -84,7 +84,7 @@ class Database {
   }
 
   editDocument( id, data ) {
-    logger.log_debug("Attempting to edit document");
+    logger.debug("Attempting to edit document");
     return queries.edit_record(id, data, this.documentModel);
   }
 
@@ -96,7 +96,7 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
   createVisitor(data) {
-    logger.log_debug("Attempting to create visitor record.");
+    logger.debug("Attempting to create visitor record.");
     return queries.create_record(data, this.visitorModel);
   }
 
@@ -113,7 +113,7 @@ class Database {
    * @return {Promise} Promise object with query result
    */
   queryForVisitors(query) {
-    logger.log_debug(`Attempting to query for visitors using query: ${query}`)
+    logger.debug(`Attempting to query for visitors using query: ${query}`)
     return queries.find_many_records(query, this.visitorModel);
   }
 
@@ -123,7 +123,7 @@ class Database {
    * @return {Promise} Promise object with result
    */
   findVisitorByIp(ip) {
-    logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
+    logger.debug(`Attempting to query for single visitor with IP '${ip}'`);
     return queries.find_single_record({ ip: ip }, this.visitorModel);
   }
 
@@ -133,7 +133,7 @@ class Database {
    * @return {Promise} Promise object with result
    */
   deleteVisitor(id) {
-    logger.log_debug(`Attempting to delete visitor with ID '${id}'`);
+    logger.debug(`Attempting to delete visitor with ID '${id}'`);
     return queries.delete_record({ _id : id }, this.visitorModel);
   }
 
@@ -149,10 +149,10 @@ class Database {
       var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
       // send the query
       edit_query.exec().then( visitor => {
-        logger.log_trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
+        logger.trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
         resolve(visitor);
       }).catch( err => {
-        logger.log_error(`Unable to edit visitor with id: '${id}': ${err}`);
+        logger.error(`Unable to edit visitor with id: '${id}': ${err}`);
         reject(err);
       });
     });
@@ -166,7 +166,7 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
   createPost(data) {
-    logger.log_debug(`Attempting to create post record: ${data}`);
+    logger.debug(`Attempting to create post record: ${data}`);
     return queries.create_record(data, this.postModel);
   }
 
@@ -184,7 +184,7 @@ class Database {
    * @return {Promise} Promise object with query result
    */
   queryForPosts(query) {
-    logger.log_debug(`Attempting to query for posts using query: ${query}`)
+    logger.debug(`Attempting to query for posts using query: ${query}`)
     return queries.find_many_records(query, this.postModel);
   }
 
@@ -194,7 +194,7 @@ class Database {
    * @return {Promise} Promise object with result
    */
   findPostById(id) {
-    logger.log_debug(`Attempting to query for single post with ID '${id}'`);
+    logger.debug(`Attempting to query for single post with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.postModel);
   }
 
@@ -205,7 +205,7 @@ class Database {
    * @return {Promise} Promise object with result
    */
   editPost(id, new_post) {
-    logger.log_debug(`Attempting edit query for post with ID '${id}'`);
+    logger.debug(`Attempting edit query for post with ID '${id}'`);
     return queries.edit_record({ _id : id }, new_post, this.postModel);
   }
 
@@ -225,19 +225,19 @@ class Database {
           try {
             // remove the code snippet tied to this post if it exists
             if(post.snippet != undefined) {
-              logger.log_info("post has a snippet, attempting deletion.");
+              logger.info("post has a snippet, attempting deletion.");
               fs.unlinkSync(post.snippet);
             }
           } catch (err) {
-            logger.log_error(`Unable to delete code snippet: ${err}`);
+            logger.error(`Unable to delete code snippet: ${err}`);
             reject(err);
           }
-          logger.log_info(`Successfully deleted post with id '${id}'`);
+          logger.info(`Successfully deleted post with id '${id}'`);
           resolve(post);
         }
         reject(post);
       }).catch( err => {
-        logger.log_error(`Unable to delete post with id '${id}'`);
+        logger.error(`Unable to delete post with id '${id}'`);
         reject(err);
       });
     });
@@ -251,7 +251,7 @@ class Database {
    * @return {Promise} Promise object with upload result
    */
    createAdmin(email) {
-     logger.log_debug(`Attempting to create admin with email: ${email}`);
+     logger.debug(`Attempting to create admin with email: ${email}`);
      return queries.create_record({email: email}, this.adminModel);
    }
 
@@ -261,7 +261,7 @@ class Database {
     * @return {Promise} Promise object with query result
     */
    queryForAdmins(query) {
-     logger.log_debug(`Attempting to query for posts using query: ${query}`);
+     logger.debug(`Attempting to query for posts using query: ${query}`);
      return queries.find_many_records(query, this.adminModel);
    }
 
@@ -281,17 +281,17 @@ class Database {
       admin_query.exec().then( admins => {
         if (admins.length > 1) {
           // there should only be one admin account. Log an warning and move on.
-          logger.log_warning("More than one admin account is present. This currently should not be possible. "
+          logger.warning("More than one admin account is present. This currently should not be possible. "
           + "Manual removal of 1 or more accounts should be performed. Selecting the first admin account in the collection.")
           // select the first one
           adminAccount = admins[0].email;
-          logger.log_info(`Retrieved ${adminAccount} as administrator account email.`)
+          logger.info(`Retrieved ${adminAccount} as administrator account email.`)
         } else if (admins.length == 1) {
           // this is the expected case, return the email at index 0
           adminAccount = admins[0].email;
-          logger.log_info(`Retrieved '${adminAccount}' as administrator account email.`)
+          logger.info(`Retrieved '${adminAccount}' as administrator account email.`)
         } else {
-          logger.log_info("Unable to find an administrator account. In new Email mode.");
+          logger.info("Unable to find an administrator account. In new Email mode.");
           newEmail = true;
         }
         // return the extracted values

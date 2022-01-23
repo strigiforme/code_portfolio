@@ -36,7 +36,7 @@ module.exports = class Visitor {
     output += "first visit: '"     + this.first_visit    + "'\n";
     output += "last visit: '"      + this.last_visit + "'\n";
 
-    logger.log_info(output);
+    logger.info(output);
   }
 
   clean() {
