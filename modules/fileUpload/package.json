@@ -1,8 +1,8 @@
 {
-  "name": "file_upload",
+  "name": "fileUpload",
   "version": "1.0.1",
   "description": "",
-  "main": "file_upload.js",
+  "main": "fileUpload.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
