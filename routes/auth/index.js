@@ -16,7 +16,7 @@ var session         = require("express-session");
 var database        = require("database");
 var logger          = require("logger");
 var middleware      = require("middleware");
-var accessCode_mgr = require("accessCode");
+var accessCodeMgr   = require("accessCode");
 var authenticator   = require("authenticator");
 var Sanitizer = middleware.sanitizer;
 
@@ -70,7 +70,7 @@ app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
   var code = Sanitizer.clean(req.body.code);
   try {
-    var matches = accessCode_mgr.check_access(code);
+    var matches = accessCodeMgr.check_access(code);
     if (matches) {
       logger.info("Submitted code matches stored example. Next submitted email will become administrator account.");
       authenticator.isAccessCodeValid = true;

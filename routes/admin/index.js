@@ -233,9 +233,9 @@ app.get("/admin", record, authenticate, function (req, res, next){
     // TODO: Move this to the post class?
     // decode special characters in lists of posts
     posts.forEach(function(post, index, arr) {
-      post_args = { id: post.id, title: post.title, content: post.content, type: post.type };
-      var temp_post = new Post(post_args);
-      all_posts.push(temp_post.export_to_view());
+      postArgs = { id: post.id, title: post.title, content: post.content, type: post.type };
+      var tempPost = new Post(postArgs);
+      all_posts.push(tempPost.export_to_view());
     });
     // get the visitor information as well and pass it to pug page
     database.queryForVisitors({}).then( visitors => {
