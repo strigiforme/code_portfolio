@@ -16,7 +16,7 @@ var session         = require("express-session");
 var database        = require("database");
 var logger          = require("logger");
 var middleware      = require("middleware");
-var access_code_mgr = require("access_code");
+var accessCodeMgr   = require("accessCode");
 var authenticator   = require("authenticator");
 var Sanitizer = middleware.sanitizer;
 
@@ -70,18 +70,18 @@ app.post('/auth/newadmin', function (req, res, next) {
   // extract the code submitted by the user
   var code = Sanitizer.clean(req.body.code);
   try {
-    var matches = access_code_mgr.check_access(code);
+    var matches = accessCodeMgr.check_access(code);
     if (matches) {
-      logger.log_info("Submitted code matches stored example. Next submitted email will become administrator account.");
+      logger.info("Submitted code matches stored example. Next submitted email will become administrator account.");
       authenticator.isAccessCodeValid = true;
       res.redirect("/auth/google");
     } else {
-      logger.log_info("Submitted code does not match stored example.");
+      logger.info("Submitted code does not match stored example.");
       authenticator.isAccessCodeValid = false;
       res.redirect("/auth/newadmin?access=false");
     }
   } catch( err ) {
-    logger.log_error("Error occurred while comparing access code: " + err);
+    logger.error("Error occurred while comparing access code: " + err);
     res.redirect("/");
   }
 });
@@ -94,28 +94,28 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   req.session.email = userProfile.emails[0].value;
   // check if the submitted email should be made an administrator
   if ( authenticator.isAccessCodeValid ) {
-    logger.log_info("Adding email " + req.session.email + " as the administrator account.");
+    logger.info("Adding email " + req.session.email + " as the administrator account.");
     authenticator.admin = req.session.email;
     // turn off the newEmail flag to rerturn to base case
     authenticator.doAddAdmin = false;
-    database.create_admin(req.session.email).then( () => {
-      logger.log_info("Admin account " + req.session.email + " successfully uploaded.");
+    database.createAdmin(req.session.email).then( () => {
+      logger.info("Admin account " + req.session.email + " successfully uploaded.");
       // turn off flag to ensure we don't add more administrators by accident.
       authenticator.isAccessCodeValid = false;
     }).catch(err => {
-      logger.log_error(`Error occurred adding administrator email: ${err}`);
+      logger.error(`Error occurred adding administrator email: ${err}`);
     });
   }
 
   // check if the email for the user's profile is authorized
   if(req.session.email == authenticator.admin) {
     req.session.login = true;
-    logger.log_info("User email '" + req.session.email + "' successfully authenticated.");
+    logger.info("User email '" + req.session.email + "' successfully authenticated.");
     res.redirect("/admin");
   } else {
     req.session.login = false;
-    logger.log_info("User email '" + req.session.email + "' was rejected.");
-    logger.log_debug("Did not match administrator account '" + authenticator.admin + "'")
+    logger.info("User email '" + req.session.email + "' was rejected.");
+    logger.debug("Did not match administrator account '" + authenticator.admin + "'")
     res.redirect("/?login=false");
   }
 });

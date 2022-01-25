@@ -1,36 +1,36 @@
 /**
 
-File: access_code.test.js
+File: accessCode.test.js
 Author: Howard Pearce
 Last Edit: July 12, 2021
-Description: Test suite for access_code package
+Description: Test suite for accessCode package
 
 **/
 
-var access_code_mgr = require("access_code");
+var accessCodeMgr = require("accessCode");
 
 test("Test Create Access Code", () => {
-  access_code_mgr.create_access_code( { code: "test" } );
+  accessCodeMgr.createAccessCode( { code: "test" } );
 });
 
 test("Test Access Code fails for small string", () => {
   expect( () => {
-    access_code_mgr.create_access_code( { code: "f" } );
+    accessCodeMgr.createAccessCode( { code: "f" } );
   }).toThrow();
 });
 
 test("Test Check Access", () => {
-  access_code_mgr.check_access( "test" ).then( result => {
+  accessCodeMgr.checkAccess( "test" ).then( result => {
     expect(result).toBe(true);
   });
-  access_code_mgr.check_access( "bad_value" ).then( result => {
+  accessCodeMgr.checkAccess( "bad_value" ).then( result => {
     expect(result).toBe(false);
   })
 });
 
 test("Set Filename test", () => {
   try {
-    expect(access_code_mgr.set_filename("test"));
+    expect(accessCodeMgr.setFilename("test"));
   } catch (e) {
     expect(e.message).toBe("Filename does not end in .txt")
   }

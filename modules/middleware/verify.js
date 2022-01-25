@@ -9,7 +9,7 @@ Description: Callback function to create limited access areas of software
 
 var authenticator = require("authenticator");
 
-var auth_callback = function (req, res, next) {
+var authCallback = function (req, res, next) {
   // check if we're allowed to be here
   if (authenticator.authEnabled) {
     if(!req.session.login){
@@ -27,4 +27,4 @@ var auth_callback = function (req, res, next) {
   next();
 }
 
-module.exports = auth_callback;
+module.exports = authCallback;

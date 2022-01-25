@@ -31,13 +31,13 @@ class Database {
    */
   connect(uri) {
     return new Promise( async (resolve, reject) => {
-      logger.log_info(`Connecting to MongoDB instance at: '${uri}'...`);
+      logger.info(`Connecting to MongoDB instance at: '${uri}'...`);
       let ctx = this;
       // connect to local db instance
       mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
         // get the database obj from the connection
         ctx.mongodb = mongoose.connection;
-        logger.log_info(`Connected successfully.`);
+        logger.info(`Connected successfully.`);
         // set up the schemas for the database - these represent the individual objects in mongodb
         ctx.documentSchema = mongoose.Schema ({ title: String, metadata: { date : Date, tags : String }, modules : [{ id : String, module_type : String, html : String, numInputs : Number, inputFields: [{type : String}], sanitized: Boolean}], sanitized : Boolean });
         ctx.postSchema = mongoose.Schema ({ title : String, type: String, snippet : String, content : String });
@@ -64,27 +64,27 @@ class Database {
 
   // Document related queries --------------------------------------------------
 
-  create_document(data) {
-    logger.log_debug(`Attempting to create document in database`);
+  createDocument(data) {
+    logger.debug(`Attempting to create document in database`);
     return queries.create_record(data, this.documentModel);
   }
 
-  find_document_by_id(id) {
-    logger.log_debug(`Attempting to query for single document with ID '${id}'`);
+  findDocumentById(id) {
+    logger.debug(`Attempting to query for single document with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.documentModel);
   }
 
-  query_for_documents(query) {
-    logger.log_debug(`Attempting to query for documents using query: ${query}`)
+  queryForDocuments(query) {
+    logger.debug(`Attempting to query for documents using query: ${query}`)
     return queries.find_many_records(query, this.documentModel);
   }
 
-  get_all_documents() {
-    return this.query_for_documents({});
+  getAllDocuments() {
+    return this.queryForDocuments({});
   }
 
-  edit_document( id, data ) {
-    logger.log_debug("Attempting to edit document");
+  editDocument( id, data ) {
+    logger.debug("Attempting to edit document");
     return queries.edit_record(id, data, this.documentModel);
   }
 
@@ -95,16 +95,16 @@ class Database {
    * @param {Visitor} data The required data for a visitor object
    * @return {Promise} Promise object with upload result
    */
-  create_visitor(data) {
-    logger.log_debug("Attempting to create visitor record.");
+  createVisitor(data) {
+    logger.debug("Attempting to create visitor record.");
     return queries.create_record(data, this.visitorModel);
   }
 
   /**
-   * Returns all available visitors - a wrapper for query_for_visitors
+   * Returns all available visitors - a wrapper for queryForVisitors
    */
-  get_all_visitors(){
-    return this.query_for_visitors({});
+  getAllVisitors(){
+    return this.queryForVisitors({});
   }
 
   /**
@@ -112,8 +112,8 @@ class Database {
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  query_for_visitors(query) {
-    logger.log_debug(`Attempting to query for visitors using query: ${query}`)
+  queryForVisitors(query) {
+    logger.debug(`Attempting to query for visitors using query: ${query}`)
     return queries.find_many_records(query, this.visitorModel);
   }
 
@@ -122,8 +122,8 @@ class Database {
    * @param {String} ip An IP to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_visitor_by_ip(ip) {
-    logger.log_debug(`Attempting to query for single visitor with IP '${ip}'`);
+  findVisitorByIp(ip) {
+    logger.debug(`Attempting to query for single visitor with IP '${ip}'`);
     return queries.find_single_record({ ip: ip }, this.visitorModel);
   }
 
@@ -132,8 +132,8 @@ class Database {
    * @param {String} id Unique ID of the visitor in MONGODB
    * @return {Promise} Promise object with result
    */
-  delete_visitor(id) {
-    logger.log_debug(`Attempting to delete visitor with ID '${id}'`);
+  deleteVisitor(id) {
+    logger.debug(`Attempting to delete visitor with ID '${id}'`);
     return queries.delete_record({ _id : id }, this.visitorModel);
   }
 
@@ -143,16 +143,16 @@ class Database {
    * @param {Visitor} new_visitor visitor object with update data
    * @return {Promise} Promise object with result
    */
-  edit_visitor(id, new_visitor) {
+  editVisitor(id, new_visitor) {
     return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
       // create a query to edit the post
       var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
       // send the query
       edit_query.exec().then( visitor => {
-        logger.log_trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
+        logger.trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
         resolve(visitor);
       }).catch( err => {
-        logger.log_error(`Unable to edit visitor with id: '${id}': ${err}`);
+        logger.error(`Unable to edit visitor with id: '${id}': ${err}`);
         reject(err);
       });
     });
@@ -165,17 +165,17 @@ class Database {
    * @param {post} data The required data for a post object
    * @return {Promise} Promise object with upload result
    */
-  create_post(data) {
-    logger.log_debug(`Attempting to create post record: ${data}`);
+  createPost(data) {
+    logger.debug(`Attempting to create post record: ${data}`);
     return queries.create_record(data, this.postModel);
   }
 
   /**
-   * Returns all available posts - a wrapper for query_for_posts
+   * Returns all available posts - a wrapper for queryForPosts
    * @return {Promise} Promise object with all available posts in database
    */
-  get_all_posts() {
-    return this.query_for_posts({});
+  getAllPosts() {
+    return this.queryForPosts({});
   }
 
   /**
@@ -183,8 +183,8 @@ class Database {
    * @param {map} query Information to query by. { _id: 102301234 } for example.
    * @return {Promise} Promise object with query result
    */
-  query_for_posts(query) {
-    logger.log_debug(`Attempting to query for posts using query: ${query}`)
+  queryForPosts(query) {
+    logger.debug(`Attempting to query for posts using query: ${query}`)
     return queries.find_many_records(query, this.postModel);
   }
 
@@ -193,8 +193,8 @@ class Database {
    * @param {String} id An ID to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  find_post_by_id(id) {
-    logger.log_debug(`Attempting to query for single post with ID '${id}'`);
+  findPostById(id) {
+    logger.debug(`Attempting to query for single post with ID '${id}'`);
     return queries.find_single_record({ _id: id }, this.postModel);
   }
 
@@ -204,8 +204,8 @@ class Database {
    * @param {Post} new_post post object with update data
    * @return {Promise} Promise object with result
    */
-  edit_post(id, new_post) {
-    logger.log_debug(`Attempting edit query for post with ID '${id}'`);
+  editPost(id, new_post) {
+    logger.debug(`Attempting edit query for post with ID '${id}'`);
     return queries.edit_record({ _id : id }, new_post, this.postModel);
   }
 
@@ -214,7 +214,7 @@ class Database {
    * @param {String} id An ID to search for within MONGODB
    * @return {Promise} Promise object with result
    */
-  delete_post(id) {
+  deletePost(id) {
     return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
       // create a query to delete the post
       var delete_query = postModel.findOneAndDelete( { _id: id } );
@@ -225,19 +225,19 @@ class Database {
           try {
             // remove the code snippet tied to this post if it exists
             if(post.snippet != undefined) {
-              logger.log_info("post has a snippet, attempting deletion.");
+              logger.info("post has a snippet, attempting deletion.");
               fs.unlinkSync(post.snippet);
             }
           } catch (err) {
-            logger.log_error(`Unable to delete code snippet: ${err}`);
+            logger.error(`Unable to delete code snippet: ${err}`);
             reject(err);
           }
-          logger.log_info(`Successfully deleted post with id '${id}'`);
+          logger.info(`Successfully deleted post with id '${id}'`);
           resolve(post);
         }
         reject(post);
       }).catch( err => {
-        logger.log_error(`Unable to delete post with id '${id}'`);
+        logger.error(`Unable to delete post with id '${id}'`);
         reject(err);
       });
     });
@@ -250,8 +250,8 @@ class Database {
    * @param {String} email The email address of the admin account
    * @return {Promise} Promise object with upload result
    */
-   create_admin(email) {
-     logger.log_debug(`Attempting to create admin with email: ${email}`);
+   createAdmin(email) {
+     logger.debug(`Attempting to create admin with email: ${email}`);
      return queries.create_record({email: email}, this.adminModel);
    }
 
@@ -260,8 +260,8 @@ class Database {
     * @param {map} query Information to query by. { _id: 102301234 } for example.
     * @return {Promise} Promise object with query result
     */
-   query_for_admins(query) {
-     logger.log_debug(`Attempting to query for posts using query: ${query}`);
+   queryForAdmins(query) {
+     logger.debug(`Attempting to query for posts using query: ${query}`);
      return queries.find_many_records(query, this.adminModel);
    }
 
@@ -269,7 +269,7 @@ class Database {
    * Retrieve the administrator account from MONGODB
    * @return {Promise} Promise object with admin account, and whether a new email is needed.
    */
-  get_admin_account() {
+  getAdminAccount() {
     var newEmail = false;
     // return a promise for the caller to handle
     return new Promise(  ( resolve, reject, adminModel=this.adminModel ) => {
@@ -281,17 +281,17 @@ class Database {
       admin_query.exec().then( admins => {
         if (admins.length > 1) {
           // there should only be one admin account. Log an warning and move on.
-          logger.log_warning("More than one admin account is present. This currently should not be possible. "
+          logger.warning("More than one admin account is present. This currently should not be possible. "
           + "Manual removal of 1 or more accounts should be performed. Selecting the first admin account in the collection.")
           // select the first one
           adminAccount = admins[0].email;
-          logger.log_info(`Retrieved ${adminAccount} as administrator account email.`)
+          logger.info(`Retrieved ${adminAccount} as administrator account email.`)
         } else if (admins.length == 1) {
           // this is the expected case, return the email at index 0
           adminAccount = admins[0].email;
-          logger.log_info(`Retrieved '${adminAccount}' as administrator account email.`)
+          logger.info(`Retrieved '${adminAccount}' as administrator account email.`)
         } else {
-          logger.log_info("Unable to find an administrator account. In new Email mode.");
+          logger.info("Unable to find an administrator account. In new Email mode.");
           newEmail = true;
         }
         // return the extracted values

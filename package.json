@@ -14,7 +14,7 @@
   "author": "Howard Pearce",
   "license": "ISC",
   "dependencies": {
-    "access_code": "file:modules/access_code",
+    "accessCode": "file:modules/accessCode",
     "angular": "^1.8.2",
     "authenticator": "file:modules/authenticator",
     "database": "file:modules/database",
@@ -22,7 +22,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-validator": "^6.8.0",
-    "file_upload": "file:modules/file_upload",
+    "fileUpload": "file:modules/fileUpload",
     "font-awesome": "^4.7.0",
     "generate-changelog": "^1.8.0",
     "geoip-lite": "^1.4.2",

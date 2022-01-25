@@ -23,10 +23,10 @@ module.exports = class Post {
     this.content = args.content;
     this.title = args.title;
     if ( args.snippet == undefined || args.snippet == "undefined" ) {
-      logger.log_trace("Setting snippet to be undefined in post constructor");
+      logger.trace("Setting snippet to be undefined in post constructor");
       this.snippet = undefined;
     } else {
-      logger.log_trace(`Setting snippet to be '${args.snippet}' post in constructor`);
+      logger.trace(`Setting snippet to be '${args.snippet}' post in constructor`);
       this.snippet = args.snippet;
     }
   }
@@ -39,13 +39,13 @@ module.exports = class Post {
     var exists = false;
     for (var type in post_types) {
       if ( new_type == type ) {
-        logger.log_trace(`Provided post type exists, setting post type to be value '${new_type}'`)
+        logger.trace(`Provided post type exists, setting post type to be value '${new_type}'`)
         this.type = new_type;
         exists = true;
       }
     }
     if (!exists) {
-      logger.log_warning(`Setting post type to be unknown, type '${new_type}' was not recognized.`);
+      logger.warning(`Setting post type to be unknown, type '${new_type}' was not recognized.`);
       this.type = post_types.unknown;
     }
   }
@@ -63,19 +63,19 @@ module.exports = class Post {
     } else {
       output += "snippet: N/A";
     }
-    logger.log_info(output);
+    logger.info(output);
   }
 
   /**
    * Sanitize post data
    */
   clean() {
-    logger.log_debug("Cleaning post data");
-    logger.log_trace("Cleaning type '" + this.type + "' -> '" + Sanitizer.clean(this.type) + "'");
+    logger.debug("Cleaning post data");
+    logger.trace("Cleaning type '" + this.type + "' -> '" + Sanitizer.clean(this.type) + "'");
     this.type    = Sanitizer.clean(this.type);
-    logger.log_trace("Cleaning content '" + this.content + "' -> '" + Sanitizer.clean(this.content) + "'");
+    logger.trace("Cleaning content '" + this.content + "' -> '" + Sanitizer.clean(this.content) + "'");
     this.content = Sanitizer.clean(this.content);
-    logger.log_trace("Cleaning title '" + this.title + "' -> '" + Sanitizer.clean(this.title) + "'");
+    logger.trace("Cleaning title '" + this.title + "' -> '" + Sanitizer.clean(this.title) + "'");
     this.title   = Sanitizer.clean(this.title);
   }
 
@@ -83,14 +83,14 @@ module.exports = class Post {
    * Un-escape sanitized post to make it human readable
    */
   unescape() {
-    logger.log_trace("Unescaping post data");
-    logger.log_trace("Unescaping type '" + this.type + "' -> '" + unescape(this.type) + "'");
+    logger.trace("Unescaping post data");
+    logger.trace("Unescaping type '" + this.type + "' -> '" + unescape(this.type) + "'");
     this.type    = Sanitizer.prepare(this.type);
-    logger.log_trace("Unescaping content '" + this.content + "' -> '" + unescape(this.content) + "'");
+    logger.trace("Unescaping content '" + this.content + "' -> '" + unescape(this.content) + "'");
     this.content = Sanitizer.prepare(this.content);
-    logger.log_trace("Splitting content '" + this.content + "' -> '" + this.content.split("\n") + "'");
+    logger.trace("Splitting content '" + this.content + "' -> '" + this.content.split("\n") + "'");
     this.content = this.content.split("\n");
-    logger.log_trace("Unescaping title '" + this.title + "' -> '" + unescape(this.title) + "'");
+    logger.trace("Unescaping title '" + this.title + "' -> '" + unescape(this.title) + "'");
     this.title   = Sanitizer.prepare(this.title);
   }
 
@@ -122,10 +122,10 @@ module.exports = class Post {
   export() {
     // determine if the post has a snippet, we shouldn't include it if there isn't one.
     if ( !this.has_snippet ) {
-      logger.log_trace("Exporting without snippet");
+      logger.trace("Exporting without snippet");
       return { id: this.id, title: this.title, type: this.type, content: this.content };
     } else {
-      logger.log_trace("Exporting with snippet");
+      logger.trace("Exporting with snippet");
       return { id: this.id, title: this.title, type: this.type, snippet: this.snippet, content: this.content };
     }
   }

@@ -21,10 +21,10 @@ var create_record = function(data, db_model) {
     var new_entry = new model(data);
     // create a query for the object
     new_entry.save().then( data => {
-        logger.log_trace(`Successfully uploaded record with id: '${new_entry._id}'`);
+        logger.trace(`Successfully uploaded record with id: '${new_entry._id}'`);
         resolve(new_entry);
     }).catch( err => {
-      logger.log_error('Error occurred while uploading record.');
+      logger.error('Error occurred while uploading record.');
       reject(err);
     });
   });
@@ -43,10 +43,10 @@ var find_single_record = function(query, db_model) {
     var new_query = model.findOne(query);
     // send the query
     new_query.exec().then( data => {
-        logger.log_trace(`Successfully performed query for single record: ${new_query}`);
+        logger.trace(`Successfully performed query for single record: ${new_query}`);
         resolve(data);
     }).catch( err => {
-        logger.log_error('Error occurred performing query for single record.');
+        logger.error('Error occurred performing query for single record.');
         reject(err);
     });
   });
@@ -65,10 +65,10 @@ var find_many_records = function(query, db_model) {
     var new_query = model.find(query);
     // send the query
     new_query.exec().then( data => {
-        logger.log_trace(`Successfully performed query for many records: ${new_query}`);
+        logger.trace(`Successfully performed query for many records: ${new_query}`);
         resolve(data);
     }).catch( err => {
-        logger.log_error('Error occurred performing query for many records.');
+        logger.error('Error occurred performing query for many records.');
         reject(err);
     });
   });
@@ -86,11 +86,11 @@ var edit_record = function(query, new_data, db_model) {
  return new Promise ( ( resolve, reject, model=db_model ) => {
    var edit_query = model.findOneAndUpdate(query, new_data);
    edit_query.exec().then( data => {
-     logger.log_trace(`Successfully performed edit query for record ${data}`);
-     logger.log_trace(`New data is ${new_data}`);
+     logger.trace(`Successfully performed edit query for record ${data}`);
+     logger.trace(`New data is ${new_data}`);
      resolve(data);
    }).catch( err => {
-     logger.log_error(`Error occurred while attempting edit query: ${query}`);
+     logger.error(`Error occurred while attempting edit query: ${query}`);
      reject(err);
    });
  });
@@ -106,10 +106,10 @@ var delete_record = function(query, db_model) {
   return new Promise ( ( resolve, reject, model=db_model) => {
     var delete_query = model.findOneAndDelete(query);
     delete_query.exec().then( data => {
-      logger.log_trace(`Successfully performed delete query for record ${data}`);
+      logger.trace(`Successfully performed delete query for record ${data}`);
       resolve(data);
     }).catch( err => {
-      logger.log_error(`Error occurred while attempting delete query: ${query}`);
+      logger.error(`Error occurred while attempting delete query: ${query}`);
       reject(err);
     });
   });

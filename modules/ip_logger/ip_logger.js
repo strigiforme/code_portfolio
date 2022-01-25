@@ -20,37 +20,37 @@ var ip_callback = function(req, res, next) {
     visitorAddress = visitorAddress.split(",")[0];
     visitorAddress = String(visitorAddress.split(":").slice(-1));
   } catch (error) {
-    logger.log_error("Problem splitting visitor address: " + error)
+    logger.error("Problem splitting visitor address: " + error)
   }
   // should have just the IP address at this point, get the user's location using their IP
-  logger.log_debug("Recevied IP address '" + visitorAddress + "'");
+  logger.debug("Recevied IP address '" + visitorAddress + "'");
   // hash the IP to protect the users privacy
   var hash = crypto.createHash('sha256').update(visitorAddress).digest('hex');
 
-  database.find_visitor_by_ip(hash).then(visitor => {
+  database.findVisitorByIp(hash).then(visitor => {
     // we haven't seen this IP before
     if (visitor == null) {
       // Get their physical location using their IP
       var location = locate.lookup(visitorAddress);
       var now = new Date()
-      database.create_visitor({lastvisit: now, firstvisit: now, location_string: JSON.stringify(location), ip: hash, visits: 1}).then(result => {
+      database.createVisitor({lastvisit: now, firstvisit: now, location_string: JSON.stringify(location), ip: hash, visits: 1}).then(result => {
         next();
       }).catch( err => {
-        logger.log_error("Unable to save visitor IP:" + err);
+        logger.error("Unable to save visitor IP:" + err);
         next();
       });
     } else {
       // take the visitor and increment their visits
       visitor.visits += 1;
       visitor.lastvisit = new Date();
-      database.edit_visitor(visitor._id, visitor).then(result => {
+      databaseeditVisitor(visitor._id, visitor).then(result => {
         next();
       }).catch( err => {
         logger.log_err("Unable to increment visitor count: " + err);
       });
     }
   }).catch( err => {
-    logger.log_error("Unable to retrieve visitor by IP: " + err);
+    logger.error("Unable to retrieve visitor by IP: " + err);
   })
 
 

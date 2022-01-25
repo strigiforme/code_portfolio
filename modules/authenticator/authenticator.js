@@ -17,7 +17,7 @@ class Authenticator {
    * Construct the Authenticator
    * @param {String} adminAccount The email address of the administrators account.
    * @param {Boolean} addAdminFlag boolean flag that identifies if we are in 'new' mode. (No admin exists, and we need to add one)
-   * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the access_code module.
+   * @param {Boolean} accessCodeValid boolean flag that identifies if the access code the user entered is valid. Set by the accessCode module.
    * @param {Database} database reference to the database module.
    * @param {Boolean} adminEnabled whether or not to check for admin account
    */
@@ -35,11 +35,11 @@ class Authenticator {
   async fetchAdminAccount() {
     try {
       // retrieve the administrator account's email
-      var result = await database.get_admin_account();
+      var result = await database.getAdminAccount();
       this.adminAccount = result.account;
       this.addAdminFlag = result.new;
     } catch (error) {
-      logger.log_error("ERROR: promise rejection while getting administrator account email: " + error);
+      logger.error("ERROR: promise rejection while getting administrator account email: " + error);
     }
   }
 

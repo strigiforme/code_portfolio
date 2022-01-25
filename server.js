@@ -11,7 +11,7 @@ Description: Main route and logic handler for node application. Everything that
 // dependencies
 const express            = require("express");
 const fs                 = require("fs");
-const access_code_mgr    = require("access_code");
+const accessCodeManager  = require("accessCode");
 const authenticator      = require("authenticator");
 const database           = require("database");
 const logger             = require("logger");
@@ -36,9 +36,9 @@ database.connect('mongodb://127.0.0.1/my_database').then( () => {
 // initialize logger
 logger.initialize( { level:"DEBUG" } );
 
-if (!access_code_mgr.access_file_exists()) {
+if (!accessCodeManager.accessFileExists()) {
   // generate the users access code if it doesn't exist
-  access_code_mgr.create_access_code({});
+  accessCodeManager.create_accessCode({});
 }
 
 // initialize app
@@ -62,7 +62,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true, limit: '100kb', parameterLimit: 1000 }));
 
-logger.log_info("Loading Routes");
+logger.info("Loading Routes");
 app.use(auth);
 app.use(user);
 app.use(admin);
@@ -70,10 +70,10 @@ app.use(admin);
 // for receiving post requests
 // app.use(express.json())
 
-logger.log_info("Creating HTTP server on port 80");
+logger.info("Creating HTTP server on port 80");
 http.createServer(app).listen(80);
-logger.log_info("Creating HTTPS server on port 443")
+logger.info("Creating HTTPS server on port 443")
 https.createServer(options, app).listen(443);
 
 app.set('view engine', 'pug');
-logger.log_info("Started server successfully.");
+logger.info("Started server successfully.");

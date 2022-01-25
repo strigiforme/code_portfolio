@@ -15,52 +15,52 @@ test("Initialize logger", () => {
 
 test("Set logger level to known value", () => {
   // Try setting to all known log levels
-  logger.set_level("ERROR");
-  logger.set_level("WARNING");
-  logger.set_level("INFO");
-  logger.set_level("DEBUG");
-  logger.set_level("TRACE");
+  logger.setLevel("ERROR");
+  logger.setLevel("WARNING");
+  logger.setLevel("INFO");
+  logger.setLevel("DEBUG");
+  logger.setLevel("TRACE");
 });
 
 test("Set logger level to unknown value", () => {
   // should receive an exception
   expect( () => {
-    logger.set_level("TEST_VALUE");
+    logger.setLevel("TEST_VALUE");
   }).toThrow();
 });
 
 test("Test within limit", () => {
   expect( () => {
-    logger.within_limit("BAD_VALUE");
+    logger.withinLimit("BAD_VALUE");
   }).toThrow();
 });
 
 test("Set logging function", () => {
-  logger.set_function( function(msg) {
+  logger.setFunction( function(msg) {
     return "test";
   });
-  expect(logger.log_info("not test")).toBe("test");
+  expect(logger.info("not test")).toBe("test");
 });
 
 test("Test logs can be excluded", () => {
   // test up to warning level
-  logger.set_level("WARNING");
+  logger.setLevel("WARNING");
   // return test if log level is allowed, is undefined if not
-  logger.set_function( function(msg) {
+  logger.setFunction( function(msg) {
     return "test";
   });
-  expect(logger.log_error("")).toBe("test");
-  expect(logger.log_warning("")).toBe("test");
-  expect(logger.log_info("")).not.toBe("test");
-  expect(logger.log_debug("")).not.toBe("test");
-  expect(logger.log_trace("")).not.toBe("test");
+  expect(logger.error("")).toBe("test");
+  expect(logger.warning("")).toBe("test");
+  expect(logger.info("")).not.toBe("test");
+  expect(logger.debug("")).not.toBe("test");
+  expect(logger.trace("")).not.toBe("test");
   // Set to higher level for more testing
-  logger.set_level("TRACE");
-  expect(logger.log_error("")).toBe("test");
-  expect(logger.log_warning("")).toBe("test");
-  expect(logger.log_info("")).toBe("test");
-  expect(logger.log_debug("")).toBe("test");
-  expect(logger.log_trace("")).toBe("test");
+  logger.setLevel("TRACE");
+  expect(logger.error("")).toBe("test");
+  expect(logger.warning("")).toBe("test");
+  expect(logger.info("")).toBe("test");
+  expect(logger.debug("")).toBe("test");
+  expect(logger.trace("")).toBe("test");
 });
 
 test("Test log format", () => {
@@ -69,6 +69,6 @@ test("Test log format", () => {
   // format 4d-1|2d-1|2d 1|2d:1|2d:1|2d log_type: log_message
   let re = /\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}\sERROR: \w*/
   // Force the logger to return the log message as a string
-  logger.set_function(function(msg){ return msg; });
-  expect(re.test(logger.log_error("test"))).toBe(true);
+  logger.setFunction(function(msg){ return msg; });
+  expect(re.test(logger.error("test"))).toBe(true);
 });
