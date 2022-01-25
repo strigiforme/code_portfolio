@@ -28,19 +28,19 @@ jest.setTimeout(20000);
 mongod = new MongoMemoryServer({binary: {version: '5.0.1'}});
 
 // data to be used in tests.
-var test_post_args          = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
-var test_snippet_post_args  = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
-var test_edit_post_args     = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
-var test_visitor_args       = { ip: "123", first_visit: "2021-04-30T20:08:52.002Z", last_visit: "2021-04-30T20:08:52.002Z", visits: 5, location_string: "somewhere" };
-var test_edit_visitor_args  = { id: "123", ip: "123", first_visit: "2021-05-30T20:08:52.002Z", last_visit: "2021-05-30T20:08:52.002Z", visits: 9, location_string: "over there" };
-var test_admin_args         = { email: "testemail@test.com" };
-var test_document_args      = { id: "123", title: "title", metadata: { tags: "test"} }
-var test_editDocument_args = { id: "123", title: "new_title", metadata: { tags: "new"} }
-var test_module_args        = { id: "paragraph", input: "test" }
-var test_edit_module_args   = { id: "image", input: "new" }
+var testPostArgs          = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
+var testSnippetPostArgs  = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
+var testEditPostArgs     = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
+var testVisitorArgs       = { ip: "123", first_visit: "2021-04-30T20:08:52.002Z", last_visit: "2021-04-30T20:08:52.002Z", visits: 5, location_string: "somewhere" };
+var testEditVisitorArgs  = { id: "123", ip: "123", first_visit: "2021-05-30T20:08:52.002Z", last_visit: "2021-05-30T20:08:52.002Z", visits: 9, location_string: "over there" };
+var testAdminArgs         = { email: "testemail@test.com" };
+var testDocumentArgs      = { id: "123", title: "title", metadata: { tags: "test"} }
+var testEditDocumentArgs = { id: "123", title: "new_title", metadata: { tags: "new"} }
+var testModuleArgs        = { id: "paragraph", input: "test" }
+var testEditModuleArgs   = { id: "image", input: "new" }
 
 // do all our querying based on this post.
-var test_post                = new Post(test_post_args);
+var test_post                = new Post(testPostArgs);
 
 beforeAll( async () => {
   // Refresh and connect to mongodb instance synchronously
@@ -91,10 +91,10 @@ function compareDocuments(a, b) {
 // Test that the database can create a document successfully
 test("Create Document", async () => {
   try {
-    var newModule = ModuleFactory.createModule(test_module_args.id);
-    newModule.add_input(test_module_args.input);
+    var newModule = ModuleFactory.createModule(testModuleArgs.id);
+    newModule.add_input(testModuleArgs.input);
     // create and test the document
-    var newDoc = new Document(test_document_args);
+    var newDoc = new Document(testDocumentArgs);
     newDoc.addModule(newModule);
     await database.createDocument(newDoc.export());
   } catch (error) {
@@ -127,9 +127,9 @@ test("Edit Document", async () => {
     // should be only one
     var doc = results[0];
     // create a replacement document
-    var newModule = ModuleFactory.createModule(test_edit_module_args.id);
-    newModule.add_input(test_edit_module_args.input);
-    var newDoc = new Document(test_editDocument_args);
+    var newModule = ModuleFactory.createModule(testEditModuleArgs.id);
+    newModule.add_input(testEditModuleArgs.input);
+    var newDoc = new Document(testEditDocumentArgs);
     newDoc.addModule(newModule);
     // using the ID, update the document
     await database.editDocument(doc.id, newDoc);
@@ -158,13 +158,13 @@ test("Find Posts", async () => {
     var post = new Post(posts[0]);
     post = post.export_to_view();
     // confirm the values match what was put in
-    comparePosts(test_post_args, post);
+    comparePosts(testPostArgs, post);
     // try to query the database by it's unique ID
     var post_by_id = await database.findPostById(post.id);
     post_by_id = new Post(post_by_id).export_to_view();
     // store the ID for later
-    test_post_args.id = post.id;
-    comparePosts(test_post_args, post_by_id);
+    testPostArgs.id = post.id;
+    comparePosts(testPostArgs, post_by_id);
   } catch (error) {
     throw new Error(`Error occurred while searching for post in database: ${error}`);
   }
@@ -173,11 +173,11 @@ test("Find Posts", async () => {
 // Test that we can edit posts via their ID
 test("Edit Post", async () =>  {
   try {
-    await database.editPost(test_post_args.id, test_edit_post_args);
+    await database.editPost(testPostArgs.id, testEditPostArgs);
     // retrieve the post again to see if edit was successful
-    var edited_post = await database.findPostById(test_post_args.id);
+    var edited_post = await database.findPostById(testPostArgs.id);
     edited_post = new Post(edited_post).export_to_view();
-    comparePosts(test_edit_post_args, edited_post);
+    comparePosts(testEditPostArgs, edited_post);
   } catch (error) {
     throw new Error(`Error occurred while editing post in database: ${error}`);
   }
@@ -186,7 +186,7 @@ test("Edit Post", async () =>  {
 // Test that we can delete posts that don't have a code snippet
 test("Delete Post Without Snippet", async () => {
   try {
-    await database.deletePost(test_post_args.id);
+    await database.deletePost(testPostArgs.id);
     // confirm there are no posts left
     var posts = await database.queryForPosts( {} );
     expect(posts.length).toBe(0);
@@ -199,7 +199,7 @@ test("Delete Post Without Snippet", async () => {
 test("Delete Post With Snippet", async () => {
   try {
     // create a new post since we deleted the old one
-    var new_post = await database.createPost(test_snippet_post_args);
+    var new_post = await database.createPost(testSnippetPostArgs);
     // create an empty file that corresponds to a snippet
     if (!fs.existsSync("test/snippets")) {
       fs.mkdirSync("test/snippets");
@@ -219,7 +219,7 @@ test("Delete Post With Snippet", async () => {
 // Test that we can create a visitor in the database
 test("Create Visitor Record", async () => {
   try {
-    await database.createVisitor(test_visitor_args);
+    await database.createVisitor(testVisitorArgs);
   } catch (error) {
     throw new Error(`Error occurred while creating visitor in database: ${error}`);
   }
@@ -230,12 +230,12 @@ test("Find Visitors", async () => {
   try {
     var visitors = await database.queryForVisitors( {} );
     // confirm the values match what was put in
-    compareVisitors(test_visitor_args, visitors[0]);
+    compareVisitors(testVisitorArgs, visitors[0]);
     // try to query the database by it's ip
     var visitor_by_id = await database.findVisitorByIp(visitors[0].ip);
-    compareVisitors(test_visitor_args, visitor_by_id);
+    compareVisitors(testVisitorArgs, visitor_by_id);
     // use this in the next test
-    test_edit_visitor_args.id = visitors[0]._id;
+    testEditVisitorArgs.id = visitors[0]._id;
   } catch (error) {
     throw new Error(`Error occurred while searching for visitor in database: ${error}`);
   }
@@ -244,9 +244,9 @@ test("Find Visitors", async () => {
 // Test that we can edit visitor records using their ID
 test("Edit visitor record", async () => {
   try {
-    await database.editVisitor(test_edit_visitor_args.id, test_edit_visitor_args);
-    var new_visitor = await database.queryForVisitors({_id: test_edit_visitor_args.id});
-    compareVisitors(new_visitor[0], test_edit_visitor_args);
+    await database.editVisitor(testEditVisitorArgs.id, testEditVisitorArgs);
+    var new_visitor = await database.queryForVisitors({_id: testEditVisitorArgs.id});
+    compareVisitors(new_visitor[0], testEditVisitorArgs);
   } catch (error) {
     throw new Error(`Error occurred while creating visitor in database: ${error}`);
   }
@@ -255,7 +255,7 @@ test("Edit visitor record", async () => {
 // Test that we can delete visitor records
 test("Delete visitor", async () => {
   try {
-    await database.deleteVisitor(test_edit_visitor_args.id);
+    await database.deleteVisitor(testEditVisitorArgs.id);
     // confirm there are no posts left
     var visits = await database.queryForVisitors( {} );
     expect(visits.length).toBe(0);
@@ -267,7 +267,7 @@ test("Delete visitor", async () => {
 // Test that we can create an admin account
 test("Create Admin Account", async () => {
   try {
-    await database.createAdmin(test_admin_args.email);
+    await database.createAdmin(testAdminArgs.email);
   } catch (error) {
     throw new Error(`Error occurred while creating admin in database: ${error}`);
   }
@@ -277,7 +277,7 @@ test("Create Admin Account", async () => {
 test("Find Administrators", async () => {
   try {
     var admins = await database.queryForAdmins({});
-    expect(test_admin_args.email).toBe(admins[0].email);
+    expect(testAdminArgs.email).toBe(admins[0].email);
   } catch (error) {
     throw new Error(`Error occurred while querying for admins in database: ${error}`);
   }
