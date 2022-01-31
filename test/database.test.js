@@ -9,13 +9,9 @@ Description: Test suite for database.js
 
 // includes
 const database              = require("database");
-const objects               = require("objects");
 const middleware            = require("middleware");
 const fs                    = require('fs');
 const doc_package           = require("document");
-
-const Post                  = objects.Post;
-const Visitor               = objects.Visitor;
 const Document              = doc_package.Document;
 const Module                = doc_package.Module;
 const ModuleFactory         = doc_package.ModuleFactory;
@@ -28,17 +24,11 @@ jest.setTimeout(20000);
 mongod = new MongoMemoryServer({binary: {version: '5.0.1'}});
 
 // data to be used in tests.
-var testPostArgs          = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
-var testSnippetPostArgs  = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
-var testEditPostArgs     = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
 var testAdminArgs         = { email: "testemail@test.com" };
 var testDocumentArgs      = { id: "123", title: "title", metadata: { tags: "test"} }
 var testEditDocumentArgs = { id: "123", title: "new_title", metadata: { tags: "new"} }
 var testModuleArgs        = { id: "paragraph", input: "test" }
 var testEditModuleArgs   = { id: "image", input: "new" }
-
-// do all our querying based on this post.
-var test_post                = new Post(testPostArgs);
 
 beforeAll( async () => {
   // Refresh and connect to mongodb instance synchronously
@@ -129,81 +119,6 @@ test("Edit Document", async () => {
     compareDocuments(result, newDoc);
   } catch (error) {
     throw new Error(`Error occurred while editing document in database: ${error}`);
-  }
-});
-
-// Test that the database can create a record successfully
-test("Create Posts", async () => {
-  try {
-    await database.createPost(test_post.export_to_db());
-  } catch (error) {
-    throw new Error(`Error occurred while creating post in database: ${error}`);
-  }
-});
-
-// Test that the database can query for posts
-test("Find Posts", async () => {
-  try {
-    var posts = await database.queryForPosts( {} );
-    // should be only one post in there right now
-    var post = new Post(posts[0]);
-    post = post.export_to_view();
-    // confirm the values match what was put in
-    comparePosts(testPostArgs, post);
-    // try to query the database by it's unique ID
-    var post_by_id = await database.findPostById(post.id);
-    post_by_id = new Post(post_by_id).export_to_view();
-    // store the ID for later
-    testPostArgs.id = post.id;
-    comparePosts(testPostArgs, post_by_id);
-  } catch (error) {
-    throw new Error(`Error occurred while searching for post in database: ${error}`);
-  }
-});
-
-// Test that we can edit posts via their ID
-test("Edit Post", async () =>  {
-  try {
-    await database.editPost(testPostArgs.id, testEditPostArgs);
-    // retrieve the post again to see if edit was successful
-    var edited_post = await database.findPostById(testPostArgs.id);
-    edited_post = new Post(edited_post).export_to_view();
-    comparePosts(testEditPostArgs, edited_post);
-  } catch (error) {
-    throw new Error(`Error occurred while editing post in database: ${error}`);
-  }
-});
-
-// Test that we can delete posts that don't have a code snippet
-test("Delete Post Without Snippet", async () => {
-  try {
-    await database.deletePost(testPostArgs.id);
-    // confirm there are no posts left
-    var posts = await database.queryForPosts( {} );
-    expect(posts.length).toBe(0);
-  } catch (error) {
-    throw new Error(`Error occurred while deleting post in database: ${error}`);
-  }
-});
-
-// Test that we can delete posts with a code snippet, along with their snippet
-test("Delete Post With Snippet", async () => {
-  try {
-    // create a new post since we deleted the old one
-    var new_post = await database.createPost(testSnippetPostArgs);
-    // create an empty file that corresponds to a snippet
-    if (!fs.existsSync("test/snippets")) {
-      fs.mkdirSync("test/snippets");
-    }
-    await fs.writeFile("test/snippets/testfile.txt", "test", function (err) { if (err) throw err; });
-    await database.deletePost(new_post._id);
-    // confirm there are no posts left
-    var posts = await database.queryForPosts( {} );
-    expect(posts.length).toBe(0);
-    // confirm the snippet file has been deleted
-    expect(fs.existsSync("test/snippets/testfile.txt")).toBe(false);
-  } catch ( error ) {
-    throw new Error(`Error occurred while deleting post with a snippet in database: ${error}`);
   }
 });
 
