@@ -15,7 +15,6 @@ var database        = require("database");
 var objects         = require("objects");
 var logger          = require("logger");
 var snippets        = require("fileUpload");
-var record          = require("ip_logger");
 var authenticator   = require("authenticator");
 var middleware      = require("middleware");
 var doc_package     = require("document");
@@ -226,7 +225,7 @@ app.get('/logout', function (req, res, next) {
 });
 
 // get request for login page
-app.get("/admin", record, authenticate, function (req, res, next){
+app.get("/admin", authenticate, function (req, res, next){
   // iterate over all the posts in the database
   database.getAllPosts({}).then( posts => {
     var all_posts = new Array();

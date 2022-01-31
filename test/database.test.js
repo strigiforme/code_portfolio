@@ -31,8 +31,6 @@ mongod = new MongoMemoryServer({binary: {version: '5.0.1'}});
 var testPostArgs          = { id: "123", type:"blog", title:"test post", content:"test", snippet:undefined };
 var testSnippetPostArgs  = { id: "123", type:"blog", title:"test post", content:"test", snippet:"test/snippets/testfile.txt" };
 var testEditPostArgs     = { id: "123", type:"info", title:"new title", content:"new content", snippet:undefined };
-var testVisitorArgs       = { ip: "123", first_visit: "2021-04-30T20:08:52.002Z", last_visit: "2021-04-30T20:08:52.002Z", visits: 5, location_string: "somewhere" };
-var testEditVisitorArgs  = { id: "123", ip: "123", first_visit: "2021-05-30T20:08:52.002Z", last_visit: "2021-05-30T20:08:52.002Z", visits: 9, location_string: "over there" };
 var testAdminArgs         = { email: "testemail@test.com" };
 var testDocumentArgs      = { id: "123", title: "title", metadata: { tags: "test"} }
 var testEditDocumentArgs = { id: "123", title: "new_title", metadata: { tags: "new"} }
@@ -60,13 +58,6 @@ function comparePosts(a, b){
   expect(a.title).toBe(b.title);
   expect(a.content).toBe(b.content[0]);
   expect(a.snippet).toBe(b.snippet);
-}
-
-function compareVisitors(a, b){
-  expect(a.ip).toBe(b.ip);
-  expect(a.location_string).toBe(b.location_string);
-  expect(a.visits).toBe(b.visits);
-  // not testing date strings since they're so damn tricky. Not worth the effort
 }
 
 function compareDocuments(a, b) {
@@ -213,54 +204,6 @@ test("Delete Post With Snippet", async () => {
     expect(fs.existsSync("test/snippets/testfile.txt")).toBe(false);
   } catch ( error ) {
     throw new Error(`Error occurred while deleting post with a snippet in database: ${error}`);
-  }
-});
-
-// Test that we can create a visitor in the database
-test("Create Visitor Record", async () => {
-  try {
-    await database.createVisitor(testVisitorArgs);
-  } catch (error) {
-    throw new Error(`Error occurred while creating visitor in database: ${error}`);
-  }
-});
-
-// Test that the database can query for visitors
-test("Find Visitors", async () => {
-  try {
-    var visitors = await database.queryForVisitors( {} );
-    // confirm the values match what was put in
-    compareVisitors(testVisitorArgs, visitors[0]);
-    // try to query the database by it's ip
-    var visitor_by_id = await database.findVisitorByIp(visitors[0].ip);
-    compareVisitors(testVisitorArgs, visitor_by_id);
-    // use this in the next test
-    testEditVisitorArgs.id = visitors[0]._id;
-  } catch (error) {
-    throw new Error(`Error occurred while searching for visitor in database: ${error}`);
-  }
-});
-
-// Test that we can edit visitor records using their ID
-test("Edit visitor record", async () => {
-  try {
-    await database.editVisitor(testEditVisitorArgs.id, testEditVisitorArgs);
-    var new_visitor = await database.queryForVisitors({_id: testEditVisitorArgs.id});
-    compareVisitors(new_visitor[0], testEditVisitorArgs);
-  } catch (error) {
-    throw new Error(`Error occurred while creating visitor in database: ${error}`);
-  }
-});
-
-// Test that we can delete visitor records
-test("Delete visitor", async () => {
-  try {
-    await database.deleteVisitor(testEditVisitorArgs.id);
-    // confirm there are no posts left
-    var visits = await database.queryForVisitors( {} );
-    expect(visits.length).toBe(0);
-  } catch (error) {
-    throw new Error(`Error occurred while deleting visitor in database: ${error}`);
   }
 });
 

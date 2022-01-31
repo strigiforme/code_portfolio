@@ -14,7 +14,6 @@ var middleware       = require("middleware");
 var logger           = require("logger");
 const fs             = require("fs");
 var { exec }         = require("child_process");
-var record           = require("ip_logger");
 var document_package = require("document");
 var Document         = document_package.Document;
 var Sanitizer        = middleware.sanitizer;
@@ -23,7 +22,7 @@ var Post             = objects.Post;
 var app = module.exports = express();
 
 // get request for root page
-app.get('/', record ,function (req, res, next) {
+app.get('/' ,function (req, res, next) {
   var login_status = req.query.login;
   res.render('index', {loggedin: req.session.login, login: login_status});
   res.end()
@@ -40,12 +39,12 @@ app.get('/document_test', function (req, res, next) {
   });
 });
 
-app.get('/resume', record, function (req, res, next) {
+app.get('/resume', function (req, res, next) {
   res.render("resume", {loggedin: req.session.login});
 });
 
 // view all posts that have been created
-app.get("/posts/view_posts", record, function (req, res, next) {
+app.get("/posts/view_posts", function (req, res, next) {
   var all_posts = new Array();
   // extract the query string for post postType
   postType = req.query.type;
@@ -74,7 +73,7 @@ app.get("/posts/view_posts", record, function (req, res, next) {
 });
 
 // view individual post
-app.get("/posts/view_post", record, function (req,res,next) {
+app.get("/posts/view_post", function (req,res,next) {
   var id = Sanitizer.clean(req.query.id);
   database.findPostById(id).then( post =>  {
     var to_view = new Post(post);

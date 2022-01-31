@@ -21,8 +21,6 @@ class Database {
     this.postModel   = undefined;
     this.adminModel  = undefined;
     this.documentModel = undefined;
-    this.visitorSchema = undefined;
-    this.visitorModel = undefined;
   }
 
   /**
@@ -86,76 +84,6 @@ class Database {
   editDocument( id, data ) {
     logger.debug("Attempting to edit document");
     return queries.edit_record(id, data, this.documentModel);
-  }
-
-  // Visitor related queries ---------------------------------------------------
-
-  /**
-   * Upload a visitor object to MONGODB
-   * @param {Visitor} data The required data for a visitor object
-   * @return {Promise} Promise object with upload result
-   */
-  createVisitor(data) {
-    logger.debug("Attempting to create visitor record.");
-    return queries.create_record(data, this.visitorModel);
-  }
-
-  /**
-   * Returns all available visitors - a wrapper for queryForVisitors
-   */
-  getAllVisitors(){
-    return this.queryForVisitors({});
-  }
-
-  /**
-   * Query for visitor(s) stored within MONGODB
-   * @param {map} query Information to query by. { _id: 102301234 } for example.
-   * @return {Promise} Promise object with query result
-   */
-  queryForVisitors(query) {
-    logger.debug(`Attempting to query for visitors using query: ${query}`)
-    return queries.find_many_records(query, this.visitorModel);
-  }
-
-  /**
-   * Retrieve a single visitor stored within MONGODB
-   * @param {String} ip An IP to search for within MONGODB
-   * @return {Promise} Promise object with result
-   */
-  findVisitorByIp(ip) {
-    logger.debug(`Attempting to query for single visitor with IP '${ip}'`);
-    return queries.find_single_record({ ip: ip }, this.visitorModel);
-  }
-
-  /**
-   * Delete a visitor in the database by their ID
-   * @param {String} id Unique ID of the visitor in MONGODB
-   * @return {Promise} Promise object with result
-   */
-  deleteVisitor(id) {
-    logger.debug(`Attempting to delete visitor with ID '${id}'`);
-    return queries.delete_record({ _id : id }, this.visitorModel);
-  }
-
-  /**
-   * Modify a single visitor stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @param {Visitor} new_visitor visitor object with update data
-   * @return {Promise} Promise object with result
-   */
-  editVisitor(id, new_visitor) {
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
-      // create a query to edit the post
-      var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
-      // send the query
-      edit_query.exec().then( visitor => {
-        logger.trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
-        resolve(visitor);
-      }).catch( err => {
-        logger.error(`Unable to edit visitor with id: '${id}': ${err}`);
-        reject(err);
-      });
-    });
   }
 
   // Post related Queries ------------------------------------------------------
