@@ -11,6 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "logger": "file:../logger",
-    "mongoose": "^5.12.12"
+    "mongoose": "^6.1.9"
   }
 }
