@@ -43,13 +43,6 @@ afterAll( async () => {
   await mongod.stop();
 });
 
-function comparePosts(a, b){
-  expect(a.type).toBe(b.type);
-  expect(a.title).toBe(b.title);
-  expect(a.content).toBe(b.content[0]);
-  expect(a.snippet).toBe(b.snippet);
-}
-
 function compareDocuments(a, b) {
   expect(a.title).toBe(b.title);
   expect(a.metadata.tags).toBe(b.metadata.tags);

@@ -27,7 +27,6 @@
     "generate-changelog": "^1.8.0",
     "geoip-lite": "^1.4.2",
     "https": "^1.0.0",
-    "ip_logger": "file:modules/ip_logger",
     "logger": "file:modules/logger",
     "middleware": "file:modules/middleware",
     "mongo-sanitize": "^1.1.0",
