@@ -32,7 +32,7 @@ class Database {
       logger.info(`Connecting to MongoDB instance at: '${uri}'...`);
       let ctx = this;
       // connect to local db instance
-      mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
+      mongoose.connect(uri).then(()=>{
         // get the database obj from the connection
         ctx.mongodb = mongoose.connection;
         logger.info(`Connected successfully.`);
