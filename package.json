@@ -1,6 +1,6 @@
 {
   "name": "code_portfolio",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Software development portfolio",
   "main": "server.js",
   "scripts": {
@@ -15,7 +15,6 @@
   "license": "ISC",
   "dependencies": {
     "accessCode": "file:modules/accessCode",
-    "angular": "^1.8.2",
     "authenticator": "file:modules/authenticator",
     "database": "file:modules/database",
     "document": "file:modules/document",
@@ -25,16 +24,13 @@
     "fileUpload": "file:modules/fileUpload",
     "font-awesome": "^4.7.0",
     "generate-changelog": "^1.8.0",
-    "geoip-lite": "^1.4.2",
     "https": "^1.0.0",
-    "ip_logger": "file:modules/ip_logger",
     "logger": "file:modules/logger",
     "middleware": "file:modules/middleware",
     "mongo-sanitize": "^1.1.0",
     "mongodb-memory-server": "^7.2.0",
-    "mongoose": "^5.12.1",
+    "mongoose": "^6.1.9",
     "multer": "^1.4.2",
-    "objects": "file:modules/objects",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
     "prompt-sync": "^4.2.0",

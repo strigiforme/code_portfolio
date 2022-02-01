@@ -21,8 +21,6 @@ class Database {
     this.postModel   = undefined;
     this.adminModel  = undefined;
     this.documentModel = undefined;
-    this.visitorSchema = undefined;
-    this.visitorModel = undefined;
   }
 
   /**
@@ -34,7 +32,7 @@ class Database {
       logger.info(`Connecting to MongoDB instance at: '${uri}'...`);
       let ctx = this;
       // connect to local db instance
-      mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}).then(()=>{
+      mongoose.connect(uri).then(()=>{
         // get the database obj from the connection
         ctx.mongodb = mongoose.connection;
         logger.info(`Connected successfully.`);
@@ -86,161 +84,6 @@ class Database {
   editDocument( id, data ) {
     logger.debug("Attempting to edit document");
     return queries.edit_record(id, data, this.documentModel);
-  }
-
-  // Visitor related queries ---------------------------------------------------
-
-  /**
-   * Upload a visitor object to MONGODB
-   * @param {Visitor} data The required data for a visitor object
-   * @return {Promise} Promise object with upload result
-   */
-  createVisitor(data) {
-    logger.debug("Attempting to create visitor record.");
-    return queries.create_record(data, this.visitorModel);
-  }
-
-  /**
-   * Returns all available visitors - a wrapper for queryForVisitors
-   */
-  getAllVisitors(){
-    return this.queryForVisitors({});
-  }
-
-  /**
-   * Query for visitor(s) stored within MONGODB
-   * @param {map} query Information to query by. { _id: 102301234 } for example.
-   * @return {Promise} Promise object with query result
-   */
-  queryForVisitors(query) {
-    logger.debug(`Attempting to query for visitors using query: ${query}`)
-    return queries.find_many_records(query, this.visitorModel);
-  }
-
-  /**
-   * Retrieve a single visitor stored within MONGODB
-   * @param {String} ip An IP to search for within MONGODB
-   * @return {Promise} Promise object with result
-   */
-  findVisitorByIp(ip) {
-    logger.debug(`Attempting to query for single visitor with IP '${ip}'`);
-    return queries.find_single_record({ ip: ip }, this.visitorModel);
-  }
-
-  /**
-   * Delete a visitor in the database by their ID
-   * @param {String} id Unique ID of the visitor in MONGODB
-   * @return {Promise} Promise object with result
-   */
-  deleteVisitor(id) {
-    logger.debug(`Attempting to delete visitor with ID '${id}'`);
-    return queries.delete_record({ _id : id }, this.visitorModel);
-  }
-
-  /**
-   * Modify a single visitor stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @param {Visitor} new_visitor visitor object with update data
-   * @return {Promise} Promise object with result
-   */
-  editVisitor(id, new_visitor) {
-    return new Promise(  ( resolve, reject, visitorModel=this.visitorModel ) => {
-      // create a query to edit the post
-      var edit_query = visitorModel.findOneAndUpdate( { _id: id }, new_visitor );
-      // send the query
-      edit_query.exec().then( visitor => {
-        logger.trace(`Successfully edited visitor with id: '${id}' and update data: ${new_visitor}`);
-        resolve(visitor);
-      }).catch( err => {
-        logger.error(`Unable to edit visitor with id: '${id}': ${err}`);
-        reject(err);
-      });
-    });
-  }
-
-  // Post related Queries ------------------------------------------------------
-
-  /**
-   * Upload a new post object to MONGODB
-   * @param {post} data The required data for a post object
-   * @return {Promise} Promise object with upload result
-   */
-  createPost(data) {
-    logger.debug(`Attempting to create post record: ${data}`);
-    return queries.create_record(data, this.postModel);
-  }
-
-  /**
-   * Returns all available posts - a wrapper for queryForPosts
-   * @return {Promise} Promise object with all available posts in database
-   */
-  getAllPosts() {
-    return this.queryForPosts({});
-  }
-
-  /**
-   * Query for post stored within MONGODB
-   * @param {map} query Information to query by. { _id: 102301234 } for example.
-   * @return {Promise} Promise object with query result
-   */
-  queryForPosts(query) {
-    logger.debug(`Attempting to query for posts using query: ${query}`)
-    return queries.find_many_records(query, this.postModel);
-  }
-
-  /**
-   * Retrieve a single post stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @return {Promise} Promise object with result
-   */
-  findPostById(id) {
-    logger.debug(`Attempting to query for single post with ID '${id}'`);
-    return queries.find_single_record({ _id: id }, this.postModel);
-  }
-
-  /**
-   * Modify a single post stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @param {Post} new_post post object with update data
-   * @return {Promise} Promise object with result
-   */
-  editPost(id, new_post) {
-    logger.debug(`Attempting edit query for post with ID '${id}'`);
-    return queries.edit_record({ _id : id }, new_post, this.postModel);
-  }
-
-  /**
-   * Delete a single post stored within MONGODB
-   * @param {String} id An ID to search for within MONGODB
-   * @return {Promise} Promise object with result
-   */
-  deletePost(id) {
-    return new Promise(  ( resolve, reject, postModel=this.postModel ) => {
-      // create a query to delete the post
-      var delete_query = postModel.findOneAndDelete( { _id: id } );
-      // send the query
-      delete_query.exec().then( post => {
-        // check if the post was found in the database
-        if ( post != null ) {
-          try {
-            // remove the code snippet tied to this post if it exists
-            if(post.snippet != undefined) {
-              logger.info("post has a snippet, attempting deletion.");
-              fs.unlinkSync(post.snippet);
-            }
-          } catch (err) {
-            logger.error(`Unable to delete code snippet: ${err}`);
-            reject(err);
-          }
-          logger.info(`Successfully deleted post with id '${id}'`);
-          resolve(post);
-        }
-        reject(post);
-      }).catch( err => {
-        logger.error(`Unable to delete post with id '${id}'`);
-        reject(err);
-      });
-    });
   }
 
   // Admin related Queries -----------------------------------------------------
