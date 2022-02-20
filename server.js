@@ -38,7 +38,7 @@ logger.initialize( { level:"DEBUG" } );
 
 if (!accessCodeManager.accessFileExists()) {
   // generate the users access code if it doesn't exist
-  accessCodeManager.create_accessCode({});
+  accessCodeManager.createAccessCode({});
 }
 
 // initialize app
