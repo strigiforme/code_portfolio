@@ -1,14 +1,14 @@
 {
   "name": "authenticator",
   "version": "1.0.0",
-  "description": "",
+  "description": "Handles google authentication API. Ensures access control.",
   "main": "authenticator.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Howard Pearce",
+  "license": "MIT",
   "dependencies": {
     "database": "file:../database",
     "logger": "file:../logger"

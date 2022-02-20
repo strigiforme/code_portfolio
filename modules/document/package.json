@@ -1,13 +1,13 @@
 {
   "name": "document",
   "version": "1.0.1",
-  "description": "module for managing portfolio documents",
+  "description": "Module for managing modular text documents in portfolio.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Howard Pearce",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "logger": "file:../logger"
   }

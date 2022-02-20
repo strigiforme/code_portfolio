@@ -1,6 +1,6 @@
 {
   "name": "code_portfolio",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Software development portfolio",
   "main": "server.js",
   "scripts": {
@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.cs.dal.ca/hpearce/code_portfolio.git"
+    "url": "https://github.com/strigiforme/code_portfolio.git"
   },
   "author": "Howard Pearce",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "accessCode": "file:modules/accessCode",
     "authenticator": "file:modules/authenticator",
