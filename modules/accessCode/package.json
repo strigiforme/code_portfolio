@@ -1,14 +1,14 @@
 {
   "name": "accessCode",
   "version": "1.0.0",
-  "description": "",
+  "description": "Manages initial access code to portfolio.",
   "main": "accessCode.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Howard Pearce",
+  "license": "MIT",
   "dependencies": {
     "authenticator": "file:../authenticator",
     "crypto": "^1.0.1",

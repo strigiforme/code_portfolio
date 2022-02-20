@@ -1,12 +1,12 @@
 {
   "name": "logger",
   "version": "1.0.0",
-  "description": "",
+  "description": "Provides info logging interface.",
   "main": "logger.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Howard Pearce",
+  "license": "MIT"
 }
