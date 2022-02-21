@@ -2,14 +2,14 @@
 
 File: authenticator.js
 Author: Howard Pearce
-Last Edit: June 8, 2021
+Last Edit: February 20, 2022
 Description: Manages authentication for portfolio application. This includes
              login, logout, current administrators, etc.
 
 **/
 
-var database   = require('database')
-var logger     = require('logger')
+var database = require('database')
+var logger = require('logger')
 var AccessCode = require('./accessCode.js')
 
 class Authenticator {
@@ -24,7 +24,7 @@ class Authenticator {
     this.adminAccount = undefined
     this.addAdminFlag = false
     this.accessCodeValid = false
-    this.accessCode = new AccessCode(accessCodePath);
+    this.accessCode = new AccessCode(accessCodePath)
     this.database = database
     this.adminEnabled = adminEnabled
   }
@@ -40,7 +40,7 @@ class Authenticator {
       this.addAdminFlag = result.new
       // initialize access code
       if (!this.adminExists && !this.accessCode.accessFileExists) {
-        this.accessCode.createAccessCode();
+        this.accessCode.createAccessCode()
       }
     } catch (error) {
       logger.error('ERROR: promise rejection while getting administrator account email: ' + error)
@@ -51,9 +51,9 @@ class Authenticator {
    * @brief handle access code from user.
    * @param {String} inputAccessCode the users input to be compared.
    */
-  async compareAccessCode(inputAccessCode) {
-    var result = await this.accessCode.compare(inputAccessCode);
-    return result;
+  async compareAccessCode (inputAccessCode) {
+    var result = await this.accessCode.compare(inputAccessCode)
+    return result
   }
 
   /** Getters and Setters **/
@@ -66,7 +66,7 @@ class Authenticator {
   set isAccessCodeValid (value) { this.accessCodeValid = value }
 }
 
-logger.debug("constructing authenticator")
-var authenticator = new Authenticator(database, false, "access.txt");
+logger.debug('constructing authenticator')
+var authenticator = new Authenticator(database, false, 'access.txt')
 
-module.exports = authenticator;
+module.exports = authenticator
