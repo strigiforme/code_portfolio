@@ -28,7 +28,7 @@ class Database {
    * @param {String} uri The location of the database - must be a MONGODB instance
    */
   connect(uri) {
-    return new Promise( async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       logger.info(`Connecting to MongoDB instance at: '${uri}'...`);
       let ctx = this;
       // connect to local db instance
