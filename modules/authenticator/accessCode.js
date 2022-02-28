@@ -24,20 +24,41 @@ var accessCodeClass = class AccessCode {
   }
 
   /**
+   * Given a potential access code, verify it is valid.
+   * @param {String} newAccessCode  the access code to be verified.
+   * @throw {Error} If access code fails verification.
+   */
+  verifyCode(newAccessCode) {
+    if ( newAccessCode < 1 ) {
+      throw new Error('Access Code provided is less than 1 characters. Cannot continue.')
+    }
+
+    if ( newAccessCode < 100 ) {
+      throw new Error('Access Code provided is more than 100 characters. Cannot continue.')
+    }
+  }
+
+  /**
    * Provided a code, generate a txt file with the hashed access code.
    * @throw {Error} If access code is empty or file cannot be created
    */
-  createAccessCode () {
-    // Does not use logger since this should be displayed no matter what
-    console.log('Access code file does not exist yet.')
-    console.log('You will be prompted to enter your access code, be sure to remember the code you provide. ')
-    console.log('You will need it to log into the administrator account later, and it will not be accessible.')
-    // Get the code from the user
-    this.accessCode = prompt('Enter access code: ')
+  createAccessCode (args) {
 
-    if (this.accessCode.length < 1) {
-      throw new Error('Access Code provided is less than 1 characters. Cannot continue.')
+    if (!args.providedCode) {
+
+      verifyCode(args.providedCode)
+
+      // Does not use logger since this should be displayed no matter what
+      console.log('Access code file does not exist yet.')
+      console.log('You will be prompted to enter your access code, be sure to remember the code you provide. ')
+      console.log('You will need it to log into the administrator account later, and it will not be accessible.')
+      // Get the code from the user
+      this.accessCode = prompt('Enter access code: ')
+
+      verifyCode(this.accessCode)
+
     } else {
+      this.accessCode = args.providedCode;
       console.log('Access code received.')
     }
 
