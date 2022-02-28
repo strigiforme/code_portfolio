@@ -28,12 +28,12 @@ var accessCodeClass = class AccessCode {
    * @param {String} newAccessCode  the access code to be verified.
    * @throw {Error} If access code fails verification.
    */
-  verifyCode(newAccessCode) {
-    if ( newAccessCode < 1 ) {
+  verifyCode (newAccessCode) {
+    if (newAccessCode < 1) {
       throw new Error('Access Code provided is less than 1 characters. Cannot continue.')
     }
 
-    if ( newAccessCode < 100 ) {
+    if (newAccessCode < 100) {
       throw new Error('Access Code provided is more than 100 characters. Cannot continue.')
     }
   }
@@ -43,9 +43,7 @@ var accessCodeClass = class AccessCode {
    * @throw {Error} If access code is empty or file cannot be created
    */
   createAccessCode (args) {
-
     if (!args.providedCode) {
-
       verifyCode(args.providedCode)
 
       // Does not use logger since this should be displayed no matter what
@@ -56,9 +54,8 @@ var accessCodeClass = class AccessCode {
       this.accessCode = prompt('Enter access code: ')
 
       verifyCode(this.accessCode)
-
     } else {
-      this.accessCode = args.providedCode;
+      this.accessCode = args.providedCode
       console.log('Access code received.')
     }
 
