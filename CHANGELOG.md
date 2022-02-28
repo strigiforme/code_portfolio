@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/strigiforme/code_portfolio/compare/v3.0.0...v3.1.0) (2022-02-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* API calls to AccessCodeManager must be made from
+authenticator. API has been reduced
+
+### Features
+
+* **Authenticator:** Combine accessCode test suite ([5beb103](https://github.com/strigiforme/code_portfolio/commit/5beb10302cf25f630b67c8be56c1d44cbf7098e3))
+
+
+* make AccessCodeManager subcomponent of Authenticator ([ddf1454](https://github.com/strigiforme/code_portfolio/commit/ddf145409524a69adcb7665db9d1c88f232dea2d))
+
 ## 3.0.0 (2022-02-20)
 
 
