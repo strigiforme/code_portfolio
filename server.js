@@ -11,10 +11,9 @@ Description: Main route and logic handler for node application. Everything that
 // dependencies
 const express            = require("express");
 const fs                 = require("fs");
-const accessCodeManager  = require("accessCode");
-const authenticator      = require("authenticator");
 const database           = require("database");
 const logger             = require("logger");
+const authenticator      = require("authenticator");
 const auth               = require("./routes/auth");
 const user               = require("./routes/user");
 const admin              = require("./routes/admin");
@@ -27,19 +26,14 @@ const bodyParser         = require('body-parser');
 // gotta do this idk why
 var app = express();
 
-// start the database
-database.connect('mongodb://127.0.0.1/my_database').then( () => {
-  // fetch the administrator's email address after connecting
-  authenticator.fetchAdminAccount();
-});
-
 // initialize logger
 logger.initialize( { level:"DEBUG" } );
 
-if (!accessCodeManager.accessFileExists()) {
-  // generate the users access code if it doesn't exist
-  accessCodeManager.createAccessCode({});
-}
+// start the database
+database.connect('mongodb://127.0.0.1/my_database').then( () => {
+  // cannot initialize authenticator until we have DB connection
+  authenticator.initialize();
+});
 
 // initialize app
 var options = {

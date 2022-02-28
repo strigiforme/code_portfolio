@@ -1,6 +1,6 @@
 {
   "name": "code_portfolio",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Software development portfolio",
   "main": "server.js",
   "scripts": {
@@ -15,7 +15,6 @@
   "author": "Howard Pearce",
   "license": "MIT",
   "dependencies": {
-    "accessCode": "file:modules/accessCode",
     "authenticator": "file:modules/authenticator",
     "database": "file:modules/database",
     "document": "file:modules/document",
