@@ -8,14 +8,7 @@ Description: Simple logging library that standardizes logging for the whole
 
 **/
 
-// available log levels
-const levels = new Map([
-  ["ERROR",   1],
-  ["WARNING", 2],
-  ["INFO" ,   3],
-  ["DEBUG",   4],
-  ["TRACE",   5]
-])
+const LogLevel = require("./LogLevel.js")
 
 // create a variable that will serve as our logging function
 //let log_function = function(){};
@@ -61,7 +54,7 @@ class Logger {
    * @param {String} level The new logging level
    */
   setLevel(level) {
-    this.log_limit = this.getLevel(level);
+    this.log_limit = LogLevel.getLevelSeverity(level);
   }
 
   /**
@@ -73,42 +66,16 @@ class Logger {
    }
 
   /**
-   * Check if the log level provided exists within the logger
-   * @param {String} level The level to be verified
-   * @return {Boolean} false if the level does not exist, true if it does
-   */
-  isLevel(level) {
-    if ( levels.has(level) ) {
-      return true
-    }
-    return false;
-  }
-
-  /**
-   * Get the number corresponding to the log level provided
-   * @param {String} level The level to search for
-   * @throws error if the level does not exist
-   */
-   getLevel(level) {
-     if ( this.isLevel(level) ) {
-       return levels.get(level);
-     } else {
-       throw new Error(`Logging level \'${level}\' provided does not exist.
-                        Check provided level exists before trying to set it.`);
-     }
-   }
-
-  /**
    * Check if the provided log level is within the log limit
    * @param {String} level The log level to be verified
    * @return {Boolean} Whether the log level is within limit
    */
   withinLimit(level) {
-    if ( levels.has(level) ) {
-      if ( levels.get(level) <= this.log_limit) {
+    if ( LogLevel.isLevel(level) ) {
+      if ( LogLevel.getLevel(level).severity <= this.log_limit) {
         return true;
       } else {
-        return false;
+         return false;
       }
     } else {
       throw new Error(`Logging level \'${level}\' provided does not exist.
