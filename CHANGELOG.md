@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/strigiforme/code_portfolio/compare/v3.1.0...v3.2.0) (2022-03-03)
+
+
+### Features
+
+* **Logger:** Add colors corresponding to log level ([a4a233b](https://github.com/strigiforme/code_portfolio/commit/a4a233b41b882e9a3591e5b355d7e05464e92383))
+
+
+### Bug Fixes
+
+* **Logger:** Fix failing unit tests ([7ade3e1](https://github.com/strigiforme/code_portfolio/commit/7ade3e13c0090629e9f8d76d85a4e4d8b112cc40))
+
 ## [3.1.0](https://github.com/strigiforme/code_portfolio/compare/v3.0.0...v3.1.0) (2022-02-28)
 
 
