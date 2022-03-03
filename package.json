@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "authenticator": "file:modules/authenticator",
+    "chalk": "^4.1.2",
     "database": "file:modules/database",
     "document": "file:modules/document",
     "express": "^4.17.1",

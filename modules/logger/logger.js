@@ -88,7 +88,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   info(msg) {
-    return this.log("INFO", msg);
+    return this.log(LogLevel.INFO, msg);
   }
 
   /**
@@ -96,7 +96,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   warning(msg) {
-    return this.log("WARNING", msg);
+    return this.log(LogLevel.WARNING, msg);
   }
 
   /**
@@ -104,7 +104,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   error(msg) {
-    return this.log("ERROR", msg);
+    return this.log(LogLevel.ERROR, msg);
   }
 
   /**
@@ -112,7 +112,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   debug(msg) {
-    return this.log("DEBUG", msg);
+    return this.log(LogLevel.DEBUG, msg);
   }
 
   /**
@@ -120,7 +120,7 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   trace(msg) {
-    return this.log("TRACE", msg);
+    return this.log(LogLevel.TRACE, msg);
   }
 
   /**
@@ -129,10 +129,11 @@ class Logger {
    * @param {String} msg The message to be logged
    */
   log(level, msg) {
-    if ( this.withinLimit(level)) {
+    // this is less efficient than it could be.
+    if ( this.withinLimit(level.name)) {
       var now = new Date();
       var format_date = `${now.getFullYear()}-${(now.getMonth() + 1)}-${now.getDate()} ${('0' + now.getHours()).slice(-2)}:${('0' + now.getMinutes()).slice(-2)}:${('0' + now.getSeconds()).slice(-2)}`;
-      return this.log_function(`${format_date} ${level}: ${msg}`);
+      return this.log_function(`${format_date} ${level.colorized}: ${msg}`);
     }
   }
 }
