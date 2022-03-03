@@ -67,7 +67,7 @@ test("Test log format", () => {
   // regex to verify the log is formed as expected.
   // nd Corresponds to n digits
   // format 4d-1|2d-1|2d 1|2d:1|2d:1|2d log_type: log_message
-  let re = /\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}\sERROR: \w*/
+  let re = /\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{1,2}:\d{1,2}\s.*: \w*/
   // Force the logger to return the log message as a string
   logger.setFunction(function(msg){ return msg; });
   expect(re.test(logger.error("test"))).toBe(true);

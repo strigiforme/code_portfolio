@@ -11,7 +11,7 @@ Description: Simple logging library that standardizes logging for the whole
 const LogLevel = require("./LogLevel.js")
 
 // create a variable that will serve as our logging function
-//let log_function = function(){};
+//let logFunction = function(){};
 
 class Logger {
 
@@ -21,9 +21,9 @@ class Logger {
    */
   constructor(args) {
     // default log level
-    this.log_limit = 3;
+    this.logLimit = 3;
     // empty logging function to be overridden in initialization
-    this.log_function = function(){};
+    this.logFunction = function(){};
   }
 
   /**
@@ -38,10 +38,10 @@ class Logger {
     }
 
     // allows us to change behaviour in the logging function if need be.
-    if ( !args.log_function ) {
-      this.log_function = function(msg) { console.log(msg); };
+    if ( !args.logFunction ) {
+      this.logFunction = function(msg) { console.log(msg); };
     } else {
-      this.log_function = args.log_function;
+      this.logFunction = args.logFunction;
     }
 
     if ( args.level ) {
@@ -54,7 +54,7 @@ class Logger {
    * @param {String} level The new logging level
    */
   setLevel(level) {
-    this.log_limit = LogLevel.getLevelSeverity(level);
+    this.logLimit = LogLevel.getLevelSeverity(level);
   }
 
   /**
@@ -62,7 +62,7 @@ class Logger {
    * @param {Function} func The new logging function to be used
    */
    setFunction(func) {
-     this.log_function = func;
+     this.logFunction = func;
    }
 
   /**
@@ -72,7 +72,7 @@ class Logger {
    */
   withinLimit(level) {
     if ( LogLevel.isLevel(level) ) {
-      if ( LogLevel.getLevel(level).severity <= this.log_limit) {
+      if ( LogLevel.getLevel(level).severity <= this.logLimit) {
         return true;
       } else {
          return false;
@@ -133,7 +133,7 @@ class Logger {
     if ( this.withinLimit(level.name)) {
       var now = new Date();
       var format_date = `${now.getFullYear()}-${(now.getMonth() + 1)}-${now.getDate()} ${('0' + now.getHours()).slice(-2)}:${('0' + now.getMinutes()).slice(-2)}:${('0' + now.getSeconds()).slice(-2)}`;
-      return this.log_function(`${format_date} ${level.colorized}: ${msg}`);
+      return this.logFunction(`${format_date} ${level.colorized}: ${msg}`);
     }
   }
 }

@@ -18,11 +18,11 @@ const TRACE_STR = "TRACE"
 // borrows from https://www.sohamkamani.com/javascript/enums/
 
 module.exports = class LogLevel {
-  static ERROR   = new LogLevel(ERROR_STR, 5, chalk.red(ERROR_STR))
-  static WARNING = new LogLevel(WARNING_STR, 4, chalk.yellow(WARNING_STR))
+  static ERROR   = new LogLevel(ERROR_STR, 1, chalk.red(ERROR_STR))
+  static WARNING = new LogLevel(WARNING_STR, 2, chalk.yellow(WARNING_STR))
   static DEBUG   = new LogLevel(DEBUG_STR, 3, chalk.magenta(DEBUG_STR))
-  static INFO    = new LogLevel(INFO_STR, 2, chalk.blue(INFO_STR))
-  static TRACE   = new LogLevel(TRACE_STR, 1, chalk.gray(TRACE_STR))
+  static INFO    = new LogLevel(INFO_STR, 4, chalk.blue(INFO_STR))
+  static TRACE   = new LogLevel(TRACE_STR, 5, chalk.gray(TRACE_STR))
 
   constructor(name, severity, colorized) {
     this.name = name
