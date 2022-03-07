@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.1](https://github.com/strigiforme/code_portfolio/compare/v3.2.0...v3.2.1) (2022-03-07)
+
+
+### Features
+
+* **logger:** Add access modifiers to logger ([d46a75e](https://github.com/strigiforme/code_portfolio/commit/d46a75ef829c67c5e05ea15533c562f649a07e28))
+
 ## [3.2.0](https://github.com/strigiforme/code_portfolio/compare/v3.1.0...v3.2.0) (2022-03-03)
 
 
