@@ -1,0 +1,30 @@
+.primary-grid {
+  display: grid;
+  grid-template-columns: 200px auto 200px;
+  grid-template-rows: 100px 75px 155px 420px auto;
+  width: 100vw;
+  height: 100vh;
+}
+
+.space-01 {
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+
+.border-bottom-grey {
+  border-bottom: 1px solid #777;
+}
+
+.border-right-grey {
+  border-right: 1px solid #777;
+}
+
+.border-left-grey {
+  border-left: 1px solid #777;
+}
+
+.border-top-grey {
+  border-top: 1px solid #777;
+}
