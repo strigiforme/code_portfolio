@@ -1,0 +1,19 @@
+.flex {
+  display: flex;
+}
+
+.flex div {
+  display: inline-block;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.row {
+  flex-direction: row;
+}
+
+.vertical-center {
+  align-items: center;
+}

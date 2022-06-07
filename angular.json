@@ -27,6 +27,8 @@
               "src/assets"
             ],
             "styles": [
+              "src/assets/css/text.css",
+              "src/assets/css/flex.css",
               "src/assets/css/grid.css",
               "src/styles.css"
             ],

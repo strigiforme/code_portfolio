@@ -1,0 +1,17 @@
+@font-face {
+  font-family: "Rama Gothic E Bold";
+  src: local("Rama"), url("../../assets/fonts/Rama/RamaGothicE-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Rama Gothic E SemiBold";
+  src: local("Rama"), url("../../assets/fonts/Rama/RamaGothicE-SemiBold.ttf") format("truetype");
+}
+
+a,p {
+  font-family: "Open Sans";
+}
+
+a {
+  text-decoration: none;
+}
