@@ -10,8 +10,16 @@
   justify-content: space-between;
 }
 
+.center {
+  justify-content: center;
+}
+
 .row {
   flex-direction: row;
+}
+
+.col {
+  flex-direction: column;
 }
 
 .vertical-center {
