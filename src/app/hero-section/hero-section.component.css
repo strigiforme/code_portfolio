@@ -17,8 +17,18 @@
   margin-bottom: 0px;
 }
 
+.graphic {
+  display: flex;
+  width: 70%;
+}
 
 .highlight {
   color: #FE5000;
   font-style: normal;
+}
+
+.hero-image {
+  position: absolute;
+  right: 30px;
+  bottom: 0px;
 }
