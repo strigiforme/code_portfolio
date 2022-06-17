@@ -24,3 +24,28 @@ a {
 .accent-text {
   font-family: "TT Mussels";
 }
+
+.secondary-text {
+  font-size: 24px;
+}
+
+.hero-text {
+  font-family: "Rama Gothic E SemiBold";
+  font-size: 128px;
+}
+
+@media only screen and (max-width: 1800px) {
+  .hero-text {
+    font-size: 100px;
+  }
+}
+
+@media only screen and (max-width: 1500px) {
+  .hero-text {
+    font-size: 80px;
+  }
+}
+
+.highlight {
+  color: #FE5000;
+}
